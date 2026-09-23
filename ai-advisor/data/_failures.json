@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "GLPG.BR",
+    "displayName": "Galapagos",
+    "country": "Belgium",
+    "reason": "No data found, symbol may be delisted"
+  },
+  {
+    "symbol": "^TASI.SR",
+    "displayName": "Tadawul All Share",
+    "country": "Saudi Arabia",
+    "reason": "only 1 bars"
+  }
+]
