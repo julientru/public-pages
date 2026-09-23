@@ -122,6 +122,11 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   applyTheme();
 });
 
+document.getElementById('disclaimer-link').addEventListener('click', () => {
+  state.tab = 'about';
+  renderTabs();
+});
+
 /* ---------- tabs ---------- */
 
 document.getElementById('tab-nav').addEventListener('click', (e) => {
