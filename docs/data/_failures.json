@@ -1,9 +1,9 @@
 [
   {
-    "symbol": "GLPG.BR",
-    "displayName": "Galapagos",
-    "country": "Belgium",
-    "reason": "No data found, symbol may be delisted"
+    "symbol": "1COV.DE",
+    "displayName": "Covestro",
+    "country": "Germany",
+    "reason": "only 1 bars"
   },
   {
     "symbol": "^TASI.SR",

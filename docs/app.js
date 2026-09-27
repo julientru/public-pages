@@ -1203,7 +1203,7 @@ function renderDividends() {
     </table>
     </div>
     <div class="footnote">
-      Ranked by the <b>${escapeHtml(modelMeta.label)}</b> model. Companies with a token dividend under 1.5% yield are excluded from this ranking even if their score is high (they're still viewable individually). Click a company to see all 7 models compared side by side. This is not investment advice; it mechanically reflects historical dividend payments and recent financial statements.
+      Ranked by the <b>${escapeHtml(modelMeta.label)}</b> model. Companies with a token dividend under 1.5% yield are excluded from this ranking even if their score is high (they're still viewable individually). Click a company to see all ${DIVIDEND_MODEL_DEFS.length} models compared side by side. This is not investment advice; it mechanically reflects historical dividend payments and recent financial statements.
     </div>`;
 
   wrap.querySelectorAll('tr[data-symbol]').forEach((row) => {
@@ -1329,7 +1329,7 @@ function renderDividendDetail(panel, symbol) {
       </div>
     </div>
     <div class="section-block">
-      <div class="section-title">7 dividend models compared</div>
+      <div class="section-title">${DIVIDEND_MODEL_DEFS.length} dividend models compared</div>
       <table class="rankings-table"><thead><tr><th>Model</th><th>Score</th><th>Outlook</th><th>Detail</th></tr></thead><tbody>${modelRows}</tbody></table>
       ${modelNotes}
     </div>

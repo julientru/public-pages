@@ -464,6 +464,128 @@ body {
 .about-model p { font-size: var(--fs-medium); line-height: 1.6; color: var(--text-2); margin: 0; }
 .about-list { margin: 0 0 12px; padding-left: 20px; font-size: var(--fs-medium); line-height: 1.6; color: var(--text-1); }
 .about-list li { margin-bottom: 8px; }
+
+/* Model math blocks: formula, worked example, diagram — used across the
+   About page's Forecasting models and Dividends model sections. Each
+   .about-model can mix and match whichever of these actually clarifies
+   that particular model. */
+.about-model { margin-bottom: 26px; }
+.about-model-note {
+  font-size: var(--fs-small);
+  color: var(--text-3);
+  margin: 4px 0 10px;
+  line-height: 1.55;
+}
+.about-formula {
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  color: var(--text-1);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+}
+.about-formula .fterm { color: var(--accent-ink); }
+.about-formula .fmuted { color: var(--text-3); }
+.about-formula-caption {
+  font-size: var(--fs-small);
+  color: var(--text-3);
+  margin: -4px 0 10px;
+  line-height: 1.5;
+}
+.about-tiers {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+  margin: 10px 0;
+  display: block;
+  overflow-x: auto;
+}
+.about-tiers table { border-collapse: collapse; width: 100%; min-width: 340px; }
+.about-tiers th, .about-tiers td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.about-tiers th {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.about-tiers td.mono, .about-tiers th.mono { font-family: var(--font-mono); }
+.about-example {
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-size: var(--fs-small);
+  color: var(--text-1);
+  line-height: 1.65;
+}
+.about-example b { color: var(--accent-ink); }
+.about-example .ex-title {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent-ink);
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+.about-diagram {
+  margin: 12px 0;
+  padding: 10px 12px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  max-width: 100%;
+  overflow-x: auto;
+}
+.about-diagram svg { display: block; max-width: 100%; height: auto; }
+.about-diagram-caption {
+  font-size: var(--fs-micro);
+  color: var(--text-3);
+  margin: 6px 2px 0;
+  line-height: 1.5;
+}
+.about-diagram-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.about-diagram-row .about-diagram { flex: 1 1 260px; }
+.about-weights {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+.about-weight-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 46px;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+}
+.about-weight-row .wlabel { color: var(--text-1); }
+.about-weight-row .wbar-track {
+  height: 8px;
+  border-radius: 5px;
+  background: var(--line);
+  overflow: hidden;
+}
+.about-weight-row .wbar-fill { height: 100%; background: var(--accent); border-radius: 5px; }
+.about-weight-row .wval { font-family: var(--font-mono); color: var(--text-2); text-align: right; }
 .backtest-summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -786,7 +908,7 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
           <select id="dividends-model"></select>
         </div>
       </div>
-      <div class="footnote" style="margin:0; padding:0 var(--gutter) 12px;">Covers ~300 large-cap companies across all 20 countries in the asset universe (top ~15 per country) — not the full asset universe. Companies with no dividend, or below 1.5% yield, are excluded from this ranking.</div>
+      <div class="footnote" style="margin:0; padding:0 var(--gutter) 12px;">Covers ~900 large-cap companies across all 20 countries in the asset universe (top ~50 per country, fewer for smaller markets) — not the full asset universe. Companies with no dividend, or below 1.5% yield, are excluded from this ranking.</div>
       <div id="dividends-table-wrap"></div>
     </div>
   </div>
@@ -818,43 +940,292 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
 
       <div class="about-section">
         <h2>Forecasting models</h2>
-        <p class="about-intro">Every asset can be analyzed with any of these seven independent models plus an Ensemble that blends them — pick one on the Dashboard's "Forecast models" section to overlay it on the chart, or rank the whole universe by it on the Rankings tab.</p>
+        <p class="about-intro">Every asset can be analyzed with any of these eight independent models plus an Ensemble that blends them — pick one on the Dashboard's "Forecast models" section to overlay it on the chart, or rank the whole universe by it on the Rankings tab. All of them work on <b>log-price</b> (ln of the close), so a straight line in the model means constant percentage growth, not constant dollar growth.</p>
 
         <div class="about-model">
           <h3><span class="dot" style="background:#8C8C8C;"></span>Linear Trend</h3>
           <p>The original model. Fits a linear regression to log-price over the selected lookback and projects it forward — equivalent to extrapolating the average compound growth rate. Also drives the Bullish/Bearish/Neutral recommendation and the composite ranking score, by comparing this long-term trend against recent momentum.</p>
+          <div class="about-formula">yᵢ = ln(priceᵢ),  xᵢ = days since first bar
+
+b = Σ(xᵢ-x̄)(yᵢ-ȳ) / Σ(xᵢ-x̄)²        <span class="fmuted">slope, ln($)/day</span>
+a = ȳ - b·x̄                          <span class="fmuted">intercept</span>
+R² = 1 - Σ(yᵢ-ŷᵢ)² / Σ(yᵢ-ȳ)²        <span class="fmuted">fit quality, 0-1</span>
+
+forecast(x) = exp(a + b·x)</div>
+          <p class="about-formula-caption">Forecast horizon = max(30, 25% of the lookback's span in days). Annualized growth = exp(b·365.25) − 1.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 460 170" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .lt-ax{stroke:var(--line-strong);stroke-width:1}
+                .lt-pt{fill:var(--text-3)}
+                .lt-line{stroke:var(--accent);stroke-width:2;fill:none}
+                .lt-fc{stroke:var(--gold);stroke-width:2;fill:none;stroke-dasharray:5 4}
+                .lt-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:9px}
+              </style>
+              <line x1="30" y1="140" x2="440" y2="140" class="lt-ax"/>
+              <line x1="30" y1="20" x2="30" y2="140" class="lt-ax"/>
+              <text x="30" y="152" class="lt-lbl">history</text>
+              <text x="330" y="152" class="lt-lbl">forecast →</text>
+              <text x="8" y="24" class="lt-lbl">ln(price)</text>
+              <circle class="lt-pt" cx="45" cy="118" r="2.2"/><circle class="lt-pt" cx="65" cy="122" r="2.2"/>
+              <circle class="lt-pt" cx="85" cy="108" r="2.2"/><circle class="lt-pt" cx="105" cy="112" r="2.2"/>
+              <circle class="lt-pt" cx="125" cy="98" r="2.2"/><circle class="lt-pt" cx="145" cy="104" r="2.2"/>
+              <circle class="lt-pt" cx="165" cy="92" r="2.2"/><circle class="lt-pt" cx="185" cy="80" r="2.2"/>
+              <circle class="lt-pt" cx="205" cy="86" r="2.2"/><circle class="lt-pt" cx="225" cy="70" r="2.2"/>
+              <circle class="lt-pt" cx="245" cy="74" r="2.2"/><circle class="lt-pt" cx="265" cy="60" r="2.2"/>
+              <circle class="lt-pt" cx="285" cy="64" r="2.2"/><circle class="lt-pt" cx="305" cy="50" r="2.2"/>
+              <line x1="40" y1="126" x2="310" y2="48" class="lt-line"/>
+              <line x1="310" y1="48" x2="430" y2="14" class="lt-fc"/>
+            </svg>
+            <div class="about-diagram-caption">Regression line fit through ln(price) history (dots), then extrapolated (dashed) — the slope is the model's forecast.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#2B6E5E;"></span>Moving Average Crossover</h3>
           <p>Compares a short (20-bar) and long (50-bar) simple moving average of log-price. The forecast extrapolates the short average's recent slope — smoother and less sensitive to single-day outliers than the raw linear-trend fit.</p>
+          <div class="about-formula">SMA<span class="fmuted">w</span>(i) = mean of ln(price) over the trailing w bars ending at i
+lookback = min(20, n-1)
+slope = ( SMA₂₀(last) − SMA₂₀(last − lookback) ) / lookback
+forecast(h) = exp( SMA₂₀(last) + slope · h )</div>
+          <p class="about-formula-caption">"Golden cross" when SMA₂₀ ≥ SMA₅₀ at the last bar, otherwise "death cross" — reported as context, not used in the forecast math itself. Needs at least 55 bars (longWindow + 5).</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .mc-ax{stroke:var(--line-strong);stroke-width:1}
+                .mc-price{stroke:var(--text-3);stroke-width:1.2;fill:none;opacity:0.55}
+                .mc-short{stroke:var(--accent);stroke-width:2;fill:none}
+                .mc-long{stroke:var(--gold);stroke-width:2;fill:none}
+                .mc-lbl{fill:var(--text-2);font-family:var(--font-ui);font-size:9px}
+              </style>
+              <line x1="20" y1="115" x2="440" y2="115" class="mc-ax"/>
+              <path class="mc-price" d="M20,80 C60,60 90,95 120,70 C160,40 190,85 220,55 C260,30 300,60 340,35 C380,20 410,45 440,25"/>
+              <path class="mc-long" d="M20,90 C90,82 160,70 230,60 C300,48 370,36 440,28"/>
+              <path class="mc-short" d="M20,85 C70,88 110,65 150,68 C200,50 250,55 300,38 C350,30 400,38 440,22"/>
+              <circle cx="440" cy="22" r="2.5" fill="var(--accent)"/>
+              <line x1="440" y1="22" x2="458" y2="10" class="mc-short" stroke-dasharray="4 3"/>
+              <rect x="26" y="10" width="9" height="9" fill="var(--accent)"/><text x="39" y="18" class="mc-lbl">short SMA (20)</text>
+              <rect x="150" y="10" width="9" height="9" fill="var(--gold)"/><text x="163" y="18" class="mc-lbl">long SMA (50)</text>
+            </svg>
+            <div class="about-diagram-caption">Short SMA's recent slope (dashed) is extrapolated forward; the long SMA is shown only to read the crossover.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#B8892F;"></span>ARIMA(1,1,0)</h3>
           <p>A simplified ARIMA: the log-price series is differenced once, then a first-order autoregression is fit on those differences (no moving-average term, no automatic order selection). A full ARIMA fit needs numerical optimization that's out of scope for a client-side prototype — this is a deliberate, labeled simplification of the standard method.</p>
+          <div class="about-formula">dᵢ = ln(priceᵢ) − ln(priceᵢ₋₁)        <span class="fmuted">"I": difference once</span>
+
+dₜ = φ·dₜ₋₁ + c + εₜ                  <span class="fmuted">"AR": fit by OLS on (dₜ₋₁, dₜ) pairs</span>
+φ = Σ(x-x̄)(y-ȳ)/Σ(x-x̄)²,  clamped to [-0.98, 0.98]
+c = ȳ - φ·x̄
+
+long-run daily drift = c / (1 - φ)</div>
+          <p class="about-formula-caption">Forecast iterates d̂ₜ₊₁ = φ·dₜ + c one day at a time and accumulates it onto ln(price); needs ≥30 bars. No MA(q) term at all — that's the honest gap vs. a real ARIMA fit.</p>
+          <div class="about-example">
+            <span class="ex-title">Worked example</span>
+            If φ = 0.15 and the most recent daily log-return is d = 0.004 (~+0.4%), with c = 0.0003:<br>
+            next day's diff ≈ 0.15 × 0.004 + 0.0003 = <b>0.00090</b> → price drifts up ~0.09% that day, then the projection repeats using its own output as the new "previous diff", decaying toward the long-run drift c/(1-φ) as φᵏ shrinks.
+          </div>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .ar-ax{stroke:var(--line-strong);stroke-width:1}
+                .ar-bar{fill:var(--accent)}
+                .ar-bar2{fill:var(--gold)}
+                .ar-lbl{fill:var(--text-3);font-family:var(--font-mono);font-size:8.5px}
+              </style>
+              <line x1="20" y1="105" x2="280" y2="105" class="ar-ax"/>
+              <rect class="ar-bar" x="30" y="45" width="16" height="60"/>
+              <rect class="ar-bar2" x="60" y="65" width="16" height="40"/>
+              <rect class="ar-bar" x="90" y="80" width="16" height="25"/>
+              <rect class="ar-bar2" x="120" y="90" width="16" height="15"/>
+              <rect class="ar-bar" x="150" y="96" width="16" height="9"/>
+              <rect class="ar-bar2" x="180" y="99" width="16" height="6"/>
+              <rect class="ar-bar" x="210" y="101" width="16" height="4"/>
+              <rect class="ar-bar2" x="240" y="102.5" width="16" height="2.5"/>
+              <text x="38" y="118" class="ar-lbl">d₀</text><text x="98" y="118" class="ar-lbl">d₂</text>
+              <text x="158" y="118" class="ar-lbl">d₄</text><text x="218" y="118" class="ar-lbl">d₆</text>
+              <text x="20" y="18" class="ar-lbl" font-family="var(--font-ui)">|φ|&lt;1 → each step's effect shrinks toward 0</text>
+            </svg>
+            <div class="about-diagram-caption">A stable φ (|φ| &lt; 1) means each successive day's AR contribution decays — the forecast settles near the long-run drift.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#6E4F16;"></span>Holt's Linear Trend</h3>
           <p>Double exponential smoothing on log-price (a level component and a trend component, no seasonality — irregular trading calendars don't have a clean period to model). The trend is damped (multiplied by a factor below 1 at each step forward) — without damping, a locally strong trend compounds linearly forever and produces wildly overconfident long-horizon forecasts.</p>
+          <div class="about-formula">levelᵢ = α·yᵢ + (1-α)·(levelᵢ₋₁ + φ·trendᵢ₋₁)
+trendᵢ = β·(levelᵢ - levelᵢ₋₁) + (1-β)·φ·trendᵢ₋₁
+
+α = 0.3   β = 0.1   φ = 0.98   <span class="fmuted">(fixed, not fit)</span>
+
+h-step forecast: level + trend·(φ¹+φ²+…+φʰ)
+              = level + trend· φ(1-φʰ)/(1-φ)</div>
+          <p class="about-formula-caption">The geometric-series closed form lets the model handle fractional h (sub-day chart steps) without a loop. Needs ≥10 bars.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .hd-ax{stroke:var(--line-strong);stroke-width:1}
+                .hd-bar{fill:var(--gold)}
+                .hd-line{stroke:var(--accent);stroke-width:2;fill:none}
+                .hd-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:9px}
+              </style>
+              <line x1="20" y1="110" x2="280" y2="110" class="hd-ax"/>
+              <rect class="hd-bar" x="30" y="30" width="14" height="80" opacity="1"/>
+              <rect class="hd-bar" x="55" y="42" width="14" height="68" opacity="0.88"/>
+              <rect class="hd-bar" x="80" y="52" width="14" height="58" opacity="0.76"/>
+              <rect class="hd-bar" x="105" y="61" width="14" height="49" opacity="0.65"/>
+              <rect class="hd-bar" x="130" y="69" width="14" height="41" opacity="0.55"/>
+              <rect class="hd-bar" x="155" y="76" width="14" height="34" opacity="0.46"/>
+              <rect class="hd-bar" x="180" y="82" width="14" height="28" opacity="0.38"/>
+              <rect class="hd-bar" x="205" y="87" width="14" height="23" opacity="0.31"/>
+              <rect class="hd-bar" x="230" y="91" width="14" height="19" opacity="0.25"/>
+              <rect class="hd-bar" x="255" y="95" width="14" height="15" opacity="0.20"/>
+              <path class="hd-line" d="M37,30 Q140,45 262,95" stroke-dasharray="0"/>
+              <text x="30" y="20" class="hd-lbl">φʰ contribution of trend, per future step h</text>
+            </svg>
+            <div class="about-diagram-caption">Each future step's trend contribution is multiplied by another φ (0.98) — bars shrink toward zero instead of adding a constant trend forever.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#B34632;"></span>GARCH(1,1)</h3>
           <p>Forecasts volatility, not price direction. Rather than adding its own line to the chart, its volatility estimate sets the width of the Ensemble's uncertainty band, and is shown as a standalone "current annualized volatility" figure.</p>
+          <div class="about-formula">rₜ = ln(priceₜ/priceₜ₋₁),   r̄ = mean(r),   uncond.Var = mean((rₜ-r̄)²)
+
+α = 0.08   β = 0.90   <span class="fmuted">(fixed, not MLE-fit)</span>
+ω = uncond.Var · (1 - α - β)
+
+σ²ₜ = ω + α·(rₜ₋₁-r̄)² + β·σ²ₜ₋₁          <span class="fmuted">recursion over the whole history</span>
+
+σ²(h) = uncond.Var + (σ²ₙ - uncond.Var) · (α+β)ʰ   <span class="fmuted">h-day-ahead forecast</span></div>
+          <p class="about-formula-caption">Daily vol = √σ²ₙ; annualized vol = daily vol × √252. Persistence α+β = 0.98 &lt; 1, so forecast variance mean-reverts toward the unconditional variance as h grows — never explodes or flatlines instantly. Needs ≥30 daily returns.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .gc-ax{stroke:var(--line-strong);stroke-width:1}
+                .gc-uncond{stroke:var(--text-3);stroke-width:1;stroke-dasharray:3 3}
+                .gc-curve{stroke:var(--risk);stroke-width:2;fill:none}
+                .gc-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+              </style>
+              <line x1="20" y1="110" x2="280" y2="110" class="gc-ax"/>
+              <line x1="20" y1="14" x2="280" y2="14" class="gc-ax"/>
+              <line x1="30" y1="70" x2="270" y2="70" class="gc-uncond"/>
+              <text x="200" y="65" class="gc-lbl">unconditional variance</text>
+              <path class="gc-curve" d="M35,25 C80,45 120,60 160,66 C200,70 230,70 265,70"/>
+              <text x="30" y="24" class="gc-lbl">σ²ₙ (current, elevated)</text>
+              <text x="20" y="122" class="gc-lbl">horizon h (days) →</text>
+            </svg>
+            <div class="about-diagram-caption">An elevated current variance decays geometrically (rate α+β) back toward the long-run average — mean reversion, not a straight line.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#3B6FB8;"></span>Feature Regression (ML-style)</h3>
           <p>A small linear regression predicting next-day return from engineered features — the prior day's return, the gap between a 5-day and 20-day moving average, and a 14-day RSI-like momentum measure — then projected forward recursively, day by day. A genuine feature-engineering + linear-model approach computed fresh in-browser; not a stand-in for a trained Random Forest, LSTM, or Transformer, which don't fit a static client-side prototype.</p>
+          <div class="about-formula">features = [ 1,  lagReturnᵢ,  (SMA₅-SMA₂₀)ᵢ,  rsiᵢ - 0.5 ]
+r̂ᵢ = β₀ + β₁·lagReturn + β₂·maGap + β₃·(rsi-0.5)
+
+rsi(i) = gains / (gains + losses)   <span class="fmuted">over trailing 14 signed daily returns, 0..1</span>
+
+β solved via OLS normal equations: (XᵀX)β = Xᵀy</div>
+          <p class="about-formula-caption">Each day's predicted return is clamped to ±15%, then fed back in as the next day's "lag return" — a recursive, AR-like walk using the fitted features instead of the raw series. Needs ≥40 bars, ≥15 training rows.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .fr-box{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+                .fr-arrow{stroke:var(--text-2);stroke-width:1.3;fill:none;marker-end:url(#fr-arrowhead)}
+                .fr-txt{fill:var(--text-1);font-family:var(--font-mono);font-size:8px}
+                .fr-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8px}
+              </style>
+              <defs>
+                <marker id="fr-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="var(--text-2)"/>
+                </marker>
+              </defs>
+              <rect class="fr-box" x="15" y="15" width="90" height="46" rx="6"/>
+              <text x="22" y="32" class="fr-txt">lagReturn</text>
+              <text x="22" y="44" class="fr-txt">maGap, rsi-.5</text>
+              <text x="24" y="56" class="fr-lbl">(features, day t)</text>
+              <path class="fr-arrow" d="M108,38 L155,38"/>
+              <rect class="fr-box" x="158" y="15" width="70" height="46" rx="6"/>
+              <text x="168" y="42" class="fr-txt">linear model</text>
+              <path class="fr-arrow" d="M193,64 L193,90"/>
+              <rect class="fr-box" x="150" y="93" width="86" height="30" rx="6"/>
+              <text x="160" y="112" class="fr-txt">r̂ (day t+1)</text>
+              <path class="fr-arrow" d="M150,108 C 80,120 20,80 18,64"/>
+              <text x="15" y="135" class="fr-lbl">fed back as next lagReturn</text>
+            </svg>
+            <div class="about-diagram-caption">Each predicted return becomes next step's "lagReturn" feature — a recursive one-step-ahead loop, not a single multi-day fit.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#9A5FB0;"></span>Sentiment Proxy <em>(simulated)</em></h3>
           <p><b>No real news or text data source is connected.</b> This score is derived purely from a shift in recent price momentum, framed the way a sentiment score would read. It exists to show where a real news/NLP signal would plug into the Ensemble — not as a genuine sentiment measure.</p>
+          <div class="about-formula">recentMean = mean(last 20 daily log-returns)
+olderMean  = mean(the 20 daily log-returns before that)
+shift = recentMean - olderMean
+
+sentiment = clamp(shift / 0.01, -1, +1)        <span class="fmuted">scale=0.01 tunes typical shifts to ±1</span>
+impliedDailyDrift = sentiment · recentMean · 0.5</div>
+          <p class="about-formula-caption">Label: sentiment &gt; 0.3 → "Positive", &lt; -0.3 → "Negative", else "Neutral". The ×0.5 factor deliberately keeps this a modest tilt on top of recent momentum, not a dominant signal — honestly, there is little real math here to be rigorous about, since the underlying signal is a stand-in for data this prototype doesn't have.</p>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:#B34632;"></span>Monte Carlo Simulation</h3>
           <p>Simulates hundreds of random price paths under geometric Brownian motion, using the asset's historical drift and GARCH-estimated volatility, then reports the 10th-90th percentile of simulated outcomes — a distribution of possible futures instead of one line.</p>
+          <div class="about-formula">ln(priceₜ₊₁) = ln(priceₜ) + μ + σ·Z,   Z ~ N(0,1)
+
+μ = mean historical daily log-return
+σ = GARCH's dailyVol (or historical std-dev if GARCH unavailable)
+Z drawn via Box-Muller from a seeded PRNG (seed = round(lastPrice·1000), reproducible per run)
+
+500 paths simulated → sort final prices → report P10 / P50 / P90</div>
+          <p class="about-formula-caption">Rankings uses a lighter 80-path run without keeping per-path chart data, for speed across the whole asset universe. Needs ≥20 bars.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .mo-ax{stroke:var(--line-strong);stroke-width:1}
+                .mo-band{fill:var(--gold-soft);opacity:0.8}
+                .mo-med{stroke:var(--gold);stroke-width:2;fill:none}
+                .mo-path{stroke:var(--text-3);stroke-width:0.8;fill:none;opacity:0.5}
+                .mo-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+              </style>
+              <line x1="20" y1="115" x2="280" y2="115" class="mo-ax"/>
+              <path class="mo-band" d="M30,70 C100,55 180,35 270,15 L270,95 C180,90 100,80 30,88 Z"/>
+              <path class="mo-path" d="M30,72 C90,68 150,50 210,55 C240,58 260,40 270,30"/>
+              <path class="mo-path" d="M30,74 C90,80 150,90 210,75 C240,66 260,58 270,50"/>
+              <path class="mo-path" d="M30,73 C90,60 150,70 210,45 C240,35 260,25 270,20"/>
+              <path class="mo-med" d="M30,73 C100,63 180,55 270,55"/>
+              <text x="230" y="18" class="mo-lbl">P90</text>
+              <text x="230" y="100" class="mo-lbl">P10</text>
+              <text x="230" y="60" class="mo-lbl" fill="var(--gold-ink)">P50</text>
+            </svg>
+            <div class="about-diagram-caption">A handful of the simulated paths (grey) fan out from today's price; the shaded band spans the 10th-90th percentile of all simulated endpoints.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3><span class="dot" style="background:var(--ink);"></span>Ensemble</h3>
           <p>A weighted average of every directional model's forecast (the Sentiment Proxy is weighted at half since it's simulated, not real data). Its uncertainty band comes from GARCH's volatility forecast rather than any single model's own fit.</p>
+          <div class="about-weights">
+            <div class="about-weight-row"><span class="wlabel">Linear Trend</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">MA Crossover</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">ARIMA(1,1,0)</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">Holt's Linear Trend</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">Feature Regression</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">Monte Carlo (median)</span><div class="wbar-track"><div class="wbar-fill" style="width:100%"></div></div><span class="wval">1.0</span></div>
+            <div class="about-weight-row"><span class="wlabel">Sentiment Proxy <em>(simulated)</em></span><div class="wbar-track"><div class="wbar-fill" style="width:50%;background:var(--gold);"></div></div><span class="wval">0.5</span></div>
+          </div>
+          <div class="about-formula">blended% = Σ(weightᵢ · forecastChangePctᵢ) / Σ(weightᵢ)     <span class="fmuted">GARCH itself casts no vote</span>
+
+annualVol = GARCH's annualVol (or Linear Trend's own vol if GARCH unavailable)
+dailyVol = annualVol / √252
+bandWidth (ln-space) = dailyVol · √daysAhead
+low/high = lastPrice · exp( ln(1+blended%) ∓ bandWidth )</div>
+          <p class="about-formula-caption">Whichever directional models are actually available for the asset/lookback contribute (e.g. ARIMA drops out under 30 bars) — the weights above apply to whichever subset is present, not a fixed 7-model set.</p>
         </div>
       </div>
 
@@ -865,41 +1236,246 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
           <li><b>Composite score (default)</b> — blends 60% long-term trend growth with 40% recent momentum, then discounts that blend for low-confidence fits (a noisy R²) and for volatility above 20%/yr — so a noisy short-term spike can't outrank a steady, well-supported trend.</li>
           <li><b>Any individual model</b> — ranks assets directly by that model's forecast % at the selected lookback. Assets are skipped where the model needs more history than is available at that lookback (e.g. ARIMA, Moving Average Crossover, and Feature Regression all need 30-50+ bars of data).</li>
         </ul>
+        <div class="about-formula">rankScore = (0.6·longTermGrowth + 0.4·momentumGrowth) · confidenceFactor · volPenalty
+
+confidenceFactor = 0.4 + 0.6·clamp(R², 0, 1)              <span class="fmuted">range 0.4-1.0</span>
+volPenalty       = 1 / (1 + max(0, annualVol - 0.20))      <span class="fmuted">penalizes vol above 20%/yr</span></div>
         <p>Use <b>Top</b> to see the highest-scoring assets, or <b>Bottom</b> to see the lowest-scoring ones — useful for spotting names the model is bearish on, not only bullish on. Clicking any row expands its full Dashboard-equivalent detail — chart, recommendation, stats, forecast models, backtest — inline, without leaving the Rankings tab.</p>
       </div>
 
       <div class="about-section">
         <h2>How the Dividends tab works</h2>
-        <p>A separate ranking, built on different data than everything else in this app: real historical dividend payments, annual and quarterly financial statements (free cash flow, revenue), and analyst EPS estimates for ~300 large-cap companies across all 20 countries in the asset universe (top ~15 per country) — not price history, and not the full 540-asset universe.</p>
-        <p>Every company can be scored by any of <b>7 independent models</b>, selectable under "Rank by" — matching how the Dashboard offers several price-forecast models rather than one blended number. Click into any company to see all 7 compared side by side.</p>
+        <p>A separate ranking, built on different data than everything else in this app: real historical dividend payments, annual and quarterly financial statements (free cash flow, revenue), and analyst EPS estimates for ~900 large-cap companies across all 20 countries in the asset universe (top ~50 per country, fewer for smaller markets that don't have 50 real liquid large-caps) — not price history, and not the full ~940-asset universe.</p>
+        <p>Every company can be scored by any of <b>9 independent models</b>, selectable under "Rank by" — matching how the Dashboard offers several price-forecast models rather than one blended number. Click into any company to see all 9 compared side by side.</p>
 
         <div class="about-model">
           <h3>Composite</h3>
           <p>The original model: 40% dividend growth consistency (from real payment history, penalized for any cut &gt;10% year-over-year) + 40% sustainability (60% earnings-based payout ratio + 40% the <i>level</i> of FCF margin — not just its trend, so a company stuck at a deeply negative margin can't hide behind a decent payout ratio — then nudged by FCF margin trend and recent quarterly FCF momentum) + 20% current yield.</p>
+          <div class="about-formula">growthScore:  ≥2 cuts → 5     1 cut → 30     else clamp(50 + CAGR·400, 0, 100)
+
+payoutTierScore: comfortable 90 · moderate 65 · tight 35 · exceeds earnings 10 · unknown 50
+fcfMarginLevelScore = clamp(50 + latestFcfMargin·150, 0, 100)
+sustainScore = payoutTierScore·0.6 + fcfMarginLevelScore·0.4
+             + clamp(marginTrend·40, -15, +15)          <span class="fmuted">trend nudge, capped</span>
+             + clamp(qoqFcfGrowth·40, -10, +10)          <span class="fmuted">momentum nudge, capped</span>
+
+yieldScore = clamp(yieldPct · 1200, 0, 100)              <span class="fmuted">e.g. 8.3% yield → 100</span>
+
+Composite = growthScore·0.4 + sustainScore·0.4 + yieldScore·0.2</div>
+          <div class="about-example">
+            <span class="ex-title">Worked example</span>
+            5%/yr dividend CAGR (0.05), no cuts, payout ratio 45% ("comfortable"), FCF margin 0.12 (12%), flat trend, yield 0.03 (3.0%):<br>
+            growthScore = clamp(50+0.05·400, 0,100) = <b>70</b> · fcfMarginLevelScore = clamp(50+0.12·150,0,100) = <b>68</b> ·
+            sustainScore = 90·0.6+68·0.4 = <b>81.2</b> · yieldScore = clamp(0.03·1200,0,100) = <b>36</b><br>
+            Composite = 70·0.4 + 81.2·0.4 + 36·0.2 = <b>67.7</b> → Stable (50-70 tier).
+          </div>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .cp-lbl{fill:var(--text-2);font-family:var(--font-ui);font-size:9px}
+                .cp-val{fill:var(--text-3);font-family:var(--font-mono);font-size:8.5px}
+              </style>
+              <rect x="20" y="20" width="120" height="14" rx="3" fill="var(--accent)"/>
+              <text x="150" y="31" class="cp-val">growth 40%</text>
+              <rect x="20" y="42" width="120" height="14" rx="3" fill="var(--gold)"/>
+              <text x="150" y="53" class="cp-val">sustainability 40%</text>
+              <rect x="20" y="64" width="120" height="14" rx="3" fill="var(--risk)"/>
+              <text x="150" y="75" class="cp-val">yield 20%</text>
+              <rect x="20" y="20" width="48" height="14" rx="3" fill="var(--accent)" opacity="0"/>
+              <rect x="20" y="98" width="240" height="14" rx="3" fill="var(--line)"/>
+              <rect x="20" y="98" width="96" height="14" rx="3" fill="var(--accent)"/>
+              <rect x="116" y="98" width="96" height="14" rx="3" fill="var(--gold)"/>
+              <rect x="212" y="98" width="48" height="14" rx="3" fill="var(--risk)"/>
+              <text x="20" y="118" class="cp-lbl">stacked weights → one 0-100 Composite score</text>
+            </svg>
+            <div class="about-diagram-caption">The three weighted components (40/40/20) stack into the final Composite score.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3>Tenure (streak)</h3>
           <p>How many consecutive years has this company avoided a cut, from real payment history? A 15-year unbroken streak scores at the top of the scale — distinct from the Composite's CAGR, since the same growth rate over 3 years vs. 15 years is a very different track record.</p>
+          <div class="about-formula">score = clamp( (consecutiveYearsNoCut / 15) · 100, 0, 100 )</div>
+          <p class="about-formula-caption">A "cut" is any year-over-year drop &gt;10% in the annual dividend total (see the shared cut-detection logic below). The first and last calendar years on record are dropped before counting — they're usually partial years from the fetch window, which would misread as a cut.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .tn-ax{stroke:var(--line-strong);stroke-width:1}
+                .tn-line{stroke:var(--accent);stroke-width:2.5;fill:none}
+                .tn-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+                .tn-tick{stroke:var(--text-3);stroke-width:1}
+              </style>
+              <line x1="25" y1="90" x2="300" y2="90" class="tn-ax"/>
+              <line x1="25" y1="10" x2="25" y2="90" class="tn-ax"/>
+              <path class="tn-line" d="M25,90 L207,10"/>
+              <path class="tn-line" d="M207,10 L300,10"/>
+              <line x1="207" y1="90" x2="207" y2="10" class="tn-tick" stroke-dasharray="2 2"/>
+              <text x="190" y="103" class="tn-lbl">15 yrs</text>
+              <text x="270" y="103" class="tn-lbl">25 yrs</text>
+              <text x="4" y="14" class="tn-lbl">100</text>
+              <text x="8" y="94" class="tn-lbl">0</text>
+            </svg>
+            <div class="about-diagram-caption">Score rises linearly with streak length and caps at 100 once the streak reaches 15 years.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3>FCF Payout Ratio</h3>
           <p>Recomputes the payout ratio directly from real numbers — total dividends paid (estimated from per-share amounts × shares outstanding) ÷ free cash flow — rather than using the earnings-based ratio the Composite relies on. Some companies look sustainable on earnings but are straining cash flow, or the reverse; this can disagree with the Composite when that happens. A year where FCF was negative while a dividend was paid scores at the bottom of the scale, rather than being excluded from the ranking.</p>
+          <div class="about-formula">sharesOutstanding ≈ marketCap / price
+totalDividendsPaid = (per-share annual total for the FCF year) · sharesOutstanding
+fcfPayoutRatio = totalDividendsPaid / freeCashFlow</div>
+          <div class="about-tiers"><table>
+            <tr><th>FCF payout ratio</th><th>Tier</th><th class="mono">Score</th></tr>
+            <tr><td class="mono">≤ 50%</td><td>comfortable</td><td class="mono">90</td></tr>
+            <tr><td class="mono">50–80%</td><td>moderate</td><td class="mono">65</td></tr>
+            <tr><td class="mono">80–100%</td><td>tight</td><td class="mono">35</td></tr>
+            <tr><td class="mono">&gt; 100%</td><td>exceeds FCF</td><td class="mono">10</td></tr>
+            <tr><td class="mono">FCF ≤ 0</td><td>dividend not covered at all</td><td class="mono">0</td></tr>
+          </table></div>
         </div>
+
         <div class="about-model">
           <h3>Volatility-Adjusted Yield</h3>
           <p>Current yield divided by the stock's own annualized price volatility (last 24 months, the same measure used in the Dashboard's forecast models). A 4% yield from a steady utility scores higher than the same 4% from a volatile miner.</p>
+          <div class="about-formula">ratio = yieldPct / annualVolatility(last 24 months)
+score = clamp(ratio · 200, 0, 100)          <span class="fmuted">ratio ≈ 0.5 (e.g. 5% yield / 10% vol) tops the scale</span></div>
+          <div class="about-example">
+            <span class="ex-title">Worked example</span>
+            Utility: 4% yield, 12% annual volatility → ratio = 0.333 → score = clamp(66.7, 0,100) = <b>66.7</b>.<br>
+            Miner: same 4% yield, 45% annual volatility → ratio = 0.089 → score = <b>17.8</b>. Identical yield, very different score.
+          </div>
         </div>
+
         <div class="about-model">
           <h3>Leverage-Adjusted</h3>
           <p>Blends debt-to-equity (60%) with the payout-ratio tier (40%) — high leverage can make an otherwise-comfortable payout fragile. Not computed for Financial Services companies (banks, insurers), who don't report debt-to-equity the way industrials do — shown as not applicable rather than guessed.</p>
+          <div class="about-tiers"><table>
+            <tr><th>Debt/equity (%)</th><th class="mono">Leverage score</th></tr>
+            <tr><td class="mono">≤ 50</td><td class="mono">90</td></tr>
+            <tr><td class="mono">50–100</td><td class="mono">65</td></tr>
+            <tr><td class="mono">100–200</td><td class="mono">35</td></tr>
+            <tr><td class="mono">&gt; 200</td><td class="mono">10</td></tr>
+          </table></div>
+          <div class="about-formula">score = leverageScore·0.6 + payoutTierScore·0.4     <span class="fmuted">payoutTierScore: same 90/65/35/10/50 tiers as Composite</span></div>
         </div>
+
         <div class="about-model">
           <h3>Sector-Relative Yield</h3>
-          <p>Ranks a company's yield as a percentile against other companies in the same sector within this ~300-company dividend dataset (not the whole market) — a 3% yield is mediocre for a bank but strong for a tech company, so this reframes yield by what's typical for that sector here.</p>
+          <p>Ranks a company's yield as a percentile against other companies in the same sector within this ~900-company dividend dataset (not the whole market) — a 3% yield is mediocre for a bank but strong for a tech company, so this reframes yield by what's typical for that sector here.</p>
+          <div class="about-formula">percentile = (# sector peers with lower yield) / (# sector peers)
+score = clamp(percentile · 100, 0, 100)</div>
+          <p class="about-formula-caption">Needs ≥3 sector peers with known yield in the dataset, otherwise scored as insufficient data.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .sr-dot{fill:var(--text-3)}
+                .sr-me{fill:var(--accent)}
+                .sr-ax{stroke:var(--line-strong);stroke-width:1}
+                .sr-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+              </style>
+              <line x1="20" y1="60" x2="280" y2="60" class="sr-ax"/>
+              <circle class="sr-dot" cx="40" cy="60" r="4"/><circle class="sr-dot" cx="70" cy="60" r="4"/>
+              <circle class="sr-dot" cx="100" cy="60" r="4"/><circle class="sr-dot" cx="130" cy="60" r="4"/>
+              <circle class="sr-dot" cx="160" cy="60" r="4"/><circle class="sr-dot" cx="190" cy="60" r="4"/>
+              <circle class="sr-me" cx="215" cy="60" r="5"/>
+              <circle class="sr-dot" cx="245" cy="60" r="4"/><circle class="sr-dot" cx="265" cy="60" r="4"/>
+              <text x="200" y="42" class="sr-lbl" fill="var(--accent-ink)">this company</text>
+              <text x="20" y="78" class="sr-lbl">lower yield ← sector peers, sorted → higher yield</text>
+            </svg>
+            <div class="about-diagram-caption">6 of 8 peers yield less → 6/8 = 75th percentile → score 75.</div>
+          </div>
         </div>
+
         <div class="about-model">
           <h3>Analyst-Implied Forward <em>(derived, not a real analyst call)</em></h3>
           <p>Yahoo has no direct analyst dividend forecast field — only forward EPS estimates. This projects next year's dividend as (forward EPS estimate × current payout ratio), assuming the payout ratio holds steady, and nudges the result by the recent balance of analyst EPS estimate revisions (more raising vs. cutting in the last 30 days). Labeled as a derived projection, not a genuine analyst dividend call.</p>
+          <div class="about-formula">impliedForwardDividend = forwardEpsNextYear · payoutRatio
+impliedGrowthPct = (impliedForwardDividend / currentDividendRate - 1) · 100
+
+score = clamp(50 + impliedGrowthPct·5, 0, 100)
+revisionBalance = (upRevisions - downRevisions) / (upRevisions + downRevisions)
+score = clamp(score + revisionBalance·10, 0, 100)     <span class="fmuted">±10 pt nudge, only if any revisions exist</span></div>
+          <div class="about-example">
+            <span class="ex-title">Worked example</span>
+            Current dividend rate $2.00/share, forward EPS $5.50, payout ratio 40% → implied forward dividend = $2.20 → impliedGrowthPct = +10%.<br>
+            score = clamp(50 + 10·5, 0,100) = <b>100</b>. With 2 analysts raising, 1 cutting estimates: revisionBalance = 1/3 → score = clamp(100+3.3,0,100) = <b>100</b> (already capped).
+          </div>
+        </div>
+
+        <div class="about-model">
+          <h3>Growth Deceleration</h3>
+          <p>A single CAGR over the whole dividend history can't tell a company that grew fast early and has since slowed down apart from one that's held a steady pace throughout. This compares dividend growth in the earliest third of the years on record to the most recent third — catching a slowdown a long-run average would smooth over. Needs at least 6 years of dividend history to compute.</p>
+          <div class="about-formula">segmentSize = max(2, floor(years.length / 3))
+earlyCagr  = CAGR of the first `segmentSize` years on record
+recentCagr = CAGR of the last `segmentSize` years on record
+decelerationPts = (earlyCagr - recentCagr) · 100        <span class="fmuted">percentage points</span>
+
+score = clamp(80 - decelerationPts · 4, 0, 100)</div>
+          <div class="about-tiers"><table>
+            <tr><th>decelerationPts</th><th>Trend label</th></tr>
+            <tr><td class="mono">≤ -1</td><td>accelerating</td></tr>
+            <tr><td class="mono">-1 to 1</td><td>holding steady</td></tr>
+            <tr><td class="mono">1 to 5</td><td>decelerating</td></tr>
+            <tr><td class="mono">&gt; 5</td><td>sharply decelerating</td></tr>
+          </table></div>
+          <div class="about-example">
+            <span class="ex-title">Worked example</span>
+            Early-years CAGR 12%/yr, recent-years CAGR 4%/yr → decelerationPts = (12-4) = 8 → score = clamp(80 - 8·4, 0,100) = <b>48</b> ("sharply decelerating", Caution tier).
+          </div>
+          <div class="about-diagram">
+            <svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .gd-ax{stroke:var(--line-strong);stroke-width:1}
+                .gd-early{stroke:var(--accent);stroke-width:2.5;fill:none}
+                .gd-recent{stroke:var(--risk);stroke-width:2.5;fill:none}
+                .gd-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+              </style>
+              <line x1="20" y1="95" x2="280" y2="95" class="gd-ax"/>
+              <path class="gd-early" d="M20,90 L110,35"/>
+              <path class="gd-recent" d="M190,50 L280,38"/>
+              <line x1="110" y1="95" x2="190" y2="95" class="gd-ax" stroke-dasharray="2 3"/>
+              <text x="35" y="28" class="gd-lbl" fill="var(--accent-ink)">early segment (steep)</text>
+              <text x="185" y="30" class="gd-lbl" fill="var(--risk-ink)">recent segment (flatter)</text>
+              <text x="120" y="110" class="gd-lbl">…years in between…</text>
+            </svg>
+            <div class="about-diagram-caption">Two separate CAGR line segments (earliest third vs. most recent third of years) — the gap between their steepness is the deceleration.</div>
+          </div>
+        </div>
+
+        <div class="about-model">
+          <h3>Earnings Quality</h3>
+          <p>Compares net income growth to free cash flow growth over the same annual window, both from real financial statements. A company can report growing earnings while cash flow doesn't keep pace (working capital changes, capex timing, one-off gains) — that's a subtler, earlier warning sign than the payout ratio or FCF margin alone catch, since it questions whether the earnings behind the payout ratio are backed by real cash.</p>
+          <div class="about-formula">netIncomeCagr = (lastNetIncome / firstNetIncome)^(1/yearsSpan) - 1
+fcfCagr        = (lastFCF / firstFCF)^(1/yearsSpan) - 1
+gap = netIncomeCagr - fcfCagr
+
+score = clamp(70 - gap · 250, 0, 100)</div>
+          <div class="about-tiers"><table>
+            <tr><th>gap (net income CAGR − FCF CAGR)</th><th>Read</th></tr>
+            <tr><td class="mono">≤ -2 pts</td><td>FCF outgrowing earnings — conservative, cash-backed</td></tr>
+            <tr><td class="mono">-2 to 2 pts</td><td>growing in line with each other</td></tr>
+            <tr><td class="mono">2 to 8 pts</td><td>earnings outpacing FCF — worth watching</td></tr>
+            <tr><td class="mono">&gt; 8 pts</td><td>earnings far outpacing FCF — real divergence</td></tr>
+          </table></div>
+          <p class="about-formula-caption">If either CAGR can't be computed because net income or FCF was negative at an endpoint, the model scores 15 when net income still grew (a red flag: earnings up, cash not even positive) rather than silently abstaining; if both signals are unusable it returns insufficient data.</p>
+          <div class="about-diagram">
+            <svg viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .eq-ax{stroke:var(--line-strong);stroke-width:1}
+                .eq-ni{stroke:var(--gold);stroke-width:2.5;fill:none}
+                .eq-fcf{stroke:var(--accent);stroke-width:2.5;fill:none}
+                .eq-lbl{fill:var(--text-3);font-family:var(--font-ui);font-size:8.5px}
+              </style>
+              <line x1="20" y1="90" x2="240" y2="90" class="eq-ax"/>
+              <path class="eq-ni" d="M20,85 L230,20"/>
+              <path class="eq-fcf" d="M20,85 L230,55"/>
+              <rect x="150" y="10" width="9" height="9" fill="var(--gold)"/><text x="163" y="18" class="eq-lbl">net income</text>
+              <rect x="150" y="24" width="9" height="9" fill="var(--accent)"/><text x="163" y="32" class="eq-lbl">FCF</text>
+              <text x="20" y="103" class="eq-lbl">gap = the widening space between the two lines</text>
+            </svg>
+            <div class="about-diagram-caption">Net income climbing faster than FCF over the same years is the "divergence" this model penalizes.</div>
+          </div>
         </div>
 
         <p>In the main table, the <b>"Paid in"</b> column shows the distinct months (across the company's full history on record) it has typically paid a dividend in — e.g. "Feb, May, Aug, Nov" for a quarterly payer. Clicking into a company shows every individual payment with its <b>yield at payout</b>: that payment's amount ÷ the average closing price over the 3 months <i>before</i> the payment date, using the company's own real price history — not today's price applied retroactively.</p>

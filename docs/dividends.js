@@ -1,7 +1,7 @@
 /* Dividend outlook scoring for the AI Financial Advisor prototype.
 
    Rather than one blended number claiming to be "the" answer, this offers
-   7 independent models plus the original Composite, matching how the
+   9 independent models plus the original Composite, matching how the
    price-forecast side of the app (models.js) already presents several
    methods side by side. Each model exposes:
      { key, label, methodNote, score: 0-100|null, outlookLabel, detail }
@@ -16,8 +16,9 @@
    Data limitations, stated plainly: annual FCF/revenue history is capped
    at ~4-5 years by Yahoo's fundamentals API, quarterly at ~5 quarters
    (~15 months) regardless of how far back it's requested, and this covers
-   ~300 large-cap assets across all 20 countries in the main asset universe
-   (top ~15 companies per country) — not the full 540-asset universe.
+   ~900 large-cap assets across all 20 countries in the main asset universe
+   (top ~50 companies per country, fewer for smaller markets that don't
+   have 50 real liquid large-caps) — not the full ~940-asset universe.
    Assets outside that set, or with no dividend at all, are excluded from
    rankings but can still be looked up individually. Sector/debt data is
    missing for some companies (notably debt-to-equity for many banks and
@@ -424,6 +425,17 @@ function percentileRank(sortedArr, value) {
   return below / sortedArr.length;
 }
 
+function ordinalSuffix(n) {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return 'th';
+  switch (n % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+
 function modelSectorRelativeYield(ctx, sectorYields) {
   const { growth, yieldPct, asset } = ctx;
   if (!growth.hasDividend || yieldPct === null) return nullModel('sector-relative-yield', 'Sector-Relative Yield', 'No dividend');
@@ -442,8 +454,8 @@ function modelSectorRelativeYield(ctx, sectorYields) {
   const score = clamp(percentile * 100, 0, 100);
 
   return finalizeModel('sector-relative-yield', 'Sector-Relative Yield', score, {
-    methodNote: `Percentile rank of current yield among ${peers.length} "${sector}" peers in this ~300-company dividend dataset (not the whole market) — a 3% yield can be weak for one sector and strong for another.`,
-    detail: `${(yieldPct * 100).toFixed(2)}% yield ranks in the ${(percentile * 100).toFixed(0)}th percentile of ${sector} peers here.`,
+    methodNote: `Percentile rank of current yield among ${peers.length} "${sector}" peers in this ~900-company dividend dataset (not the whole market) — a 3% yield can be weak for one sector and strong for another.`,
+    detail: `${(yieldPct * 100).toFixed(2)}% yield ranks in the ${(percentile * 100).toFixed(0)}${ordinalSuffix(Math.round(percentile * 100))} percentile of ${sector} peers here.`,
     sector,
     sectorPercentile: percentile,
     sectorPeerCount: peers.length,
@@ -493,6 +505,136 @@ function modelAnalystImplied(ctx) {
   });
 }
 
+/* ---------- Model 8: Growth Deceleration ---------- */
+/* The Composite's CAGR is a single number over the whole history — it
+   can't tell a company that grew dividends fast early and has since
+   slowed down apart from one that's held a steady pace throughout, even
+   though those are very different trajectories for what happens next.
+   This compares the most recent third of the dividend-growth years to
+   the earliest third, using real per-year totals (the same `growth.years`
+   the Composite/Tenure models use), rather than one CAGR over everything. */
+function modelGrowthDeceleration(ctx) {
+  const { growth } = ctx;
+  if (!growth.hasDividend) return nullModel('growth-deceleration', 'Growth Deceleration', 'No dividend');
+  if (growth.years.length < 6) {
+    return nullModel('growth-deceleration', 'Growth Deceleration', 'Needs at least 6 years of history to compare early vs. recent growth');
+  }
+
+  const years = growth.years;
+  const segmentSize = Math.max(2, Math.floor(years.length / 3));
+  const early = years.slice(0, segmentSize);
+  const recent = years.slice(-segmentSize);
+
+  function segmentCagr(segment) {
+    const first = segment[0][1];
+    const last = segment[segment.length - 1][1];
+    const span = segment[segment.length - 1][0] - segment[0][0];
+    if (span <= 0 || first <= 0) return null;
+    return (last / first) ** (1 / span) - 1;
+  }
+
+  const earlyCagr = segmentCagr(early);
+  const recentCagr = segmentCagr(recent);
+  if (earlyCagr === null || recentCagr === null) {
+    return nullModel('growth-deceleration', 'Growth Deceleration', 'Could not compute early vs. recent growth segments');
+  }
+
+  // A recent pace at or above the early pace scores at the top (still
+  // accelerating or holding steady); every 5 points of deceleration
+  // (early - recent, in percentage-point terms) costs 20 score points.
+  const decelerationPts = (earlyCagr - recentCagr) * 100;
+  const score = clamp(80 - decelerationPts * 4, 0, 100);
+
+  let trend;
+  if (decelerationPts <= -1) trend = 'accelerating';
+  else if (decelerationPts <= 1) trend = 'holding steady';
+  else if (decelerationPts <= 5) trend = 'decelerating';
+  else trend = 'sharply decelerating';
+
+  return finalizeModel('growth-deceleration', 'Growth Deceleration', score, {
+    methodNote: `Compares dividend growth in the earliest ~${early.length} years on record (${(earlyCagr * 100).toFixed(1)}%/yr) to the most recent ~${recent.length} years (${(recentCagr * 100).toFixed(1)}%/yr), rather than one CAGR blended across the whole history — catches a slowdown a single long-run average would smooth over.`,
+    detail: `Growth is ${trend}: ${(earlyCagr * 100).toFixed(1)}%/yr early on vs. ${(recentCagr * 100).toFixed(1)}%/yr recently.`,
+    earlyCagr,
+    recentCagr,
+  });
+}
+
+/* ---------- Model 9: Earnings Quality ---------- */
+/* The FCF Payout Ratio model catches FCF that can't cover the dividend
+   right now; the Composite's FCF-margin-level term catches a cash-poor
+   margin level. Neither directly asks whether *earnings growth itself is
+   backed by cash* — a company can report growing net income while FCF
+   stalls or shrinks (working capital changes, capex timing, one-off
+   gains), which is an earlier, subtler warning sign than either of those:
+   the earnings the payout ratio is measured against may not be "real" in
+   a cash sense, even before that shows up in the payout ratio or FCF
+   margin. Compares net income CAGR to FCF CAGR over the same annual
+   window. */
+function modelEarningsQuality(ctx) {
+  const { growth, sustainability } = ctx;
+  if (!growth.hasDividend) return nullModel('earnings-quality', 'Earnings Quality', 'No dividend');
+
+  const rows = (sustainability.fcfRows || []).filter((r) => r.netIncome !== null && r.netIncome !== undefined);
+  if (rows.length < 2) {
+    return nullModel('earnings-quality', 'Earnings Quality', 'No net income history available alongside FCF');
+  }
+
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  const yearsSpan = new Date(last.date).getFullYear() - new Date(first.date).getFullYear();
+
+  if (yearsSpan <= 0) {
+    return nullModel('earnings-quality', 'Earnings Quality', 'Insufficient time span to compare growth rates');
+  }
+
+  let netIncomeCagr = null;
+  if (first.netIncome > 0 && last.netIncome > 0) {
+    netIncomeCagr = (last.netIncome / first.netIncome) ** (1 / yearsSpan) - 1;
+  }
+  let fcfCagr = null;
+  if (first.freeCashFlow > 0 && last.freeCashFlow > 0) {
+    fcfCagr = (last.freeCashFlow / first.freeCashFlow) ** (1 / yearsSpan) - 1;
+  }
+
+  if (netIncomeCagr === null || fcfCagr === null) {
+    // One or both went negative somewhere in the window, which the CAGR
+    // math (a fractional power of a negative ratio) can't represent — but
+    // earnings growing while FCF can't even stay positive is itself a bad
+    // sign, and earnings staying positive while FCF does the same in
+    // reverse is worse. Score from whichever signal is available rather
+    // than abstaining.
+    if (netIncomeCagr !== null && netIncomeCagr > 0 && (first.freeCashFlow <= 0 || last.freeCashFlow <= 0)) {
+      return finalizeModel('earnings-quality', 'Earnings Quality', 15, {
+        methodNote: 'Compares net income growth to free cash flow growth over the same annual window — a company can report growing earnings while cash flow can\'t stay positive, which is a warning sign the payout ratio alone (earnings-based) won\'t show.',
+        detail: `Net income grew ~${(netIncomeCagr * 100).toFixed(1)}%/yr while FCF was negative in at least one endpoint year — earnings growth isn't backed by cash here.`,
+        netIncomeCagr,
+        fcfCagr: null,
+      });
+    }
+    return nullModel('earnings-quality', 'Earnings Quality', 'Net income or FCF was negative in the comparison window, making a growth-rate comparison unreliable');
+  }
+
+  const gap = netIncomeCagr - fcfCagr;
+  // Earnings and FCF growing in lockstep (gap near 0) scores neutral-high;
+  // FCF growing faster than earnings scores higher still (conservative
+  // accounting, cash showing up ahead of reported profit); earnings
+  // outrunning FCF scores lower, more so the wider the gap.
+  const score = clamp(70 - gap * 250, 0, 100);
+
+  let read;
+  if (gap <= -0.02) read = 'FCF is growing faster than earnings — a conservative, cash-backed trend';
+  else if (gap <= 0.02) read = 'earnings and FCF are growing in line with each other';
+  else if (gap <= 0.08) read = 'earnings are outpacing FCF — worth watching';
+  else read = 'earnings are growing much faster than FCF — a real divergence';
+
+  return finalizeModel('earnings-quality', 'Earnings Quality', score, {
+    methodNote: 'Compares net income growth to free cash flow growth over the same annual window (both from real financial statements). When earnings grow faster than cash flow, the earnings-based payout ratio can look more comfortable than the underlying cash generation actually supports.',
+    detail: `Net income ${(netIncomeCagr * 100).toFixed(1)}%/yr vs. FCF ${(fcfCagr * 100).toFixed(1)}%/yr — ${read}.`,
+    netIncomeCagr,
+    fcfCagr,
+  });
+}
+
 /* ---------- Model plumbing ---------- */
 function nullModel(key, label, reason) {
   return { key, label, score: null, outlookLabel: reason, methodNote: '', detail: reason };
@@ -510,6 +652,8 @@ const DIVIDEND_MODEL_DEFS = [
   { key: 'leverage', label: 'Leverage-Adjusted' },
   { key: 'sector-relative-yield', label: 'Sector-Relative Yield' },
   { key: 'analyst-implied', label: 'Analyst-Implied Forward' },
+  { key: 'growth-deceleration', label: 'Growth Deceleration' },
+  { key: 'earnings-quality', label: 'Earnings Quality' },
 ];
 
 /* Runs every model for one asset. `priceSeries` ({dates,closes}) and
@@ -526,6 +670,8 @@ function runAllDividendModels(asset, priceSeries, sectorYields) {
     modelLeverage(ctx),
     sectorYields ? modelSectorRelativeYield(ctx, sectorYields) : nullModel('sector-relative-yield', 'Sector-Relative Yield', 'Not computed'),
     modelAnalystImplied(ctx),
+    modelGrowthDeceleration(ctx),
+    modelEarningsQuality(ctx),
   ];
   return { ctx, models };
 }
