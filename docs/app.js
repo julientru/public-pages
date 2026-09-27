@@ -1493,6 +1493,34 @@ function renderPortfolio() {
    INIT — called by loader.js once MARKET_DATA is assembled
    ============================================================ */
 
+/* Formats a data-fetch ISO timestamp for the About page: absolute date
+   + time, plus a relative "(3 days ago)" qualifier so staleness is
+   obvious without doing date math in your head. */
+function formatSyncTimestamp(isoString) {
+  if (!isoString) return 'Unknown';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return 'Unknown';
+
+  const absolute = date.toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+  });
+
+  const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  let relative;
+  if (daysAgo <= 0) relative = 'today';
+  else if (daysAgo === 1) relative = '1 day ago';
+  else relative = `${daysAgo} days ago`;
+
+  return `${absolute} (${relative})`;
+}
+
+function populateAboutSyncInfo() {
+  const marketEl = document.getElementById('about-sync-market');
+  const dividendsEl = document.getElementById('about-sync-dividends');
+  if (marketEl) marketEl.textContent = formatSyncTimestamp(MARKET_DATA?.generatedAt);
+  if (dividendsEl) dividendsEl.textContent = formatSyncTimestamp(DIVIDEND_DATA?.generatedAt);
+}
+
 function initApp() {
   ASSETS = MARKET_DATA.assets;
   ASSET_BY_SYMBOL = new Map(ASSETS.map((a) => [a.symbol, a]));
@@ -1502,6 +1530,7 @@ function initApp() {
   populateDashboardFilters();
   populateRankingsFilters();
   populateDividendsFilters();
+  populateAboutSyncInfo();
   renderTabs();
 }
 
