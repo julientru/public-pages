@@ -76,6 +76,22 @@
       .filter(Boolean);
 
     window.MARKET_DATA = { generatedAt: index.generatedAt, assets };
+
+    // Dividend data is a separate, smaller dataset (a large-cap subset,
+    // not the full universe) — fetch it too, but don't fail the whole app
+    // if it's missing or errors; the Dividends tab just shows an empty state.
+    setProgress(groups.length, groups.length, 'Loading dividend data…');
+    try {
+      const divResp = await fetch('data/dividends.json');
+      if (divResp.ok) {
+        window.DIVIDEND_DATA = await divResp.json();
+      } else {
+        window.DIVIDEND_DATA = { generatedAt: null, assets: [] };
+      }
+    } catch (e) {
+      console.warn('Could not load dividend data:', e.message);
+      window.DIVIDEND_DATA = { generatedAt: null, assets: [] };
+    }
   }
 
   loadAll()

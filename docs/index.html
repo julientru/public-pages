@@ -690,9 +690,10 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
 
   <div class="tab-nav" id="tab-nav">
     <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="portfolio">Portfolio</button>
     <button class="tab-btn" data-tab="compare">Compare</button>
     <button class="tab-btn" data-tab="rankings">Rankings</button>
-    <button class="tab-btn" data-tab="portfolio">Portfolio</button>
+    <button class="tab-btn" data-tab="dividends">Dividends</button>
     <button class="tab-btn" data-tab="about">About</button>
   </div>
 
@@ -758,6 +759,35 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
         </div>
       </div>
       <div id="rankings-table-wrap"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-dividends">
+    <div class="panel">
+      <div class="rankings-controls">
+        <div class="control-group">
+          <label>Show</label>
+          <div class="chip" id="dividends-direction-top" data-direction="top">Top</div>
+          <div class="chip" id="dividends-direction-bottom" data-direction="bottom">Bottom</div>
+          <select id="dividends-top-n">
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Country</label>
+          <select id="dividends-country"></select>
+        </div>
+        <div class="control-group">
+          <label>Rank by</label>
+          <select id="dividends-model"></select>
+        </div>
+      </div>
+      <div class="footnote" style="margin:0; padding:0 var(--gutter) 12px;">Covers ~300 large-cap companies across all 20 countries in the asset universe (top ~15 per country) — not the full asset universe. Companies with no dividend, or below 1.5% yield, are excluded from this ranking.</div>
+      <div id="dividends-table-wrap"></div>
     </div>
   </div>
 
@@ -837,12 +867,51 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
         </ul>
         <p>Use <b>Top</b> to see the highest-scoring assets, or <b>Bottom</b> to see the lowest-scoring ones — useful for spotting names the model is bearish on, not only bullish on. Clicking any row expands its full Dashboard-equivalent detail — chart, recommendation, stats, forecast models, backtest — inline, without leaving the Rankings tab.</p>
       </div>
+
+      <div class="about-section">
+        <h2>How the Dividends tab works</h2>
+        <p>A separate ranking, built on different data than everything else in this app: real historical dividend payments, annual and quarterly financial statements (free cash flow, revenue), and analyst EPS estimates for ~300 large-cap companies across all 20 countries in the asset universe (top ~15 per country) — not price history, and not the full 540-asset universe.</p>
+        <p>Every company can be scored by any of <b>7 independent models</b>, selectable under "Rank by" — matching how the Dashboard offers several price-forecast models rather than one blended number. Click into any company to see all 7 compared side by side.</p>
+
+        <div class="about-model">
+          <h3>Composite</h3>
+          <p>The original model: 40% dividend growth consistency (from real payment history, penalized for any cut &gt;10% year-over-year) + 40% sustainability (60% earnings-based payout ratio + 40% the <i>level</i> of FCF margin — not just its trend, so a company stuck at a deeply negative margin can't hide behind a decent payout ratio — then nudged by FCF margin trend and recent quarterly FCF momentum) + 20% current yield.</p>
+        </div>
+        <div class="about-model">
+          <h3>Tenure (streak)</h3>
+          <p>How many consecutive years has this company avoided a cut, from real payment history? A 15-year unbroken streak scores at the top of the scale — distinct from the Composite's CAGR, since the same growth rate over 3 years vs. 15 years is a very different track record.</p>
+        </div>
+        <div class="about-model">
+          <h3>FCF Payout Ratio</h3>
+          <p>Recomputes the payout ratio directly from real numbers — total dividends paid (estimated from per-share amounts × shares outstanding) ÷ free cash flow — rather than using the earnings-based ratio the Composite relies on. Some companies look sustainable on earnings but are straining cash flow, or the reverse; this can disagree with the Composite when that happens. A year where FCF was negative while a dividend was paid scores at the bottom of the scale, rather than being excluded from the ranking.</p>
+        </div>
+        <div class="about-model">
+          <h3>Volatility-Adjusted Yield</h3>
+          <p>Current yield divided by the stock's own annualized price volatility (last 24 months, the same measure used in the Dashboard's forecast models). A 4% yield from a steady utility scores higher than the same 4% from a volatile miner.</p>
+        </div>
+        <div class="about-model">
+          <h3>Leverage-Adjusted</h3>
+          <p>Blends debt-to-equity (60%) with the payout-ratio tier (40%) — high leverage can make an otherwise-comfortable payout fragile. Not computed for Financial Services companies (banks, insurers), who don't report debt-to-equity the way industrials do — shown as not applicable rather than guessed.</p>
+        </div>
+        <div class="about-model">
+          <h3>Sector-Relative Yield</h3>
+          <p>Ranks a company's yield as a percentile against other companies in the same sector within this ~300-company dividend dataset (not the whole market) — a 3% yield is mediocre for a bank but strong for a tech company, so this reframes yield by what's typical for that sector here.</p>
+        </div>
+        <div class="about-model">
+          <h3>Analyst-Implied Forward <em>(derived, not a real analyst call)</em></h3>
+          <p>Yahoo has no direct analyst dividend forecast field — only forward EPS estimates. This projects next year's dividend as (forward EPS estimate × current payout ratio), assuming the payout ratio holds steady, and nudges the result by the recent balance of analyst EPS estimate revisions (more raising vs. cutting in the last 30 days). Labeled as a derived projection, not a genuine analyst dividend call.</p>
+        </div>
+
+        <p>In the main table, the <b>"Paid in"</b> column shows the distinct months (across the company's full history on record) it has typically paid a dividend in — e.g. "Feb, May, Aug, Nov" for a quarterly payer. Clicking into a company shows every individual payment with its <b>yield at payout</b>: that payment's amount ÷ the average closing price over the 3 months <i>before</i> the payment date, using the company's own real price history — not today's price applied retroactively.</p>
+        <p>Trailing P/E and EPS remain visible as valuation context in each company's detail view, not as part of any score — a low P/E doesn't predict dividend behavior the way payout ratio and FCF trend do.</p>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="forecast.js"></script>
 <script src="models.js"></script>
+<script src="dividends.js"></script>
 <script src="loader.js"></script>
 <script src="app.js"></script>
 </body>

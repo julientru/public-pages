@@ -28,6 +28,10 @@ function buildInitialState() {
     rankingsModel: 'composite',
     portfolio: loadPortfolio(),
     selectedModelKeys: ['ensemble'],
+    dividendsTopN: 10,
+    dividendsDirection: 'top',
+    dividendsCountry: 'all',
+    dividendsModel: 'composite',
   };
 }
 
@@ -35,7 +39,8 @@ function buildInitialState() {
 
 function formatPrice(value, currency) {
   if (!isFinite(value)) return '—';
-  const decimals = value >= 1000 ? 0 : value >= 10 ? 2 : 4;
+  const abs = Math.abs(value);
+  const decimals = abs >= 1000 ? 0 : abs >= 10 ? 2 : 4;
   return value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + (currency ? ' ' + currency : '');
 }
 function formatPct(value) {
@@ -147,6 +152,7 @@ function renderTabs() {
   if (state.tab === 'compare') renderCompare();
   if (state.tab === 'rankings') renderRankings();
   if (state.tab === 'portfolio') renderPortfolio();
+  if (state.tab === 'dividends') renderDividends();
 }
 
 /* ---------- shared: chart SVG builder ---------- */
@@ -727,7 +733,7 @@ function renderCompareChart() {
     return;
   }
 
-  const lookback = LOOKBACKS.find((l) => l.key === state.compareLookback) || LOOKBACKS[2];
+  const lookback = LOOKBACKS.find((l) => l.key === state.compareLookback) || LOOKBACKS.find((l) => l.key === '12mo');
   const seriesList = state.compareSymbols.map((symbol, i) => {
     const asset = ASSET_BY_SYMBOL.get(symbol);
     const series = barsForLookback({ dates: asset.dates, closes: asset.closes }, lookback.months);
@@ -1044,6 +1050,305 @@ function cssEscape(value) {
 }
 
 /* ============================================================
+   DIVIDENDS
+   ============================================================ */
+
+const DIVIDEND_LABEL_STYLE = {
+  'Strong outlook': 'background: var(--accent-soft); color: var(--accent-ink);',
+  'Stable': 'background: var(--gold-soft); color: var(--gold-ink);',
+  'Caution': 'background: var(--gold-soft); color: var(--gold-ink);',
+  'At risk': 'background: var(--risk-soft); color: var(--risk-ink);',
+  'No dividend': 'background: var(--line); color: var(--text-2);',
+  'Insufficient data': 'background: var(--line); color: var(--text-2);',
+};
+
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/* Distinct months (across all years on record) this company has paid a
+   dividend in, e.g. "Feb, May, Aug, Nov" for a typical quarterly payer —
+   more useful for "when should I expect a payment" than just the most
+   recent one. */
+function typicalDividendMonths(dividends) {
+  if (!dividends || dividends.length === 0) return null;
+  const months = new Set(dividends.map((d) => Number(d.t.slice(5, 7)) - 1));
+  return [...months].sort((a, b) => a - b).map((m) => MONTH_ABBR[m]).join(', ');
+}
+
+/* Average close price in the `windowMonths` before `dateStr`, from the
+   asset's own price series in MARKET_DATA (already loaded for every
+   dividend-tab company — confirmed 1:1 overlap with the price universe).
+   Used to compute what % of the share price each dividend payment
+   represented at the time, not just today's yield. */
+function averagePriceBeforeDate(priceSeries, dateStr, windowMonths) {
+  if (!priceSeries || priceSeries.dates.length === 0) return null;
+  const end = new Date(dateStr);
+  const start = new Date(end);
+  start.setMonth(start.getMonth() - windowMonths);
+  const startStr = start.toISOString().slice(0, 10);
+  const endStr = end.toISOString().slice(0, 10);
+
+  let sum = 0;
+  let count = 0;
+  for (let i = 0; i < priceSeries.dates.length; i++) {
+    const d = priceSeries.dates[i];
+    if (d >= startStr && d < endStr) {
+      sum += priceSeries.closes[i];
+      count++;
+    }
+  }
+  return count > 0 ? sum / count : null;
+}
+
+/* Per-payment yield: each dividend amount ÷ the average share price over
+   the 3 months before that payout date, using the asset's real price
+   history rather than a flat current-price estimate. */
+function dividendsWithYieldAtPayout(dividends, priceSeries) {
+  return (dividends || []).map((d) => {
+    const avgPrice = averagePriceBeforeDate(priceSeries, d.t, 3);
+    const yieldAtPayout = avgPrice && avgPrice > 0 ? d.amount / avgPrice : null;
+    return { ...d, avgPrice3mo: avgPrice, yieldAtPayout };
+  });
+}
+
+function populateDividendsFilters() {
+  const countrySelect = document.getElementById('dividends-country');
+  const countries = ['all', ...new Set((DIVIDEND_DATA.assets || []).map((a) => a.country))].sort((a, b) => (a === 'all' ? -1 : b === 'all' ? 1 : a.localeCompare(b)));
+  countrySelect.innerHTML = countries.map((c) => `<option value="${c}">${c === 'all' ? 'All countries' : escapeHtml(c)}</option>`).join('');
+  countrySelect.value = state.dividendsCountry;
+  countrySelect.addEventListener('change', () => { state.dividendsCountry = countrySelect.value; renderDividends(); });
+
+  const modelSelect = document.getElementById('dividends-model');
+  modelSelect.innerHTML = DIVIDEND_MODEL_DEFS.map((m) => `<option value="${m.key}">${escapeHtml(m.label)}</option>`).join('');
+  modelSelect.value = state.dividendsModel;
+  modelSelect.addEventListener('change', () => { state.dividendsModel = modelSelect.value; renderDividends(); });
+
+  document.getElementById('dividends-top-n').addEventListener('change', (e) => {
+    state.dividendsTopN = parseInt(e.target.value, 10);
+    renderDividends();
+  });
+
+  document.getElementById('dividends-direction-top').addEventListener('click', () => {
+    state.dividendsDirection = 'top';
+    renderDividends();
+  });
+  document.getElementById('dividends-direction-bottom').addEventListener('click', () => {
+    state.dividendsDirection = 'bottom';
+    renderDividends();
+  });
+}
+
+function updateDividendsDirectionChips() {
+  document.getElementById('dividends-direction-top').classList.toggle('active', state.dividendsDirection === 'top');
+  document.getElementById('dividends-direction-bottom').classList.toggle('active', state.dividendsDirection === 'bottom');
+}
+
+let dividendsExpandedSymbol = null;
+
+function renderDividends() {
+  updateDividendsDirectionChips();
+  const wrap = document.getElementById('dividends-table-wrap');
+
+  const pool = state.dividendsCountry === 'all'
+    ? DIVIDEND_DATA.assets
+    : DIVIDEND_DATA.assets.filter((a) => a.country === state.dividendsCountry);
+
+  if (!pool || pool.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">Dividend data isn\'t available (data/dividends.json failed to load or is empty).</div>';
+    return;
+  }
+
+  // Sector-relative-yield needs peers from the *whole* dividend universe,
+  // not just the country-filtered pool, so percentiles don't shift when
+  // filtering to one country.
+  const ranked = rankDividendAssets(pool, state.dividendsModel, DIVIDEND_DATA.assets);
+  const sliced = state.dividendsDirection === 'bottom'
+    ? ranked.slice(-state.dividendsTopN).reverse()
+    : ranked.slice(0, state.dividendsTopN);
+
+  const modelMeta = DIVIDEND_MODEL_DEFS.find((m) => m.key === state.dividendsModel) || DIVIDEND_MODEL_DEFS[0];
+
+  const rows = sliced.map((r, i) => {
+    const asset = DIVIDEND_DATA.assets.find((a) => a.symbol === r.symbol);
+    const yieldStr = r.yieldPct !== null ? (r.yieldPct * 100).toFixed(2) + '%' : '—';
+    const monthsStr = typicalDividendMonths(asset?.dividends) || '—';
+    const scoreStr = r.model.score !== null ? r.model.score.toFixed(0) : '—';
+    return `
+      <tr data-symbol="${escapeHtml(r.symbol)}">
+        <td class="rank-num">${i + 1}</td>
+        <td>
+          <div class="asset-row-name">${escapeHtml(r.displayName)}</div>
+          <div class="asset-row-symbol">${escapeHtml(r.symbol)} · ${escapeHtml(r.country)}</div>
+        </td>
+        <td>${yieldStr}</td>
+        <td style="font-size:var(--fs-small); color:var(--text-2);">${escapeHtml(monthsStr)}</td>
+        <td>${scoreStr}</td>
+        <td><span class="mini-badge" style="${DIVIDEND_LABEL_STYLE[r.model.outlookLabel] || ''}">${escapeHtml(r.model.outlookLabel)}</span></td>
+      </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div style="overflow-x:auto;">
+    <table class="rankings-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Company</th>
+          <th title="Current dividend yield (annual dividend / share price)">Yield</th>
+          <th title="Distinct months this company has paid a dividend in, across its history on record">Paid in</th>
+          <th title="${escapeHtml(modelMeta.label)} model score, 0-100">Score</th>
+          <th title="${escapeHtml(modelMeta.label)} model outcome">Outlook</th>
+        </tr>
+      </thead>
+      <tbody>${rows || '<tr><td colspan="6" class="empty-state">No dividend-paying companies match this filter.</td></tr>'}</tbody>
+    </table>
+    </div>
+    <div class="footnote">
+      Ranked by the <b>${escapeHtml(modelMeta.label)}</b> model. Companies with a token dividend under 1.5% yield are excluded from this ranking even if their score is high (they're still viewable individually). Click a company to see all 7 models compared side by side. This is not investment advice; it mechanically reflects historical dividend payments and recent financial statements.
+    </div>`;
+
+  wrap.querySelectorAll('tr[data-symbol]').forEach((row) => {
+    row.addEventListener('click', () => {
+      const symbol = row.getAttribute('data-symbol');
+      dividendsExpandedSymbol = dividendsExpandedSymbol === symbol ? null : symbol;
+      renderDividends();
+    });
+  });
+
+  if (dividendsExpandedSymbol) {
+    const activeRow = wrap.querySelector(`tr[data-symbol="${cssEscape(dividendsExpandedSymbol)}"]`);
+    if (activeRow) {
+      activeRow.classList.add('rankings-row-expanded');
+      const colCount = activeRow.children.length;
+      const detailRow = document.createElement('tr');
+      detailRow.className = 'rankings-detail-row';
+      const cell = document.createElement('td');
+      cell.colSpan = colCount;
+      cell.innerHTML = '<div class="rankings-inline-detail panel"></div>';
+      detailRow.appendChild(cell);
+      activeRow.insertAdjacentElement('afterend', detailRow);
+      renderDividendDetail(cell.querySelector('.rankings-inline-detail'), dividendsExpandedSymbol);
+    } else {
+      dividendsExpandedSymbol = null;
+    }
+  }
+}
+
+function renderDividendDetail(panel, symbol) {
+  const asset = (DIVIDEND_DATA.assets || []).find((a) => a.symbol === symbol);
+  if (!asset) {
+    panel.innerHTML = '<div class="empty-state">No data for this asset.</div>';
+    return;
+  }
+
+  const priceAsset = ASSET_BY_SYMBOL.get(symbol);
+  const priceSeries = priceAsset ? { dates: priceAsset.dates, closes: priceAsset.closes } : null;
+  const sectorYields = sectorYieldPercentiles(DIVIDEND_DATA.assets);
+
+  const r = analyzeDividendAsset(asset, priceSeries, sectorYields);
+  const currency = currencyForAsset({ symbol: r.symbol, assetClass: 'equity', country: r.country });
+
+  const paymentsWithYield = dividendsWithYieldAtPayout(asset.dividends, priceSeries);
+  const paymentRows = paymentsWithYield
+    .slice()
+    .reverse()
+    .map((d) => `<tr><td>${d.t}</td><td>${formatPrice(d.amount, currency)}</td><td>${d.avgPrice3mo !== null ? formatPrice(d.avgPrice3mo, currency) : '—'}</td><td>${d.yieldAtPayout !== null ? (d.yieldAtPayout * 100).toFixed(2) + '%' : '—'}</td></tr>`)
+    .join('');
+
+  const fcfRows = (r.sustainability.fcfRows || []).map((row) => `<tr><td>${new Date(row.date).getFullYear()}</td><td>${row.freeCashFlow !== null && row.freeCashFlow !== undefined ? formatPrice(row.freeCashFlow / 1e6, currency) + 'M' : '—'}</td><td>${row.fcfMargin !== null ? (row.fcfMargin * 100).toFixed(1) + '%' : '—'}</td></tr>`).join('');
+
+  const modelRows = r.models.map((m) => {
+    const scoreStr = m.score !== null ? m.score.toFixed(0) : '—';
+    return `
+      <tr>
+        <td>${escapeHtml(m.label)}</td>
+        <td>${scoreStr}</td>
+        <td><span class="mini-badge" style="${DIVIDEND_LABEL_STYLE[m.outlookLabel] || ''}">${escapeHtml(m.outlookLabel)}</span></td>
+        <td style="font-size:var(--fs-small); color:var(--text-2);">${escapeHtml(m.detail || '')}</td>
+      </tr>`;
+  }).join('');
+  const modelNotes = r.models
+    .filter((m) => m.methodNote)
+    .map((m) => `<div class="footnote" style="margin:2px 0;"><b>${escapeHtml(m.label)}:</b> ${escapeHtml(m.methodNote)}</div>`)
+    .join('');
+
+  function quarterLabel(dateStr) {
+    const d = new Date(dateStr);
+    return `Q${Math.floor(d.getUTCMonth() / 3) + 1} ${d.getUTCFullYear()}`;
+  }
+  const quarterlyRows = (r.momentum.quarters || []).map((row) => `<tr><td>${quarterLabel(row.date)}</td><td>${formatPrice(row.freeCashFlow / 1e6, '')}M</td><td>${row.fcfMargin !== null ? (row.fcfMargin * 100).toFixed(1) + '%' : '—'}</td></tr>`).join('');
+  const momentumSection = r.momentum.available
+    ? `
+    <div class="section-block">
+      <div class="section-title">Recent momentum — quarter-over-quarter FCF</div>
+      <table class="rankings-table"><thead><tr><th>Quarter</th><th>Free cash flow</th><th>FCF margin</th></tr></thead><tbody>${quarterlyRows}</tbody></table>
+      <div class="footnote" style="margin:8px 0 0;">Yahoo only provides the trailing ~5 quarters of cash flow data (about 15 months), regardless of how far back it's requested — this is the full quarterly window available, not a selectable range. It nudges the sustainability score by at most ±10 points, on top of the longer, more stable annual trend above.</div>
+    </div>`
+    : `
+    <div class="section-block">
+      <div class="section-title">Recent momentum — quarter-over-quarter FCF</div>
+      <div class="footnote" style="margin:0;">Not available for this company — some markets (e.g. many UK-listed companies) report cash flow semi-annually rather than quarterly, so Yahoo has no quarterly data to show here. The annual trend above is unaffected.</div>
+    </div>`;
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-title">
+        <h1>${escapeHtml(asset.displayName)}</h1>
+        <div class="symbol">${escapeHtml(asset.symbol)} · ${escapeHtml(asset.country)}</div>
+      </div>
+      <div class="detail-price">
+        <div class="value">${formatPrice(r.snapshot?.currentPrice, currency)}</div>
+      </div>
+    </div>
+    <div class="recommendation-block">
+      <div class="rec-badge" style="${DIVIDEND_LABEL_STYLE[r.label] || ''}">${escapeHtml(r.label)}</div>
+      <div class="rec-text">
+        <p>${escapeHtml(r.growth.label)}. Payout ratio is ${escapeHtml(r.sustainability.payoutTier)}${r.sustainability.payoutRatio !== null ? ' (' + (r.sustainability.payoutRatio * 100).toFixed(0) + '% of earnings)' : ''}.${r.sustainability.marginTrend !== null ? ' FCF margin has ' + (r.sustainability.marginTrend >= 0 ? 'expanded' : 'contracted') + ' by ' + Math.abs(r.sustainability.marginTrend * 100).toFixed(1) + ' points over the available history.' : ''}${r.momentum.available && r.momentum.qoqGrowth !== null ? ' Recent quarters show FCF ' + (r.momentum.qoqGrowth >= 0 ? 'growing' : 'shrinking') + ' quarter-over-quarter.' : ''}</p>
+        <div class="rec-meta">Current yield: <b>${r.yieldPct !== null ? (r.yieldPct * 100).toFixed(2) + '%' : '—'}</b> · Trailing P/E: <b>${r.snapshot?.trailingPE ? r.snapshot.trailingPE.toFixed(1) : '—'}</b> · Trailing EPS: <b>${r.snapshot?.trailingEps !== null && r.snapshot?.trailingEps !== undefined ? formatPrice(r.snapshot.trailingEps, currency) : '—'}</b></div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-label">Dividend CAGR</div>
+        <div class="stat-value ${r.growth.cagr !== null ? pctClass(r.growth.cagr * 100) : ''}">${r.growth.cagr !== null ? formatPct(r.growth.cagr * 100) : '—'}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Years with cuts</div>
+        <div class="stat-value ${r.growth.cutYears.length > 0 ? 'negative' : 'positive'}">${r.growth.cutYears.length}${r.growth.cutYears.length ? ' (' + r.growth.cutYears.join(', ') + ')' : ''}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">FCF margin (latest)</div>
+        <div class="stat-value">${r.sustainability.latestFcfMargin !== null ? (r.sustainability.latestFcfMargin * 100).toFixed(1) + '%' : '—'}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">FCF growth (annualized)</div>
+        <div class="stat-value ${r.sustainability.fcfCagr !== null ? pctClass(r.sustainability.fcfCagr * 100) : ''}">${r.sustainability.fcfCagr !== null ? formatPct(r.sustainability.fcfCagr * 100) : '—'}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">FCF momentum (recent quarters)</div>
+        <div class="stat-value ${r.momentum.qoqGrowth !== null ? pctClass(r.momentum.qoqGrowth * 100) : ''}">${r.momentum.qoqGrowth !== null ? formatPct(r.momentum.qoqGrowth * 100) : '—'}</div>
+      </div>
+    </div>
+    <div class="section-block">
+      <div class="section-title">7 dividend models compared</div>
+      <table class="rankings-table"><thead><tr><th>Model</th><th>Score</th><th>Outlook</th><th>Detail</th></tr></thead><tbody>${modelRows}</tbody></table>
+      ${modelNotes}
+    </div>
+    <div class="section-block">
+      <div class="section-title">Dividend payments</div>
+      ${paymentRows ? `<table class="rankings-table"><thead><tr><th>Payment date</th><th>Amount</th><th>Avg. price (3mo prior)</th><th>Yield at payout</th></tr></thead><tbody>${paymentRows}</tbody></table>` : '<div class="footnote" style="margin:0;">No dividend history available.</div>'}
+      <div class="footnote" style="margin:8px 0 0;">"Yield at payout" is that payment's amount ÷ the average closing price over the 3 months before the payment date — using this company's own real price history, not today's price. Shows what each payment was actually worth relative to the stock at the time, rather than assuming a flat current yield applied throughout.</div>
+    </div>
+    <div class="section-block">
+      <div class="section-title">Free cash flow margin by year</div>
+      ${fcfRows ? `<table class="rankings-table"><thead><tr><th>Fiscal year</th><th>Free cash flow</th><th>FCF margin</th></tr></thead><tbody>${fcfRows}</tbody></table>` : '<div class="footnote" style="margin:0;">No FCF history available.</div>'}
+    </div>
+    ${momentumSection}
+    <div class="footnote">
+      Dividend history and FCF/revenue are real historical figures from Yahoo Finance (dividend payments, and up to ~5 years of annual cash flow statements). This is a mechanical read of the past, not a forecast guarantee — companies can cut dividends or see FCF deteriorate for reasons this model can't see coming.
+    </div>`;
+}
+
+/* ============================================================
    PORTFOLIO
    ============================================================ */
 
@@ -1152,6 +1457,7 @@ function initApp() {
   applyTheme();
   populateDashboardFilters();
   populateRankingsFilters();
+  populateDividendsFilters();
   renderTabs();
 }
 

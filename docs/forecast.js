@@ -10,6 +10,8 @@
 
 const LOOKBACKS = [
   { key: '1mo', label: '1 month', months: 1 },
+  { key: '2mo', label: '2 months', months: 2 },
+  { key: '3mo', label: '3 months', months: 3 },
   { key: '6mo', label: '6 months', months: 6 },
   { key: '12mo', label: '12 months', months: 12 },
   { key: '24mo', label: '24 months', months: 24 },
@@ -213,7 +215,7 @@ function classify(longTermAnnualGrowth, momentumAnnualGrowth, r2) {
    a lookback key, return the sliced series, regression, forecast points,
    and recommendation. */
 function analyzeAsset(asset, lookbackKey) {
-  const lookback = LOOKBACKS.find((l) => l.key === lookbackKey) || LOOKBACKS[2];
+  const lookback = LOOKBACKS.find((l) => l.key === lookbackKey) || LOOKBACKS.find((l) => l.key === '12mo');
   const fullSeries = { dates: asset.dates, closes: asset.closes };
   const series = barsForLookback(fullSeries, lookback.months);
   const n = seriesLength(series);
