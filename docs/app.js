@@ -32,6 +32,7 @@ function buildInitialState() {
     dividendsDirection: 'top',
     dividendsCountry: 'all',
     dividendsModel: 'composite',
+    dividendsRequireRecentMomentum: false,
   };
 }
 
@@ -1110,6 +1111,33 @@ function dividendsWithYieldAtPayout(dividends, priceSeries) {
   });
 }
 
+/* Builds display rows for the "Free cash flow margin by year" table.
+   fcfRows are keyed by fiscal year-END date, which varies by company
+   (Apple: Sep 30, Microsoft: Jun 30, Nvidia: Jan 31 — not a calendar
+   year). Just labels each row with its fiscal year; rows for a fiscal
+   year that hasn't closed yet simply aren't in fcfRows to begin with
+   (Yahoo's annual fundamentals only cover completed fiscal years), so
+   there's nothing to synthesize here. */
+function buildFcfYearRows(fcfRows) {
+  return (fcfRows || []).map((row) => ({ label: String(new Date(row.date).getUTCFullYear()), row, partial: false }));
+}
+
+/* Whether an asset has a fundamentals row that actually covers the
+   current fiscal exercise — the same "does this company have data for
+   the current calendar year" question buildFcfYearRows() answers when
+/* Whether an asset has quarter-over-quarter FCF momentum data — exactly
+   the same condition that decides whether the detail view's "Recent
+   momentum — quarter-over-quarter FCF" section has real data to show,
+   or the "not available for this company" fallback (some markets, e.g.
+   many UK-listed companies, report cash flow semi-annually rather than
+   quarterly, so Yahoo has no quarterly data for them at all). Matches
+   analyzeQuarterlyMomentum()'s own availability rule: at least 2
+   quarterly rows with a non-null freeCashFlow. */
+function hasRecentMomentumFcfData(asset) {
+  const rows = (asset.fundamentalsQuarterly || []).filter((r) => r.freeCashFlow !== null && r.freeCashFlow !== undefined);
+  return rows.length >= 2;
+}
+
 function populateDividendsFilters() {
   const countrySelect = document.getElementById('dividends-country');
   const countries = ['all', ...new Set((DIVIDEND_DATA.assets || []).map((a) => a.country))].sort((a, b) => (a === 'all' ? -1 : b === 'all' ? 1 : a.localeCompare(b)));
@@ -1135,11 +1163,17 @@ function populateDividendsFilters() {
     state.dividendsDirection = 'bottom';
     renderDividends();
   });
+
+  document.getElementById('dividends-recent-momentum-only').addEventListener('click', () => {
+    state.dividendsRequireRecentMomentum = !state.dividendsRequireRecentMomentum;
+    renderDividends();
+  });
 }
 
 function updateDividendsDirectionChips() {
   document.getElementById('dividends-direction-top').classList.toggle('active', state.dividendsDirection === 'top');
   document.getElementById('dividends-direction-bottom').classList.toggle('active', state.dividendsDirection === 'bottom');
+  document.getElementById('dividends-recent-momentum-only').classList.toggle('active', state.dividendsRequireRecentMomentum);
 }
 
 let dividendsExpandedSymbol = null;
@@ -1148,9 +1182,13 @@ function renderDividends() {
   updateDividendsDirectionChips();
   const wrap = document.getElementById('dividends-table-wrap');
 
-  const pool = state.dividendsCountry === 'all'
+  let pool = state.dividendsCountry === 'all'
     ? DIVIDEND_DATA.assets
     : DIVIDEND_DATA.assets.filter((a) => a.country === state.dividendsCountry);
+
+  if (state.dividendsRequireRecentMomentum) {
+    pool = (pool || []).filter((a) => hasRecentMomentumFcfData(a));
+  }
 
   if (!pool || pool.length === 0) {
     wrap.innerHTML = '<div class="empty-state">Dividend data isn\'t available (data/dividends.json failed to load or is empty).</div>';
@@ -1254,7 +1292,13 @@ function renderDividendDetail(panel, symbol) {
     .map((d) => `<tr><td>${d.t}</td><td>${formatPrice(d.amount, currency)}</td><td>${d.avgPrice3mo !== null ? formatPrice(d.avgPrice3mo, currency) : '—'}</td><td>${d.yieldAtPayout !== null ? (d.yieldAtPayout * 100).toFixed(2) + '%' : '—'}</td></tr>`)
     .join('');
 
-  const fcfRows = (r.sustainability.fcfRows || []).map((row) => `<tr><td>${new Date(row.date).getFullYear()}</td><td>${row.freeCashFlow !== null && row.freeCashFlow !== undefined ? formatPrice(row.freeCashFlow / 1e6, currency) + 'M' : '—'}</td><td>${row.fcfMargin !== null ? (row.fcfMargin * 100).toFixed(1) + '%' : '—'}</td></tr>`).join('');
+  const fcfYearRows = buildFcfYearRows(r.sustainability.fcfRows);
+  const fcfRows = fcfYearRows.map(({ label, row, partial }) => {
+    if (!row) return `<tr><td>${escapeHtml(label)}</td><td colspan="2" style="color:var(--text-3);">Unavailable</td></tr>`;
+    const fcfStr = row.freeCashFlow !== null && row.freeCashFlow !== undefined ? formatPrice(row.freeCashFlow / 1e6, currency) + 'M' : '—';
+    const marginStr = row.fcfMargin !== null ? (row.fcfMargin * 100).toFixed(1) + '%' : '—';
+    return `<tr${partial ? ' style="color:var(--text-2);"' : ''}><td>${escapeHtml(label)}</td><td>${fcfStr}</td><td>${marginStr}</td></tr>`;
+  }).join('');
 
   const modelRows = r.models.map((m) => {
     const scoreStr = m.score !== null ? m.score.toFixed(0) : '—';

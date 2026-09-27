@@ -907,6 +907,10 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
           <label>Rank by</label>
           <select id="dividends-model"></select>
         </div>
+        <div class="control-group">
+          <label>Data freshness</label>
+          <div class="chip" id="dividends-recent-momentum-only" title="Hide companies with no quarter-over-quarter free cash flow data (the 'Recent momentum' section in a company's detail view) — some markets report cash flow semi-annually rather than quarterly, so Yahoo has none to show for them">Recent momentum FCF only</div>
+        </div>
       </div>
       <div class="footnote" style="margin:0; padding:0 var(--gutter) 12px;">Covers ~900 large-cap companies across all 20 countries in the asset universe (top ~50 per country, fewer for smaller markets) — not the full asset universe. Companies with no dividend, or below 1.5% yield, are excluded from this ranking.</div>
       <div id="dividends-table-wrap"></div>
