@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tower Move</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .pegs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(100%, 720px); }
+    .peg {
+      position: relative;
+      height: clamp(200px, 40vh, 300px);
+      border: 4px solid transparent;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      padding: 0 4px 14px;
+      gap: 3px;
+      touch-action: manipulation;
+      font: inherit;
+    }
+    .peg::before {
+      content: "";
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      width: 10px;
+      height: 80%;
+      margin-left: -5px;
+      background: #b08968;
+      border-radius: 6px;
+    }
+    .peg.picked { border-color: var(--accent); }
+    .peg.goal { background: #fff7d6; }
+    .peg:focus-visible { outline: 4px solid var(--blue); outline-offset: 2px; }
+    .peg .label { position: absolute; top: 6px; left: 10px; font-weight: bold; opacity: 0.6; }
+    .disk {
+      position: relative;
+      height: 28px;
+      border-radius: 14px;
+      box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.15);
+      transition: transform 0.15s ease;
+    }
+    .disk.up { transform: translateY(-24px); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="btn home" href="../../index.html" aria-label="Back to games">🏠</a>
+    <h1>🗼 Tower Move</h1>
+    <button class="btn go" id="restart">New game</button>
+  </div>
+
+  <div class="levels" role="group" aria-label="Choose how many rings">
+    <button class="btn" data-disks="3" aria-pressed="true">Easy</button>
+    <button class="btn" data-disks="4" aria-pressed="false">Medium</button>
+    <button class="btn" data-disks="5" aria-pressed="false">Hard</button>
+  </div>
+
+  <div class="stats">
+    <span>👆 Moves: <b id="moves">0</b></span>
+    <span>🏅 Best possible: <b id="target">7</b></span>
+  </div>
+  <div class="message" id="message">Move the whole tower to the ⭐ pole!</div>
+
+  <div class="pegs" id="pegs"></div>
+  <p class="help">Tap a pole to pick up its top ring, then tap another pole to drop it. A big ring can never go on a smaller one. Keys 1 2 3 work too.</p>
+
+  <script src="hanoi.js"></script>
+</body>
+</html>

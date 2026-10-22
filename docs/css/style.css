@@ -64,6 +64,17 @@ p.subtitle { font-size: 1.2rem; margin: 0 0 24px; text-align: center; }
 .game-card.tetris { background: #ffe3e3; }
 .game-card.jump { background: #dff5e1; }
 .game-card.memory { background: #e3edff; }
+.game-card.lights { background: #fff4c2; }
+.game-card.slide { background: #ffe8d6; }
+.game-card.sudoku { background: #e8f8f5; }
+.game-card.simon { background: #f3e5ff; }
+.game-card.hanoi { background: #ffe3ef; }
+.game-card.pattern { background: #e6f7ff; }
+.game-card.maze { background: #eef5d9; }
+.game-card.odd { background: #fff0e0; }
+.game-card.flood { background: #dff3ff; }
+.game-card.tictactoe { background: #f0eaff; }
+.game-card.army { background: #e4f0d0; }
 
 /* ---------- Game pages ---------- */
 .topbar {
@@ -145,3 +156,29 @@ canvas {
   text-align: center;
   margin: 8px 0;
 }
+
+/* Level picker (Easy / Medium / Hard) used by several games. */
+.levels { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+.levels .btn[aria-pressed="true"] { background: var(--accent); }
+
+/* Little bounce for a win message. */
+.message.win { animation: pop 0.5s ease; }
+@keyframes pop { 0% { transform: scale(0.6); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+/* ---------- Hub: player-count picker ---------- */
+.players {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 480px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.players .btn { flex: 1 1 0; flex-direction: column; gap: 0; min-width: 0; padding: 8px 4px; font-size: 1.6rem; line-height: 1.1; background: #b9b9c8; }
+.players .btn span { font-size: clamp(0.7rem, 3.6vw, 1.1rem); white-space: nowrap; }
+.players .btn[aria-pressed="true"] { background: var(--accent); }
+.soon { font-size: 1.4rem; text-align: center; }
+.game-card[hidden] { display: none; }
+.game-card.snap { background: #fff3c4; }
+.game-card.apples { background: #f0e3ff; }
+.game-card.connect4 { background: #d9f4f7; }

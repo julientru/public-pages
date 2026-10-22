@@ -1,0 +1,56 @@
+# kids-games
+
+Simple logic games for kids aged 5 to 10. Plain HTML and vanilla JavaScript: no build step, no dependencies, nothing saved (everything lives in browser memory).
+
+## Games
+
+| Game | Folder | Controls |
+| --- | --- | --- |
+| 🧱 Blocks (Tetris-style) | `games/tetris/` | On-screen buttons, or ⬅️ ➡️ move, ⬆️ turn, ⬇️ faster, Space drop |
+| 🐸 Jumpy Frog | `games/jump/` | Tap the game / Jump button, or Space / ⬆️ |
+| 🃏 Memory Match | `games/memory/` | Tap cards, or Tab + Enter. Easy / Medium / Hard |
+| 💡 Lights Out | `games/lights/` | Tap a light, or Tab + Enter. Easy / Medium / Hard |
+| 🧩 Slide Puzzle | `games/slide/` | Tap a tile next to the space, or arrow keys. Easy / Hard |
+| 🍎 Picture Sudoku | `games/sudoku/` | Tap a square then a fruit, or Tab + keys 1–6. Easy (4×4) / Hard (6×6) |
+| 🎵 Copy Me | `games/simon/` | Tap the animals, or keys 1–4 |
+| 🗼 Tower Move | `games/hanoi/` | Tap a pole to pick up, tap another to drop, or keys 1–3. 3 / 4 / 5 rings |
+| 🔁 What's Next? | `games/pattern/` | Tap a choice, or keys 1–3. Gets harder as you score |
+| 🐭 Mouse Maze | `games/maze/` | Swipe, on-screen arrows, or arrow keys / WASD. Easy / Medium / Hard |
+| 🔍 Odd One Out | `games/odd/` | Tap a picture, or keys 1–5. 10 rounds |
+| 🌊 Color Flood | `games/flood/` | Tap a square or color button, or keys 1–6. Easy / Medium / Hard |
+| ❌ Tic-Tac-Toe | `games/tictactoe/` | Tap a square, or keys 1–9. Easy robot / Clever robot |
+| 🪖 Army Rush | `games/army/` | Slide on the field, hold ⬅️ ➡️, or arrow keys / A D. Your army shoots by itself; shoot a door to get a better weapon or more soldiers. 12 waves |
+
+### 2-player games
+
+Pick 👤👤 2 at the top of the hub to see them.
+
+| Game | Folder | How to play |
+| --- | --- | --- |
+| ⚡ Snap Match | `games/snap/` | Face to face: phone flat between the players. First to tap the yellow picture in your own grid gets a ⭐. Wrong tap = frozen for 1 second. 5 ⭐ wins. |
+| 🍎 Apple Grab | `games/apples/` | Face to face, taking turns: take 1, 2 or 3 apples. Whoever takes the last apple wins the round. 3 rounds wins. |
+| 🔴🟡 Four in a Row | `games/connect4/` | Take turns on the same screen: tap a column to drop a disc. Four in a line wins. |
+
+## Run locally
+
+Open `index.html` in a browser, or serve the folder:
+
+```sh
+python3 -m http.server 8000
+# then open http://localhost:8000
+```
+
+## Publish with GitHub Pages
+
+1. In the repo on GitHub, go to **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to *Deploy from a branch*.
+3. Choose branch `main` and folder `/ (root)`, then **Save**.
+4. After a minute the site is live at `https://<your-user>.github.io/kids-games/`.
+
+All links are relative, so the site works from that sub-path. The empty `.nojekyll` file tells Pages to serve files as-is.
+
+## Adding a game
+
+Create `games/<name>/index.html` (link `../../css/style.css` for the shared look and include a 🏠 link back to `../../index.html`), then add a card for it in the root `index.html`.
+
+For a multiplayer game, add `data-players="2"` (or 3, 4) to its card so the player-count menu shows it; cards without it are 1-player games. Face-to-face games can reuse `css/duel.css` and `js/duel.js` (top half turned upside down, shared start/winner screen).

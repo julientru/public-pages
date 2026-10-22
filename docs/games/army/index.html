@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Army Rush</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    body { padding: 10px 16px; }
+    .topbar { margin-bottom: 8px; }
+    .stats { gap: 6px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); margin-bottom: 8px; flex-wrap: nowrap; }
+    .stats span { padding: 4px 8px; white-space: nowrap; }
+    /* Tall 3:4 field that fits the screen height, so the whole battle is visible on a phone. */
+    #game {
+      width: min(100%, max(270px, calc((100vh - 230px) * 0.75)));
+      height: auto;
+      aspect-ratio: 3 / 4;
+      cursor: pointer;
+    }
+    .controls { margin-top: 10px; width: min(100%, 480px); }
+    .controls .btn { flex: 1 1 0; font-size: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="btn home" href="../../index.html" aria-label="Back to games">🏠</a>
+    <h1>🪖 Army Rush</h1>
+    <span></span>
+  </div>
+
+  <div class="stats">
+    <span>🌊 <b id="wave">1</b>/12</span>
+    <span>❤️ <b id="hearts">3</b></span>
+    <span>👥 <b id="soldiers">1</b></span>
+    <span id="weapon">🪨 Stones</span>
+  </div>
+
+  <canvas id="game" width="480" height="640"></canvas>
+
+  <div class="controls">
+    <button class="btn" id="left" aria-label="Move left">⬅️</button>
+    <button class="btn" id="right" aria-label="Move right">➡️</button>
+  </div>
+  <p class="help">Your army shoots by itself. Slide your finger on the field, hold ⬅️ ➡️, or use the arrow keys to aim.
+    Shoot a door to open it: one gives a better weapon, the other gives more soldiers. You can only pick one!</p>
+
+  <script src="army.js"></script>
+</body>
+</html>
