@@ -1,41 +1,53 @@
-// Army Rush: a silly army marches down at you. Your soldiers shoot by themselves; you aim.
-// Shoot doors to get a better weapon or more soldiers. The army keeps getting tougher,
-// so without upgrades you cannot win. Enemies never get hurt for real: they flash,
-// squash, and tumble away with dizzy eyes.
+// Army Rush: a silly army marches down at you. Your army shoots by itself; you aim.
+// Shoot boxes to get a new weapon, more of your weapon, or a stronger defence.
+// A new weapon swaps your whole army for one of it, and a weapon you miss never comes back.
+// The enemy breaks your wall first, then hits your life. Enemies never get hurt for real:
+// they flash, squash, and tumble away with dizzy eyes.
 (function () {
   const W = 480;
   const H = 640;
-  const WALL_Y = H - 108;   // sandbags: an enemy that reaches them breaks through
-  const SQUAD_Y = H - 76;  // front row of your army
+  const WALL_Y = H - 108;  // sandbag wall: enemies stop and bash it until it breaks
+  const SQUAD_Y = H - 72;  // your army
   const STEP = 1 / 60;
 
-  // dps per soldier = dmg * rate * (multi || 1). Each tier is clearly stronger than the last.
+  // One unit of each weapon: dps = dmg * rate * (multi || 1). max = how many you can have,
+  // add = how many an army box gives. Each new weapon starts as one unit.
   const WEAPONS = [
-    { name: "Stones", emoji: "🪨", dmg: 1, rate: 2, speed: 420, cap: 6, kind: "stone" },
-    { name: "Axes", emoji: "🪓", dmg: 2, rate: 2, speed: 430, cap: 6, kind: "axe" },
-    { name: "Bows", emoji: "🏹", dmg: 3, rate: 2.5, speed: 620, cap: 6, kind: "arrow" },
-    { name: "Pistol", emoji: "🔫", dmg: 4, rate: 3, speed: 650, cap: 6, kind: "dart" },
-    { name: "Two pistols", emoji: "🔫🔫", dmg: 4, rate: 3, multi: 2, speed: 650, cap: 6, kind: "dart" },
-    { name: "Cannon", emoji: "💣", dmg: 25, rate: 1.2, speed: 420, cap: 3, splash: 45, kind: "ball" },
-    { name: "Gatling", emoji: "💥", dmg: 5, rate: 10, speed: 760, cap: 4, kind: "pellet" },
-    { name: "Tank", emoji: "🛡️", dmg: 60, rate: 1.5, speed: 520, cap: 2, splash: 55, kind: "shell" },
-    { name: "Missiles", emoji: "🚀", dmg: 50, rate: 1.5, multi: 2, speed: 480, cap: 3, splash: 60, kind: "missile" },
-    { name: "Planes", emoji: "✈️", dmg: 125, rate: 2, speed: 380, cap: 2, splash: 60, kind: "plane" },
-    { name: "Satellite laser", emoji: "🛰️", dmg: 100, rate: 4, speed: 1100, cap: 2, pierce: 3, kind: "laser" },
-    { name: "Mega bomb", emoji: "☢️", dmg: 700, rate: 1, speed: 360, cap: 1, splash: 130, kind: "bomb" },
+    { name: "Stones", emoji: "🪨", dmg: 1, rate: 2, speed: 420, kind: "stone", max: 6, add: 2 },
+    { name: "Axes", emoji: "🪓", dmg: 3, rate: 2, speed: 430, kind: "axe", max: 6, add: 2 },
+    { name: "Bows", emoji: "🏹", dmg: 6, rate: 2.5, speed: 620, kind: "arrow", max: 5, add: 1 },
+    { name: "Pistol", emoji: "🔫", dmg: 14, rate: 3, speed: 650, kind: "dart", max: 5, add: 1 },
+    { name: "Two pistols", emoji: "🔫🔫", dmg: 18, rate: 3, multi: 2, speed: 650, kind: "dart", max: 4, add: 1 },
+    { name: "Cannon", emoji: "💣", dmg: 250, rate: 1.2, speed: 420, splash: 45, kind: "ball", max: 4, add: 1, vehicle: true },
+    { name: "Gatling", emoji: "💥", dmg: 80, rate: 10, speed: 760, kind: "pellet", max: 3, add: 1 },
+    { name: "Tank", emoji: "🛡️", dmg: 1400, rate: 1.5, speed: 520, splash: 55, kind: "shell", max: 3, add: 1, vehicle: true },
+    { name: "Missiles", emoji: "🚀", dmg: 1900, rate: 1.5, multi: 2, speed: 480, splash: 60, kind: "missile", max: 3, add: 1 },
+    { name: "Planes", emoji: "✈️", dmg: 7500, rate: 2, speed: 380, splash: 60, kind: "plane", max: 3, add: 1, vehicle: true },
+    { name: "Satellite laser", emoji: "🛰️", dmg: 10000, rate: 4, speed: 1100, pierce: 3, kind: "laser", max: 2, add: 1, vehicle: true },
+    { name: "Mega bomb", emoji: "☢️", dmg: 110000, rate: 1, speed: 360, splash: 130, kind: "bomb", max: 1, add: 0, vehicle: true },
   ];
 
-  // hp is a multiple of the wave's toughness. bite = soldiers lost when it reaches the sandbags.
+  // hp is a multiple of the wave's toughness. hit = life lost when it reaches your army,
+  // bash = wall damage per second while it stands at the wall, shot = what it throws at you.
   const ENEMIES = {
-    thrower: { name: "Stone thrower", r: 20, speed: 40, hp: 1, bite: 1, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue" },
-    boss: { name: "Big Boss", r: 40, speed: 22, hp: 7, bite: 3, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth" },
-    soldier: { name: "Soldier", r: 21, speed: 46, hp: 1.2, bite: 1, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile" },
-    cannon: { name: "Cannon crew", r: 24, speed: 34, hp: 2, bite: 2, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o" },
-    bigboss: { name: "Big Big Boss", r: 55, speed: 17, hp: 14, bite: 5, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true },
-    tank: { name: "Tank", r: 32, speed: 30, hp: 3, bite: 3, color: "#90a955", tank: true },
-    bigtank: { name: "Big tank", r: 45, speed: 23, hp: 6, bite: 5, color: "#bc6c25", tank: true },
-    tankboss: { name: "Tank Boss", r: 62, speed: 15, hp: 20, bite: 10, color: "#6d597a", tank: true, crown: true },
-    king: { name: "KING TANK", r: 82, speed: 10, hp: 55, bite: 99, color: "#f4c430", tank: true, crown: true, mustache: true },
+    thrower: { name: "Stone thrower", r: 20, speed: 40, hp: 1, hit: 5, bash: 3, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue",
+      shot: { kind: "stone", every: 3.4, dmg: 1 } },
+    boss: { name: "Big Boss", r: 40, speed: 22, hp: 7, hit: 15, bash: 8, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth",
+      shot: { kind: "rock", every: 3, dmg: 3 } },
+    soldier: { name: "Soldier", r: 21, speed: 46, hp: 1.2, hit: 6, bash: 4, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile",
+      shot: { kind: "cork", every: 2.8, dmg: 1 } },
+    cannon: { name: "Cannon crew", r: 24, speed: 34, hp: 2, hit: 8, bash: 5, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o",
+      shot: { kind: "ball", every: 3.2, dmg: 2 } },
+    bigboss: { name: "Big Big Boss", r: 55, speed: 17, hp: 14, hit: 20, bash: 12, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true,
+      shot: { kind: "rock", every: 2.4, dmg: 4 } },
+    tank: { name: "Tank", r: 32, speed: 30, hp: 3, hit: 10, bash: 8, color: "#90a955", tank: true,
+      shot: { kind: "shell", every: 3.2, dmg: 3 } },
+    bigtank: { name: "Big tank", r: 45, speed: 23, hp: 6, hit: 15, bash: 12, color: "#bc6c25", tank: true,
+      shot: { kind: "shell", every: 2.6, dmg: 4 } },
+    tankboss: { name: "Tank Boss", r: 62, speed: 15, hp: 20, hit: 30, bash: 20, color: "#6d597a", tank: true, crown: true,
+      shot: { kind: "bigshell", every: 2, dmg: 6 } },
+    king: { name: "KING TANK", r: 82, speed: 10, hp: 55, hit: 100, bash: 40, color: "#f4c430", tank: true, crown: true, mustache: true,
+      shot: { kind: "bigshell", every: 1.4, dmg: 8 } },
   };
 
   const WAVES = [
@@ -53,7 +65,16 @@
     { name: "THE KING TANK!", groups: [["tank", 10], ["king", 1]], gap: 1.3 },
   ];
   // How tough each wave is (roughly the firepower a good player has by then).
-  const POWER = [2, 10, 50, 200, 480, 900, 1500, 2600, 4400, 7000, 11000, 13000];
+  const POWER = [2, 9, 35, 100, 300, 500, 1500, 4000, 9000, 14000, 25000, 33000];
+
+  // power = enemy toughness, boxes = chance that a door is a box (else a tough wall),
+  // hurt = how hard enemies hit your wall and your life.
+  const LEVELS = {
+    easy: { name: "Easy", power: 0.5, boxes: 1, hurt: 1 },
+    normal: { name: "Normal", power: 0.85, boxes: 2 / 3, hurt: 1.2 },
+    hard: { name: "Hard", power: 1, boxes: 1 / 2, hurt: 1.4 },
+    mega: { name: "Mega-hard", power: 1.05, boxes: 1 / 3, hurt: 1.6 },
+  };
 
   const POOF_WORDS = ["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"];
 
@@ -61,12 +82,13 @@
   const ctx = canvas.getContext("2d");
   const el = {
     wave: document.getElementById("wave"),
-    hearts: document.getElementById("hearts"),
-    soldiers: document.getElementById("soldiers"),
+    life: document.getElementById("life"),
     weapon: document.getElementById("weapon"),
   };
+  const levelBtns = document.querySelectorAll("[data-level]");
 
   let g;            // everything about the current battle
+  let level = "easy";
   let state = "ready";
   let time = 0;     // seconds, keeps animations going on every screen
   let endedAt = -10; // a short pause after the end, so a stray tap does not restart at once
@@ -75,8 +97,9 @@
   function newGame() {
     g = {
       wave: 0, spawnQueue: [], spawnIn: 0, breakIn: 2.5, banner: null,
-      enemies: [], bullets: [], doors: [], doorIn: 4, fx: [], tumblers: [],
-      soldiers: 1, tier: 0, hearts: 3, squadX: W / 2, fireIn: 0.3, shake: 0, hurt: 0,
+      enemies: [], bullets: [], shots: [], doors: [], doorIn: 4, fx: [], tumblers: [],
+      tier: 0, count: 1, missed: new Set(), life: 100, wall: 100, wallMax: 100, shield: 0,
+      squadX: W / 2, fireIn: 0.3, shake: 0, hurt: 0,
     };
     startWave(0);
     syncStats();
@@ -96,50 +119,60 @@
 
   function dps() {
     const w = WEAPONS[g.tier];
-    return w.dmg * w.rate * (w.multi || 1) * g.soldiers;
+    return w.dmg * w.rate * (w.multi || 1) * g.count;
   }
 
   function fmt(n) {
     n = Math.ceil(n);
     if (n < 1000) return String(n);
     if (n < 10000) return (n / 1000).toFixed(1).replace(".0", "") + "k";
-    return Math.round(n / 1000) + "k";
+    if (n < 1e6) return Math.round(n / 1000) + "k";
+    return (n / 1e6).toFixed(1).replace(".0", "") + "M";
   }
 
   function syncStats() {
     el.wave.textContent = g.wave + 1;
-    el.hearts.textContent = g.hearts;
-    el.soldiers.textContent = g.soldiers;
+    el.life.textContent = Math.max(0, Math.ceil(g.life));
     const w = WEAPONS[g.tier];
-    el.weapon.textContent = w.emoji + " " + w.name;
+    el.weapon.textContent = w.emoji + " " + w.name + (g.count > 1 ? " ×" + g.count : "");
+  }
+
+  // The next weapon you can still get: missed ones are gone for this game.
+  function nextWeapon() {
+    for (let t = g.tier + 1; t < WEAPONS.length; t++) if (!g.missed.has(t)) return t;
+    return -1;
   }
 
   // ---------- Spawning ----------
 
   function spawnEnemy(type) {
     const T = ENEMIES[type];
-    const hp = Math.max(1, Math.round(T.hp * POWER[g.wave]));
+    const hp = Math.max(1, Math.round(T.hp * POWER[g.wave] * LEVELS[level].power));
     g.enemies.push({
       type, x: T.r + 10 + Math.random() * (W - 2 * T.r - 20), y: -T.r - 10,
       hp, maxHp: hp, shownHp: hp, flash: 0, seed: Math.random() * 10, wobble: 0.6 + Math.random() * 0.8,
+      shotIn: 1 + Math.random() * T.shot.every, bash: 0,
     });
   }
 
   function spawnDoors() {
     if (g.noDoors) return;
-    const army = (amount, hpFor) => ({ kind: "army", amount, hp: hpFor, maxHp: hpFor });
-    const base = 1 + Math.floor(g.wave * 0.5);
-    const d = dps();
-    const doorHp = (secs) => Math.max(4, Math.ceil(d * secs));
-    let a, b;
-    const canUpgrade = g.tier < WEAPONS.length - 1 && g.tier <= g.wave + 1;
-    if (canUpgrade) {
-      a = { kind: "weapon", tier: g.tier + 1, hp: doorHp(2.4), maxHp: doorHp(2.4) };
-      b = army(base + (Math.random() < 0.5 ? 1 : 0), doorHp(2));
-    } else {
-      a = army(base, doorHp(1.6));
-      b = army(base * 2 + 1, doorHp(3.2));
-    }
+    const boxHp = (secs) => Math.max(4, Math.ceil(dps() * secs));
+    const w = WEAPONS[g.tier];
+    const next = nextWeapon();
+    const offers = [];
+    // New weapons arrive at a steady pace, about one per wave.
+    if (next >= 0 && next <= g.wave + 2) offers.push({ kind: "weapon", tier: next, hp: boxHp(2.4) });
+    if (g.count < w.max) offers.push({ kind: "army", amount: Math.min(w.add, w.max - g.count), hp: boxHp(2) });
+    const wallHurt = g.wall < g.wallMax * 0.7;
+    const wall = { kind: "wall", hp: boxHp(2) };
+    const shield = { kind: "shield", hp: boxHp(2) };
+    if (wallHurt || Math.random() < 0.5) offers.push(wall, shield); else offers.push(shield, wall);
+    let pair = offers.slice(0, 2);
+    // Where a box is missing there is a tough wall instead (more of them on harder levels).
+    pair = pair.map((d) => (Math.random() < LEVELS[level].boxes ? d : { kind: "barrier", hp: boxHp(2) * 4 }));
+    pair.forEach((d) => { d.maxHp = d.hp; });
+    let [a, b] = pair;
     if (Math.random() < 0.5) [a, b] = [b, a];
     a.x0 = 18; a.x1 = W / 2 - 12;
     b.x0 = W / 2 + 12; b.x1 = W - 18;
@@ -148,38 +181,28 @@
 
   // ---------- Update ----------
 
+  function unitGap() {
+    return WEAPONS[g.tier].vehicle ? 46 : 30;
+  }
+
   function squadSpots() {
-    // Front row of up to 6, more rows behind. Big armies are drawn as 18 soldiers plus a number.
-    const n = Math.min(g.soldiers, 18);
     const spots = [];
-    for (let i = 0; i < n; i++) {
-      const row = Math.floor(i / 6);
-      const inRow = Math.min(6, n - row * 6);
-      const col = i % 6;
-      spots.push({ x: g.squadX + (col - (inRow - 1) / 2) * 27, y: SQUAD_Y + row * 18, i });
-    }
+    const gap = unitGap();
+    for (let i = 0; i < g.count; i++) spots.push({ x: g.squadX + (i - (g.count - 1) / 2) * gap, y: SQUAD_Y, i });
     return spots;
   }
 
   function squadHalfWidth() {
-    return (Math.min(6, g.soldiers) - 1) * 13.5 + 15;
+    return ((g.count - 1) * unitGap()) / 2 + (WEAPONS[g.tier].vehicle ? 22 : 15);
   }
 
   function fire() {
     const w = WEAPONS[g.tier];
-    const spots = squadSpots().slice(0, 6);
-    // Spread the shooters across the front row.
-    const count = Math.min(w.cap, spots.length);
-    const shooters = [];
-    for (let i = 0; i < count; i++) {
-      shooters.push(spots[Math.round(count === 1 ? (spots.length - 1) / 2 : i * (spots.length - 1) / (count - 1))]);
-    }
     const multi = w.multi || 1;
-    const dmg = (w.dmg * g.soldiers) / shooters.length;
-    shooters.forEach((s) => {
+    squadSpots().forEach((s) => {
       for (let m = 0; m < multi; m++) {
         const off = multi > 1 ? (m - 0.5) * 10 : 0;
-        g.bullets.push({ x: s.x + off, y: s.y - 14, vy: -w.speed, dmg, kind: w.kind,
+        g.bullets.push({ x: s.x + off, y: s.y - 16, vy: -w.speed, dmg: w.dmg, kind: w.kind,
           splash: w.splash || 0, pierce: w.pierce || 0, hit: [], age: 0 });
       }
     });
@@ -210,7 +233,11 @@
       g.fx.push({ type: "star", x, y, vx: (Math.random() - 0.5) * 300, vy: -100 - Math.random() * 200,
         t: 0, life: 0.8, color: ["#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77"][i] });
     }
-    if (word) g.fx.push({ type: "text", text: word, x, y: y - r, vy: -50, t: 0, life: 1, size: 18 + r * 0.3, color: "#fff" });
+    if (word) say(word, x, y - r, 18 + r * 0.3, "#fff");
+  }
+
+  function say(text, x, y, size, color) {
+    g.fx.push({ type: "text", text, x, y, vy: -50, t: 0, life: 1.1, size, color });
   }
 
   function boom(x, y, radius) {
@@ -221,58 +248,100 @@
     }
   }
 
+  function confetti(cx, cy, n, colors) {
+    for (let i = 0; i < n; i++) {
+      g.fx.push({ type: "confetti", x: cx + (Math.random() - 0.5) * 120, y: cy, vx: (Math.random() - 0.5) * 300,
+        vy: -150 - Math.random() * 250, t: 0, life: 1.4, rot: Math.random() * 6, color: colors[i % colors.length] });
+    }
+  }
+
   function breakDoor(pair, door) {
     door.broken = true;
     const cx = (door.x0 + door.x1) / 2;
     const cy = pair.y + pair.h / 2;
-    for (let i = 0; i < 24; i++) {
-      g.fx.push({ type: "confetti", x: cx + (Math.random() - 0.5) * 120, y: cy, vx: (Math.random() - 0.5) * 300,
-        vy: -150 - Math.random() * 250, t: 0, life: 1.4, rot: Math.random() * 6,
-        color: ["#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#9b5de5"][i % 5] });
+    if (door.kind === "barrier") {
+      // A wall is not a prize: it just crumbles out of the way.
+      door.gone = true;
+      confetti(cx, cy, 16, ["#adb5bd", "#6c757d", "#ced4da"]);
+      say("CRUMBLE!", cx, cy, 24, "#fff");
+      return;
     }
+    confetti(cx, cy, 24, ["#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#9b5de5"]);
     let text;
     if (door.kind === "weapon") {
-      g.tier = Math.max(g.tier, door.tier);
+      g.tier = door.tier;
+      g.count = 1;
       text = WEAPONS[g.tier].name + "!";
+    } else if (door.kind === "army") {
+      g.count = Math.min(WEAPONS[g.tier].max, g.count + door.amount);
+      text = "+" + door.amount + " " + WEAPONS[g.tier].emoji;
+    } else if (door.kind === "wall") {
+      g.wallMax += 40;
+      g.wall = g.wallMax;
+      text = "Bigger wall!";
     } else {
-      g.soldiers = Math.min(40, g.soldiers + door.amount);
-      text = "+" + door.amount + " soldiers!";
+      g.shield = 12;
+      text = "Shield!";
     }
     g.banner = { text: "🎉 " + text, t: 1.8 };
-    // You only get one door of the pair: the other one fades away.
-    pair.list.forEach((d) => { if (d !== door) d.gone = true; });
+    // You only get one box of the pair: the other one fades away.
+    pair.list.forEach((d) => { if (d !== door && d.kind !== "barrier") d.gone = true; });
     pair.done = true;
+    closePair(pair);
     syncStats();
+  }
+
+  // When a pair is finished, a weapon you did not take is missed for the rest of the game.
+  function closePair(pair) {
+    pair.closed = true;
+    pair.list.forEach((d) => {
+      if (d.kind === "weapon" && !d.broken) {
+        g.missed.add(d.tier);
+        g.banner = { text: "😮 Missed the " + WEAPONS[d.tier].name + "!", t: 2 };
+      }
+    });
+  }
+
+  function hurtWall(dmg) {
+    if (g.wall <= 0) return;
+    g.wall -= dmg;
+    if (g.wall <= 0) {
+      g.wall = 0;
+      g.shake = 0.5;
+      confetti(W / 2, WALL_Y, 30, ["#d4a373", "#a47148", "#e9c46a"]);
+      say("CRASH! The wall broke!", W / 2, WALL_Y - 30, 28, "#ff6b6b");
+    }
+  }
+
+  function hurtLife(dmg) {
+    g.life -= dmg;
+    g.hurt = 0.4;
+    g.shake = Math.max(g.shake, 0.25);
+    say("-" + Math.ceil(dmg) + " ❤️", g.squadX, SQUAD_Y - 34, 24, "#ff6b6b");
+    syncStats();
+    if (g.life <= 0) gameOver();
   }
 
   function breakThrough(e) {
     const T = ENEMIES[e.type];
     g.enemies.splice(g.enemies.indexOf(e), 1);
-    poof(e.x, WALL_Y, T.r, "Hee hee!");
+    poof(e.x, SQUAD_Y, T.r, "Hee hee!");
     g.leaks = (g.leaks || 0) + 1;
-    g.shake = 0.3;
-    g.hurt = 0.4;
-    if (g.soldiers > 1) {
-      const lost = Math.min(T.bite, g.soldiers - 1);
-      const spots = squadSpots();
-      for (let i = 0; i < lost; i++) {
-        const s = spots[Math.max(0, spots.length - 1 - i)] || { x: g.squadX, y: SQUAD_Y };
-        g.tumblers.push({ type: "friend", x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -300,
-          rot: 0, vr: 12, seed: Math.random() * 10, t: 0 });
-      }
-      g.soldiers -= lost;
-      g.fx.push({ type: "text", text: "-" + lost + " 👥", x: g.squadX, y: SQUAD_Y - 30, vy: -40, t: 0, life: 1.2, size: 26, color: "#ff6b6b" });
-    } else {
-      g.hearts--;
-      g.fx.push({ type: "text", text: "💔", x: g.squadX, y: SQUAD_Y - 30, vy: -40, t: 0, life: 1.2, size: 34, color: "#ff6b6b" });
-      if (g.hearts <= 0) gameOver();
-    }
-    syncStats();
+    hurtLife(T.hit * LEVELS[level].hurt);
+  }
+
+  function enemyShoot(e) {
+    const T = ENEMIES[e.type];
+    const s = T.shot;
+    g.shots.push({ x: e.x + (T.tank ? 0 : T.r * 0.6), y: e.y + T.r * 0.6, vy: s.kind === "bigshell" ? 190 : 150,
+      dmg: s.dmg, kind: s.kind, age: 0 });
+    e.throwT = 0.3;
   }
 
   function update(dt) {
     if (state !== "playing") return;
     const w = WEAPONS[g.tier];
+    const L = LEVELS[level];
 
     // Move the army.
     const speed = 380;
@@ -292,6 +361,7 @@
       g.fireIn += 1 / w.rate;
       fire();
     }
+    g.shield = Math.max(0, g.shield - dt);
 
     // Spawn the wave.
     if (g.spawnQueue.length) {
@@ -320,19 +390,57 @@
     g.doors.forEach((p) => {
       p.y += p.speed * dt;
       p.list.forEach((d) => { if (d.gone || d.broken) d.fade = (d.fade || 0) + dt; });
+      if (!p.closed && p.y >= WALL_Y - p.h) closePair(p);
     });
-    g.doors = g.doors.filter((p) => p.y < WALL_Y - p.h + 10 && !(p.done && p.list.every((d) => d.fade > 0.5)));
+    g.doors = g.doors.filter((p) => p.y < WALL_Y - p.h + 10 && !p.list.every((d) => d.fade > 0.5));
 
-    // Enemies march down.
+    // Enemies march down, stop to bash the wall, and throw things at you.
     g.enemies.slice().forEach((e) => {
       const T = ENEMIES[e.type];
-      e.y += T.speed * dt;
-      e.x += Math.sin(time * e.wobble + e.seed) * 14 * dt;
-      e.x = Math.max(T.r, Math.min(W - T.r, e.x));
+      const stopY = WALL_Y - T.r * 0.9 - 8;
+      e.atWall = g.wall > 0 && e.y >= stopY;
+      if (e.atWall) {
+        e.y = stopY;
+        e.bash += dt;
+        hurtWall(T.bash * L.hurt * dt);
+      } else {
+        e.y += T.speed * dt;
+        e.x += Math.sin(time * e.wobble + e.seed) * 14 * dt;
+        e.x = Math.max(T.r, Math.min(W - T.r, e.x));
+        e.shotIn -= dt;
+        if (e.shotIn <= 0 && e.y > 30 && e.y < WALL_Y - 80) {
+          e.shotIn = T.shot.every * (0.8 + Math.random() * 0.4);
+          enemyShoot(e);
+        }
+      }
+      e.throwT = Math.max(0, (e.throwT || 0) - dt);
       e.flash = Math.max(0, e.flash - dt);
       e.shownHp += (e.hp - e.shownHp) * Math.min(1, dt * 6);
-      if (e.y + T.r * 0.6 >= WALL_Y) breakThrough(e);
+      if (e.y + T.r * 0.6 >= SQUAD_Y - 10) breakThrough(e);
     });
+    if (state !== "playing") return;
+
+    // Enemy shots hit the wall, or your army once the wall is gone. The shield blocks them all.
+    g.shots.forEach((s) => {
+      s.y += s.vy * dt;
+      s.age += dt;
+      const lineY = g.wall > 0 ? WALL_Y - 6 : SQUAD_Y - 12;
+      if (s.y < lineY) return;
+      const onArmy = Math.abs(s.x - g.squadX) < squadHalfWidth() + 6;
+      if (g.wall <= 0 && !onArmy) {
+        if (s.y > H + 20) s.dead = true;
+        return;
+      }
+      s.dead = true;
+      if (g.shield > 0) {
+        say("Boing!", s.x, lineY - 10, 16, "#90e0ef");
+        return;
+      }
+      g.fx.push({ type: "puff", x: s.x, y: lineY, vx: 0, vy: -20, r: 8, t: 0, life: 0.4 });
+      if (g.wall > 0) hurtWall(s.dmg * L.hurt);
+      else hurtLife(s.dmg * L.hurt);
+    });
+    g.shots = g.shots.filter((s) => !s.dead);
     if (state !== "playing") return;
 
     // Bullets fly up and hit the first thing in their way.
@@ -359,9 +467,9 @@
         }
       }
       for (const p of g.doors) {
-        if (p.done || b.y > p.y + p.h || b.y < p.y) continue;
+        if (b.y > p.y + p.h || b.y < p.y) continue;
         for (const d of p.list) {
-          if (b.x < d.x0 || b.x > d.x1) continue;
+          if (d.gone || d.broken || b.x < d.x0 || b.x > d.x1) continue;
           d.hp -= b.dmg;
           d.flash = 0.1;
           if (b.splash) boom(b.x, b.y, Math.min(60, b.splash));
@@ -411,6 +519,7 @@
     endedAt = time;
     g.banner = null;
     g.doors = [];
+    g.shots = [];
   }
 
   function win() {
@@ -418,6 +527,7 @@
     endedAt = time;
     g.banner = null;
     g.doors = [];
+    g.shots = [];
   }
 
   // ---------- Drawing helpers ----------
@@ -509,7 +619,8 @@
       ctx.fill();
     });
     // Arm + prop, with a silly swing.
-    const swing = Math.sin(time * 4 + e.seed) * 0.6;
+    // Arm swings, with a big wind-up when throwing.
+    const swing = e.throwT > 0 ? 1.4 - e.throwT * 6 : Math.sin(time * 4 + e.seed) * 0.6;
     ctx.save();
     ctx.translate(r * 0.85, -r * 0.1);
     ctx.rotate(-0.6 + swing);
@@ -628,7 +739,8 @@
       ctx.fillStyle = "rgba(0,0,0,0.15)";
       ctx.beginPath(); ctx.ellipse(0, T.r * 1.05, T.r * 0.9, T.r * 0.25, 0, 0, Math.PI * 2); ctx.fill();
       // Bob while marching, squash when hit.
-      ctx.translate(0, T.tank ? 0 : -Math.abs(Math.sin(time * 8 + e.seed)) * T.r * 0.12);
+      if (e.atWall) ctx.translate(0, Math.abs(Math.sin(e.bash * 10)) * T.r * 0.2);
+      else ctx.translate(0, T.tank ? 0 : -Math.abs(Math.sin(time * 8 + e.seed)) * T.r * 0.12);
       const sq = e.flash > 0 ? 0.18 : 0;
       ctx.scale(1 + sq, 1 - sq);
     } else {
@@ -649,12 +761,11 @@
 
   // ---------- Your army ----------
 
-  function drawSoldier(x, y, hero, kick, dizzy, rot) {
+  function drawSoldier(x, y, hero, kick, tier) {
     ctx.save();
     ctx.translate(x, y);
-    if (rot) ctx.rotate(rot);
     ctx.scale(1.3, 1.3);
-    const bob = dizzy ? 0 : Math.abs(Math.sin(time * 9 + x * 0.1)) * 2;
+    const bob = Math.abs(Math.sin(time * 9 + x * 0.1)) * 2;
     ctx.translate(0, -bob + (kick || 0) * 2);
     // Seen from behind: backpack, body, helmet. The hero wears a red cape.
     if (hero) {
@@ -667,15 +778,17 @@
     circle(0, -8, hero ? 8 : 7, "#2a9d8f");
     ctx.fillStyle = "#21867a";
     ctx.fillRect(hero ? -9 : -8, -9, hero ? 18 : 16, 3);
-    if (dizzy) {
-      ctx.fillStyle = "#2b2d42";
-      ctx.font = "bold 12px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Oops!", 0, -18);
-    } else {
-      weaponIcon(g.tier, 10, -6, 9);
-    }
+    weaponIcon(tier, 10, -6, 9);
     ctx.restore();
+  }
+
+  // One unit of your army: a soldier holding the weapon, or the machine itself.
+  function drawUnit(x, y, hero, kick, tier) {
+    if (!WEAPONS[tier].vehicle) return drawSoldier(x, y, hero, kick, tier);
+    const bob = Math.sin(time * 6 + x * 0.1) * 2;
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.beginPath(); ctx.ellipse(x, y + 16, 18, 5, 0, 0, Math.PI * 2); ctx.fill();
+    weaponIcon(tier, x, y - 2 + bob + kick * 3, 20);
   }
 
   // Small drawings for each weapon: used in hands, on doors, and as the bullets.
@@ -798,10 +911,16 @@
     const shake = d.flash ? (Math.random() - 0.5) * 4 : 0;
     ctx.translate(shake, 0);
     const weapon = d.kind === "weapon";
+    if (d.kind === "barrier") {
+      drawBarrier(d, x, y, w, h);
+      ctx.restore();
+      return;
+    }
     // Frame + panel.
     ctx.fillStyle = "#7f5539";
     rr(x - 6, y - 6, w + 12, h + 12, 12); ctx.fill();
-    ctx.fillStyle = d.flash ? "#fff" : weapon ? "#ffd166" : "#90e0ef";
+    const colors = { weapon: "#ffd166", army: "#90e0ef", wall: "#f4c7a1", shield: "#cdb4ff" };
+    ctx.fillStyle = d.flash ? "#fff" : colors[d.kind];
     rr(x, y, w, h, 8); ctx.fill();
     circle(x + w - 12, y + h / 2 - 6, 4, "#7f5539");
     if (d.broken) {
@@ -820,12 +939,19 @@
       ctx.font = "bold 20px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
       ctx.textAlign = "left";
       wrapText(WEAPONS[d.tier].name, x + 64, y + 30, w - 84);
-    } else {
-      drawSoldier(x + 32, y + 40, false, 0);
+    } else if (d.kind === "army") {
+      drawUnit(x + 32, y + 38, false, 0, g.tier);
       ctx.font = "bold 34px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
       ctx.fillStyle = "#2b2d42";
       ctx.textAlign = "left";
-      ctx.fillText("+" + d.amount, x + 58, y + 48);
+      ctx.fillText("+" + d.amount, x + 62, y + 48);
+    } else {
+      ctx.font = "34px sans-serif";
+      ctx.fillStyle = "#000";
+      ctx.fillText(d.kind === "wall" ? "🧱" : "🛡️", x + 32, y + 46);
+      ctx.font = "bold 20px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
+      ctx.textAlign = "left";
+      wrapText(d.kind === "wall" ? "Bigger wall" : "Shield", x + 64, y + 30, w - 84);
     }
     // How much it still needs.
     const left = Math.max(0, d.hp / d.maxHp);
@@ -835,6 +961,26 @@
     ctx.fillStyle = "#2b2d42";
     ctx.fillText(fmt(Math.max(0, d.hp)), x + w - 6, y + h - 6);
     ctx.restore();
+  }
+
+  // A tough grey wall where a box is missing: it blocks your shots until you smash it.
+  function drawBarrier(d, x, y, w, h) {
+    ctx.fillStyle = d.flash ? "#fff" : "#8d99ae";
+    rr(x - 4, y, w + 8, h, 6); ctx.fill();
+    ctx.strokeStyle = "#5c677d"; ctx.lineWidth = 2;
+    for (let row = 0; row < 4; row++) {
+      const by = y + row * (h / 4);
+      ctx.beginPath(); ctx.moveTo(x - 4, by); ctx.lineTo(x + w + 4, by); ctx.stroke();
+      for (let bx = x + (row % 2 ? 20 : 0); bx < x + w; bx += 40) {
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by + h / 4); ctx.stroke();
+      }
+    }
+    const left = Math.max(0, d.hp / d.maxHp);
+    lifeBar(x + w / 2 - 18, y + h - 15, w - 56, left, left);
+    ctx.font = "bold 15px sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(fmt(Math.max(0, d.hp)), x + w - 6, y + h - 6);
   }
 
   function wrapText(text, x, y, maxW) {
@@ -868,11 +1014,66 @@
       const fy = ((i * 173 + time * 40) % (H + 40)) - 20;
       circle(fx, fy, 4, i % 2 ? "#fff" : "#ffd93d");
     }
-    // Sandbag wall.
-    for (let x = 0; x < W + 30; x += 34) {
+    // Sandbag wall: it gets cracks as it gets hurt, and only rubble is left once it breaks.
+    const health = g.wall / g.wallMax;
+    for (let x = 0, i = 0; x < W + 30; x += 34, i++) {
+      if (g.wall <= 0) {
+        circle(x + 6, WALL_Y + 4, 6, "#c8a27a");
+        circle(x + 20, WALL_Y + 6, 4, "#a47148");
+        continue;
+      }
       ctx.fillStyle = "#d4a373";
       rr(x - 4, WALL_Y - 8, 34, 16, 8); ctx.fill();
       ctx.strokeStyle = "#a47148"; ctx.lineWidth = 2; ctx.stroke();
+      if (health < 0.7 && (i * 7) % 3 === 0 || health < 0.35 && i % 2) {
+        ctx.beginPath(); ctx.moveTo(x + 6, WALL_Y - 6); ctx.lineTo(x + 12, WALL_Y); ctx.lineTo(x + 8, WALL_Y + 6); ctx.stroke();
+      }
+    }
+    if (g.wall > 0) {
+      ctx.font = "16px sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = "#000";
+      ctx.fillText("🧱", 8, WALL_Y + 6);
+      lifeBar(W / 2 - 50, WALL_Y - 3, W - 160, health, health);
+    }
+  }
+
+  // Your life gauge along the bottom.
+  function drawLife() {
+    ctx.font = "16px sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = "#000";
+    ctx.fillText("❤️", 8, H - 6);
+    const r = Math.max(0, g.life / 100);
+    lifeBar(W / 2 - 50, H - 18, W - 160, r, r);
+  }
+
+  function drawShield() {
+    if (g.shield <= 0 || (g.shield < 2 && Math.floor(time * 8) % 2)) return;
+    const top = (g.wall > 0 ? WALL_Y : SQUAD_Y) - 40;
+    ctx.fillStyle = "rgba(144, 224, 239, 0.35)";
+    ctx.strokeStyle = "rgba(77, 150, 255, 0.8)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, top + 40);
+    ctx.quadraticCurveTo(W / 2, top - 20, W, top + 40);
+    ctx.lineTo(W, top + 48); ctx.lineTo(0, top + 48);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+
+  // Things the enemy throws at you.
+  function drawShot(s) {
+    if (s.kind === "stone" || s.kind === "rock") {
+      const r = s.kind === "rock" ? 10 : 6;
+      ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.age * 8);
+      circle(0, 0, r, "#8d99ae"); circle(-r * 0.3, -r * 0.3, r * 0.3, "#c0c7d1");
+      ctx.restore();
+    } else if (s.kind === "cork") {
+      ctx.fillStyle = "#c08552"; rr(s.x - 4, s.y - 6, 8, 12, 3); ctx.fill();
+    } else if (s.kind === "ball") {
+      circle(s.x, s.y, 8, "#2b2d42"); circle(s.x - 2, s.y - 2, 2.5, "#6c757d");
+    } else {
+      const big = s.kind === "bigshell";
+      circle(s.x, s.y - (big ? 14 : 10), 4 + Math.random() * 3, "#ff9f1c");
+      ctx.fillStyle = big ? "#9d0208" : "#6c584c";
+      rr(s.x - (big ? 7 : 5), s.y - (big ? 10 : 7), big ? 14 : 10, big ? 22 : 16, big ? 7 : 5); ctx.fill();
     }
   }
 
@@ -952,21 +1153,13 @@
     });
 
     g.bullets.forEach(drawBullet);
+    g.shots.forEach(drawShot);
 
-    // Your army: back rows first.
-    const spots = squadSpots();
-    spots.slice().reverse().forEach((s) => drawSoldier(s.x, s.y, s.i === 0, s.i < 6 && g.kick > 0 ? 1 : 0));
-    if (g.soldiers > 1) {
-      const lx = Math.max(30, Math.min(W - 30, g.squadX));
-      ctx.font = "bold 20px 'Comic Sans MS', 'Chalkboard SE', sans-serif"; ctx.textAlign = "center";
-      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#2b2d42"; ctx.lineWidth = 5;
-      ctx.strokeText("👥 " + g.soldiers, lx, H - 6); ctx.fillText("👥 " + g.soldiers, lx, H - 6);
-    }
+    squadSpots().forEach((s) => drawUnit(s.x, s.y, s.i === 0, g.kick > 0 ? 1 : 0, g.tier));
+    drawShield();
+    drawLife();
 
-    g.tumblers.forEach((t) => {
-      if (t.type === "friend") drawSoldier(t.x, t.y, false, 0, true, t.rot);
-      else drawEnemy({ type: t.type, x: t.x, y: t.y, rot: t.rot, seed: t.seed, flash: 0 }, true);
-    });
+    g.tumblers.forEach((t) => drawEnemy({ type: t.type, x: t.x, y: t.y, rot: t.rot, seed: t.seed, flash: 0 }, true));
 
     drawFx();
     ctx.restore();
@@ -991,11 +1184,12 @@
       ctx.fillStyle = "rgba(43, 45, 66, 0.45)";
       ctx.fillRect(0, 0, W, H);
       if (state === "ready") {
-        bigText([["🪖 Army Rush!", 44, "#ffd93d"], ["A silly army is coming!", 24], ["Shoot doors to get", 24],
-          ["better weapons 🏹", 24], ["and more soldiers 👥", 24], ["Tap to start!", 32, "#6bcb77"]], H * 0.22);
+        bigText([["🪖 Army Rush!", 44, "#ffd93d"], ["A silly army is coming!", 24], ["Shoot boxes to get", 24],
+          ["a new weapon 🏹, more of it,", 24], ["or a stronger defence 🧱", 24], ["Level: " + LEVELS[level].name, 24, "#ffd93d"],
+          ["Tap to start!", 32, "#6bcb77"]], H * 0.18);
       } else if (state === "over") {
         bigText([["Oh no! 😵", 48, "#ff6b6b"], ["They got through!", 28], ["You reached wave " + (g.wave + 1), 26],
-          ["Tip: open more doors!", 24, "#ffd93d"], ["Tap to try again", 32, "#6bcb77"]], H * 0.28);
+          ["Tip: open more boxes!", 24, "#ffd93d"], ["Tap to try again", 32, "#6bcb77"]], H * 0.28);
       } else {
         bigText([["YOU WIN! 🏆", 50, "#ffd93d"], ["The King Tank", 28], ["went BOING!", 28],
           ["Tap to play again", 30, "#6bcb77"]], H * 0.32);
@@ -1068,10 +1262,19 @@
     if (k === "ArrowRight" || k === "d" || k === "D") input.right = false;
   });
 
+  levelBtns.forEach((btn) => btn.addEventListener("click", () => {
+    level = btn.dataset.level;
+    levelBtns.forEach((b) => b.setAttribute("aria-pressed", b === btn));
+    state = "ready";
+    newGame();
+    btn.blur();
+  }));
+
   // ?debug lets the test script fast-forward the battle and steer the army.
   if (/[?&]debug/.test(location.search)) {
     window.armyDebug = {
-      get g() { return g; }, get state() { return state; }, dps, WEAPONS, ENEMIES, input, start,
+      get g() { return g; }, get state() { return state; }, dps, nextWeapon, WEAPONS, ENEMIES, input, start,
+      setLevel(l) { level = l; },
       step(n) { for (let i = 0; i < n; i++) { update(STEP); updateFx(STEP); } },
     };
   }

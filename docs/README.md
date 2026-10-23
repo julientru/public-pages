@@ -19,7 +19,7 @@ Simple logic games for kids aged 5 to 10. Plain HTML and vanilla JavaScript: no 
 | 🔍 Odd One Out | `games/odd/` | Tap a picture, or keys 1–5. 10 rounds |
 | 🌊 Color Flood | `games/flood/` | Tap a square or color button, or keys 1–6. Easy / Medium / Hard |
 | ❌ Tic-Tac-Toe | `games/tictactoe/` | Tap a square, or keys 1–9. Easy robot / Clever robot |
-| 🪖 Army Rush | `games/army/` | Slide on the field, hold ⬅️ ➡️, or arrow keys / A D. Your army shoots by itself; shoot a door to get a better weapon or more soldiers. 12 waves |
+| 🪖 Army Rush | `games/army/` | Slide on the field, hold ⬅️ ➡️, or arrow keys / A D. Your army shoots by itself; shoot a box for a new weapon, more of your weapon, a bigger wall or a shield. A missed weapon never comes back. Easy / Normal / Hard / Mega-hard, 12 waves |
 
 ### 2-player games
 

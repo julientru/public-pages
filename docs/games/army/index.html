@@ -10,9 +10,11 @@
     .topbar { margin-bottom: 8px; }
     .stats { gap: 6px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); margin-bottom: 8px; flex-wrap: nowrap; }
     .stats span { padding: 4px 8px; white-space: nowrap; }
+    .levels { gap: 6px; margin-bottom: 8px; flex-wrap: nowrap; }
+    .levels .btn { min-height: 44px; padding: 6px 10px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); }
     /* Tall 3:4 field that fits the screen height, so the whole battle is visible on a phone. */
     #game {
-      width: min(100%, max(270px, calc((100vh - 230px) * 0.75)));
+      width: min(100%, max(270px, calc((100vh - 290px) * 0.75)));
       height: auto;
       aspect-ratio: 3 / 4;
       cursor: pointer;
@@ -28,10 +30,16 @@
     <span></span>
   </div>
 
+  <div class="levels" role="group" aria-label="Choose how hard">
+    <button class="btn" data-level="easy" aria-pressed="true">Easy</button>
+    <button class="btn" data-level="normal" aria-pressed="false">Normal</button>
+    <button class="btn" data-level="hard" aria-pressed="false">Hard</button>
+    <button class="btn" data-level="mega" aria-pressed="false">Mega-hard</button>
+  </div>
+
   <div class="stats">
     <span>🌊 <b id="wave">1</b>/12</span>
-    <span>❤️ <b id="hearts">3</b></span>
-    <span>👥 <b id="soldiers">1</b></span>
+    <span>❤️ <b id="life">100</b></span>
     <span id="weapon">🪨 Stones</span>
   </div>
 
@@ -42,7 +50,9 @@
     <button class="btn" id="right" aria-label="Move right">➡️</button>
   </div>
   <p class="help">Your army shoots by itself. Slide your finger on the field, hold ⬅️ ➡️, or use the arrow keys to aim.
-    Shoot a door to open it: one gives a better weapon, the other gives more soldiers. You can only pick one!</p>
+    Shoot a box to open it: a new weapon (your army starts again with one of it), more of your weapon, a bigger wall or a shield.
+    You can only pick one box of each pair, and a weapon you miss never comes back! Grey walls just block your shots.
+    The enemy breaks your wall first, then hits your ❤️.</p>
 
   <script src="army.js"></script>
 </body>
