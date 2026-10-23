@@ -75,6 +75,7 @@ p.subtitle { font-size: 1.2rem; margin: 0 0 24px; text-align: center; }
 .game-card.flood { background: #dff3ff; }
 .game-card.tictactoe { background: #f0eaff; }
 .game-card.army { background: #e4f0d0; }
+.game-card.army3d { background: #d6ecff; }
 
 /* ---------- Game pages ---------- */
 .topbar {

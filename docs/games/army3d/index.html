@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Army Rush 3D</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    body { padding: 10px 16px; }
+    .topbar { margin-bottom: 8px; }
+    .stats { gap: 6px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); margin-bottom: 8px; flex-wrap: nowrap; }
+    .stats span { padding: 4px 8px; white-space: nowrap; }
+    .levels { gap: 6px; margin-bottom: 8px; flex-wrap: nowrap; }
+    .levels .btn { min-height: 44px; padding: 6px 10px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); }
+    /* Square view that fits the screen height: wide enough for a view from behind your army. */
+    #stage {
+      position: relative;
+      width: min(100%, max(280px, calc(100vh - 290px)));
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      background: #bde0fe;
+      touch-action: none;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #stage canvas { width: 100%; height: 100%; border-radius: 0; box-shadow: none; background: none; }
+    #stage .layer { position: absolute; inset: 0; pointer-events: none; }
+    #hurt { background: #ff6b6b; opacity: 0; }
+    #banner {
+      position: absolute; left: 4%; right: 4%; top: 12%;
+      padding: 10px 12px; border-radius: 16px;
+      background: rgba(43, 45, 66, 0.7); color: #fff;
+      font-weight: bold; font-size: clamp(1rem, 5.4vw, 1.6rem); text-align: center;
+      pointer-events: none;
+    }
+    #lifeGauge {
+      position: absolute; left: 8px; right: 8px; bottom: 6px;
+      display: flex; align-items: center; gap: 6px; pointer-events: none;
+    }
+    #lifeGauge .bar { flex: 1; height: 12px; border-radius: 7px; background: #2b2d42; padding: 2px; }
+    #lifeGauge i { display: block; height: 100%; border-radius: 5px; background: #6bcb77; transition: width 0.2s; }
+    #screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: rgba(43, 45, 66, 0.45); color: #fff; text-align: center; padding: 12px;
+      font-weight: bold; font-size: clamp(1rem, 5vw, 1.5rem);
+      text-shadow: -2px -2px 0 #2b2d42, 2px -2px 0 #2b2d42, -2px 2px 0 #2b2d42, 2px 2px 0 #2b2d42, 0 3px 0 #2b2d42;
+    }
+    #screen[hidden] { display: none; }
+    #screen .big { font-size: 1.7em; color: #ffd93d; }
+    #screen .go { font-size: 1.3em; color: #6bcb77; margin-top: 8px; }
+    #screen .bad { color: #ff6b6b; }
+    #screen .gold { color: #ffd93d; }
+    #screen a { color: #ffd93d; pointer-events: auto; }
+    .controls { margin-top: 10px; width: min(100%, 480px); }
+    .controls .btn { flex: 1 1 0; font-size: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="btn home" href="../../index.html" aria-label="Back to games">🏠</a>
+    <h1>🪖 Army Rush 3D</h1>
+    <span></span>
+  </div>
+
+  <div class="levels" role="group" aria-label="Choose how hard">
+    <button class="btn" data-level="easy" aria-pressed="true">Easy</button>
+    <button class="btn" data-level="normal" aria-pressed="false">Normal</button>
+    <button class="btn" data-level="hard" aria-pressed="false">Hard</button>
+    <button class="btn" data-level="mega" aria-pressed="false">Mega-hard</button>
+  </div>
+
+  <div class="stats">
+    <span>🌊 <b id="wave">1</b>/12</span>
+    <span>❤️ <b id="life">100</b></span>
+    <span id="weapon">🪨 Stones</span>
+  </div>
+
+  <div id="stage">
+    <canvas id="game"></canvas>
+    <div class="layer" id="hurt"></div>
+    <div id="banner" hidden></div>
+    <div id="lifeGauge"><span>❤️</span><div class="bar"><i id="lifeFill" style="width: 100%"></i></div></div>
+    <div class="layer" id="screen"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="left" aria-label="Move left">⬅️</button>
+    <button class="btn" id="right" aria-label="Move right">➡️</button>
+  </div>
+  <p class="help">Your army shoots by itself. Slide your finger on the field, hold ⬅️ ➡️, or use the arrow keys to aim.
+    Shoot a box to open it: a new weapon (your army starts again with one of it), more of your weapon, a bigger wall or a shield.
+    You can only pick one box of each pair, and a weapon you miss never comes back! Grey walls just block your shots.
+    The enemy breaks your wall first, then hits your ❤️.</p>
+
+  <script src="../../js/lib/three.min.js"></script>
+  <script src="army3d.js"></script>
+</body>
+</html>

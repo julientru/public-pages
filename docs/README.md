@@ -1,6 +1,6 @@
 # kids-games
 
-Simple logic games for kids aged 5 to 10. Plain HTML and vanilla JavaScript: no build step, no dependencies, nothing saved (everything lives in browser memory).
+Simple logic games for kids aged 5 to 10. Plain HTML and vanilla JavaScript: no build step, nothing saved (everything lives in browser memory).
 
 ## Games
 
@@ -20,6 +20,7 @@ Simple logic games for kids aged 5 to 10. Plain HTML and vanilla JavaScript: no 
 | 🌊 Color Flood | `games/flood/` | Tap a square or color button, or keys 1–6. Easy / Medium / Hard |
 | ❌ Tic-Tac-Toe | `games/tictactoe/` | Tap a square, or keys 1–9. Easy robot / Clever robot |
 | 🪖 Army Rush | `games/army/` | Slide on the field, hold ⬅️ ➡️, or arrow keys / A D. Your army shoots by itself; shoot a box for a new weapon, more of your weapon, a bigger wall or a shield. A missed weapon never comes back. Easy / Normal / Hard / Mega-hard, 12 waves |
+| 🪖 Army Rush 3D | `games/army3d/` | Same rules and controls as Army Rush, drawn in 3D from behind your army (uses Three.js) |
 
 ### 2-player games
 
@@ -30,6 +31,10 @@ Pick 👤👤 2 at the top of the hub to see them.
 | ⚡ Snap Match | `games/snap/` | Face to face: phone flat between the players. First to tap the yellow picture in your own grid gets a ⭐. Wrong tap = frozen for 1 second. 5 ⭐ wins. |
 | 🍎 Apple Grab | `games/apples/` | Face to face, taking turns: take 1, 2 or 3 apples. Whoever takes the last apple wins the round. 3 rounds wins. |
 | 🔴🟡 Four in a Row | `games/connect4/` | Take turns on the same screen: tap a column to drop a disc. Four in a line wins. |
+
+## Libraries
+
+Army Rush 3D draws with [Three.js](https://threejs.org/) r159, committed as one file in `js/lib/three.min.js` (MIT licence in `js/lib/three.LICENSE`). It is the classic script build, so the game works from GitHub Pages, offline, and when opening the file directly. Every other game uses no library.
 
 ## Run locally
 
