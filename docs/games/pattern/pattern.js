@@ -1,5 +1,6 @@
 // What's Next?: spot the repeating pattern and choose the missing picture.
 (function () {
+  const t = I18n.t;
   const SETS = [
     ["🔴", "🔵", "🟢", "🟡", "🟣", "🟠"],
     ["🐶", "🐱", "🐭", "🐰", "🐻", "🐷"],
@@ -69,12 +70,12 @@
       const b = document.createElement("button");
       b.className = "btn";
       b.innerHTML = '<span class="key">' + (i + 1) + "</span>" + pic;
-      b.setAttribute("aria-label", "Choice " + (i + 1) + ": " + pic);
+      b.setAttribute("aria-label", t("Choice {n}", { n: i + 1 }) + ": " + pic);
       b.addEventListener("click", () => choose(b, pic));
       choicesEl.appendChild(b);
       return b;
     });
-    messageEl.textContent = "What comes next?";
+    messageEl.textContent = t("What comes next?");
     messageEl.classList.remove("win");
   }
 
@@ -87,14 +88,14 @@
       streak++;
       rowEl.lastChild.textContent = pic;
       rowEl.lastChild.classList.remove("ask");
-      messageEl.textContent = streak >= 3 ? "🔥 " + streak + " in a row! 🔥" : pick(["Yes! 🌟", "Great looking! 👀", "Correct! 🎉"]);
+      messageEl.textContent = streak >= 3 ? t("🔥 {n} in a row! 🔥", { n: streak }) : pick(I18n.list(["Yes! 🌟", "Great looking! 👀", "Correct! 🎉"]));
       messageEl.classList.add("win");
       nextTimer = setTimeout(newRound, 1100);
     } else {
       btn.classList.add("wrong");
       btn.disabled = true;
       streak = 0;
-      messageEl.textContent = "Not quite. Look again! 🔍";
+      messageEl.textContent = t("Not quite. Look again! 🔍");
     }
     starsEl.textContent = stars;
     streakEl.textContent = streak;

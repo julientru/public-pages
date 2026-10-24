@@ -1,5 +1,6 @@
 // Color Flood: grow your patch from the top-left corner until the whole board is one color.
 (function () {
+  const t = I18n.t;
   const COLORS = [
     { fill: "#ff6b6b", name: "red", icon: "❤️" },
     { fill: "#4d96ff", name: "blue", icon: "💧" },
@@ -83,13 +84,13 @@
       b.className = "btn";
       b.style.background = col.fill;
       b.innerHTML = '<span class="key">' + (k + 1) + "</span>" + col.icon;
-      b.setAttribute("aria-label", col.name);
+      b.setAttribute("aria-label", t(col.name));
       b.addEventListener("click", () => play(k));
       colorsEl.appendChild(b);
       return b;
     });
 
-    messageEl.textContent = "Fill the whole board with one color!";
+    messageEl.textContent = t("Fill the whole board with one color!");
     messageEl.classList.remove("win");
     draw();
   }
@@ -111,13 +112,13 @@
     const done = region(grid).size === grid.length;
     if (done) {
       over = true;
-      messageEl.textContent = "🎉 You flooded it! " + (left > 0 ? left + (left === 1 ? " move" : " moves") + " to spare! " : "") + "🎉";
+      messageEl.textContent = t(left > 1 ? "🎉 You flooded it! {n} moves to spare! 🎉" : left === 1 ? "🎉 You flooded it! 1 move to spare! 🎉" : "🎉 You flooded it! 🎉", { n: left });
       messageEl.classList.add("win");
     } else if (left === 0) {
       over = true;
-      messageEl.textContent = "Out of moves! Press New game to try again. 💪";
+      messageEl.textContent = t("Out of moves! Press New game to try again. 💪");
     } else {
-      messageEl.textContent = left <= 2 ? "Careful, only " + left + " left! 😮" : "Fill the whole board with one color!";
+      messageEl.textContent = left <= 2 ? t("Careful, only {n} left! 😮", { n: left }) : t("Fill the whole board with one color!");
     }
     draw();
   }

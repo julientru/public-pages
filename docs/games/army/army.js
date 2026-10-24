@@ -4,6 +4,7 @@
 // The enemy breaks your wall first, then hits your life. Enemies never get hurt for real:
 // they flash, squash, and tumble away with dizzy eyes.
 (function () {
+  const t = I18n.t;
   const W = 480;
   const H = 640;
   const WALL_Y = H - 108;  // sandbag wall: enemies stop and bash it until it breaks
@@ -13,56 +14,56 @@
   // One unit of each weapon: dps = dmg * rate * (multi || 1). max = how many you can have,
   // add = how many an army box gives. Each new weapon starts as one unit.
   const WEAPONS = [
-    { name: "Stones", emoji: "🪨", dmg: 1, rate: 2, speed: 420, kind: "stone", max: 6, add: 2 },
-    { name: "Axes", emoji: "🪓", dmg: 3, rate: 2, speed: 430, kind: "axe", max: 6, add: 2 },
-    { name: "Bows", emoji: "🏹", dmg: 6, rate: 2.5, speed: 620, kind: "arrow", max: 5, add: 1 },
-    { name: "Pistol", emoji: "🔫", dmg: 14, rate: 3, speed: 650, kind: "dart", max: 5, add: 1 },
-    { name: "Two pistols", emoji: "🔫🔫", dmg: 18, rate: 3, multi: 2, speed: 650, kind: "dart", max: 4, add: 1 },
-    { name: "Cannon", emoji: "💣", dmg: 250, rate: 1.2, speed: 420, splash: 45, kind: "ball", max: 4, add: 1, vehicle: true },
-    { name: "Gatling", emoji: "💥", dmg: 80, rate: 10, speed: 760, kind: "pellet", max: 3, add: 1 },
-    { name: "Tank", emoji: "🛡️", dmg: 1400, rate: 1.5, speed: 520, splash: 55, kind: "shell", max: 3, add: 1, vehicle: true },
-    { name: "Missiles", emoji: "🚀", dmg: 1900, rate: 1.5, multi: 2, speed: 480, splash: 60, kind: "missile", max: 3, add: 1 },
-    { name: "Planes", emoji: "✈️", dmg: 7500, rate: 2, speed: 380, splash: 60, kind: "plane", max: 3, add: 1, vehicle: true },
-    { name: "Satellite laser", emoji: "🛰️", dmg: 10000, rate: 4, speed: 1100, pierce: 3, kind: "laser", max: 2, add: 1, vehicle: true },
-    { name: "Mega bomb", emoji: "☢️", dmg: 110000, rate: 1, speed: 360, splash: 130, kind: "bomb", max: 1, add: 0, vehicle: true },
+    { name: t("Stones"), emoji: "🪨", dmg: 1, rate: 2, speed: 420, kind: "stone", max: 6, add: 2 },
+    { name: t("Axes"), emoji: "🪓", dmg: 3, rate: 2, speed: 430, kind: "axe", max: 6, add: 2 },
+    { name: t("Bows"), emoji: "🏹", dmg: 6, rate: 2.5, speed: 620, kind: "arrow", max: 5, add: 1 },
+    { name: t("Pistol"), emoji: "🔫", dmg: 14, rate: 3, speed: 650, kind: "dart", max: 5, add: 1 },
+    { name: t("Two pistols"), emoji: "🔫🔫", dmg: 18, rate: 3, multi: 2, speed: 650, kind: "dart", max: 4, add: 1 },
+    { name: t("Cannon"), emoji: "💣", dmg: 250, rate: 1.2, speed: 420, splash: 45, kind: "ball", max: 4, add: 1, vehicle: true },
+    { name: t("Gatling"), emoji: "💥", dmg: 80, rate: 10, speed: 760, kind: "pellet", max: 3, add: 1 },
+    { name: t("Tank"), emoji: "🛡️", dmg: 1400, rate: 1.5, speed: 520, splash: 55, kind: "shell", max: 3, add: 1, vehicle: true },
+    { name: t("Missiles"), emoji: "🚀", dmg: 1900, rate: 1.5, multi: 2, speed: 480, splash: 60, kind: "missile", max: 3, add: 1 },
+    { name: t("Planes"), emoji: "✈️", dmg: 7500, rate: 2, speed: 380, splash: 60, kind: "plane", max: 3, add: 1, vehicle: true },
+    { name: t("Satellite laser"), emoji: "🛰️", dmg: 10000, rate: 4, speed: 1100, pierce: 3, kind: "laser", max: 2, add: 1, vehicle: true },
+    { name: t("Mega bomb"), emoji: "☢️", dmg: 110000, rate: 1, speed: 360, splash: 130, kind: "bomb", max: 1, add: 0, vehicle: true },
   ];
 
   // hp is a multiple of the wave's toughness. hit = life lost when it reaches your army,
   // bash = wall damage per second while it stands at the wall, shot = what it throws at you.
   const ENEMIES = {
-    thrower: { name: "Stone thrower", r: 20, speed: 40, hp: 1, hit: 5, bash: 3, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue",
+    thrower: { name: t("Stone thrower"), r: 20, speed: 40, hp: 1, hit: 5, bash: 3, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue",
       shot: { kind: "stone", every: 3.4, dmg: 1 } },
-    boss: { name: "Big Boss", r: 40, speed: 22, hp: 7, hit: 15, bash: 8, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth",
+    boss: { name: t("Big Boss"), r: 40, speed: 22, hp: 7, hit: 15, bash: 8, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth",
       shot: { kind: "rock", every: 3, dmg: 3 } },
-    soldier: { name: "Soldier", r: 21, speed: 46, hp: 1.2, hit: 6, bash: 4, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile",
+    soldier: { name: t("Soldier"), r: 21, speed: 46, hp: 1.2, hit: 6, bash: 4, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile",
       shot: { kind: "cork", every: 2.8, dmg: 1 } },
-    cannon: { name: "Cannon crew", r: 24, speed: 34, hp: 2, hit: 8, bash: 5, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o",
+    cannon: { name: t("Cannon crew"), r: 24, speed: 34, hp: 2, hit: 8, bash: 5, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o",
       shot: { kind: "ball", every: 3.2, dmg: 2 } },
-    bigboss: { name: "Big Big Boss", r: 55, speed: 17, hp: 14, hit: 20, bash: 12, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true,
+    bigboss: { name: t("Big Big Boss"), r: 55, speed: 17, hp: 14, hit: 20, bash: 12, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true,
       shot: { kind: "rock", every: 2.4, dmg: 4 } },
-    tank: { name: "Tank", r: 32, speed: 30, hp: 3, hit: 10, bash: 8, color: "#90a955", tank: true,
+    tank: { name: t("Tank"), r: 32, speed: 30, hp: 3, hit: 10, bash: 8, color: "#90a955", tank: true,
       shot: { kind: "shell", every: 3.2, dmg: 3 } },
-    bigtank: { name: "Big tank", r: 45, speed: 23, hp: 6, hit: 15, bash: 12, color: "#bc6c25", tank: true,
+    bigtank: { name: t("Big tank"), r: 45, speed: 23, hp: 6, hit: 15, bash: 12, color: "#bc6c25", tank: true,
       shot: { kind: "shell", every: 2.6, dmg: 4 } },
-    tankboss: { name: "Tank Boss", r: 62, speed: 15, hp: 20, hit: 30, bash: 20, color: "#6d597a", tank: true, crown: true,
+    tankboss: { name: t("Tank Boss"), r: 62, speed: 15, hp: 20, hit: 30, bash: 20, color: "#6d597a", tank: true, crown: true,
       shot: { kind: "bigshell", every: 2, dmg: 6 } },
-    king: { name: "KING TANK", r: 82, speed: 10, hp: 55, hit: 100, bash: 40, color: "#f4c430", tank: true, crown: true, mustache: true,
+    king: { name: t("KING TANK"), r: 82, speed: 10, hp: 55, hit: 100, bash: 40, color: "#f4c430", tank: true, crown: true, mustache: true,
       shot: { kind: "bigshell", every: 1.4, dmg: 8 } },
   };
 
   const WAVES = [
-    { name: "Stone throwers!", groups: [["thrower", 8]], gap: 2 },
-    { name: "Here comes Big Boss!", groups: [["thrower", 8], ["boss", 1]], gap: 1.8 },
-    { name: "Soldiers!", groups: [["soldier", 12]], gap: 1.5 },
-    { name: "Two Big Bosses!", groups: [["soldier", 10], ["boss", 2]], gap: 1.5 },
-    { name: "Cannons!", groups: [["soldier", 8], ["cannon", 7]], gap: 1.4 },
-    { name: "Big Big Boss!", groups: [["cannon", 9], ["bigboss", 1]], gap: 1.4 },
-    { name: "Tanks!", groups: [["soldier", 6], ["tank", 8]], gap: 1.4 },
-    { name: "Bigger tanks!", groups: [["tank", 8], ["bigtank", 4]], gap: 1.4 },
-    { name: "Boss parade!", groups: [["bigtank", 6], ["bigboss", 2]], gap: 1.5 },
-    { name: "Tank Boss!", groups: [["tank", 10], ["tankboss", 1]], gap: 1.3 },
-    { name: "The whole tank army!", groups: [["bigtank", 10], ["tankboss", 2]], gap: 1.3 },
-    { name: "THE KING TANK!", groups: [["tank", 10], ["king", 1]], gap: 1.3 },
+    { name: t("Stone throwers!"), groups: [["thrower", 8]], gap: 2 },
+    { name: t("Here comes Big Boss!"), groups: [["thrower", 8], ["boss", 1]], gap: 1.8 },
+    { name: t("Soldiers!"), groups: [["soldier", 12]], gap: 1.5 },
+    { name: t("Two Big Bosses!"), groups: [["soldier", 10], ["boss", 2]], gap: 1.5 },
+    { name: t("Cannons!"), groups: [["soldier", 8], ["cannon", 7]], gap: 1.4 },
+    { name: t("Big Big Boss!"), groups: [["cannon", 9], ["bigboss", 1]], gap: 1.4 },
+    { name: t("Tanks!"), groups: [["soldier", 6], ["tank", 8]], gap: 1.4 },
+    { name: t("Bigger tanks!"), groups: [["tank", 8], ["bigtank", 4]], gap: 1.4 },
+    { name: t("Boss parade!"), groups: [["bigtank", 6], ["bigboss", 2]], gap: 1.5 },
+    { name: t("Tank Boss!"), groups: [["tank", 10], ["tankboss", 1]], gap: 1.3 },
+    { name: t("The whole tank army!"), groups: [["bigtank", 10], ["tankboss", 2]], gap: 1.3 },
+    { name: t("THE KING TANK!"), groups: [["tank", 10], ["king", 1]], gap: 1.3 },
   ];
   // How tough each wave is (roughly the firepower a good player has by then).
   const POWER = [2, 9, 35, 100, 300, 500, 1500, 4000, 9000, 14000, 25000, 33000];
@@ -70,13 +71,13 @@
   // power = enemy toughness, boxes = chance that a door is a box (else a tough wall),
   // hurt = how hard enemies hit your wall and your life.
   const LEVELS = {
-    easy: { name: "Easy", power: 0.5, boxes: 1, hurt: 1 },
-    normal: { name: "Normal", power: 0.85, boxes: 2 / 3, hurt: 1.2 },
-    hard: { name: "Hard", power: 1, boxes: 1 / 2, hurt: 1.4 },
-    mega: { name: "Mega-hard", power: 1.05, boxes: 1 / 3, hurt: 1.6 },
+    easy: { name: t("Easy"), power: 0.5, boxes: 1, hurt: 1 },
+    normal: { name: t("Normal"), power: 0.85, boxes: 2 / 3, hurt: 1.2 },
+    hard: { name: t("Hard"), power: 1, boxes: 1 / 2, hurt: 1.4 },
+    mega: { name: t("Mega-hard"), power: 1.05, boxes: 1 / 3, hurt: 1.6 },
   };
 
-  const POOF_WORDS = ["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"];
+  const POOF_WORDS = I18n.list(["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"]);
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
@@ -111,7 +112,7 @@
     g.spawnQueue = [];
     wave.groups.forEach(([type, count]) => { for (let n = 0; n < count; n++) g.spawnQueue.push(type); });
     g.spawnIn = 2.5;
-    g.banner = { text: "Wave " + (i + 1) + ": " + wave.name, t: 2.5 };
+    g.banner = { text: t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
     // A fresh pair of doors with every wave, so there is always something to aim for.
     g.doorIn = Math.min(g.doorIn, 1);
     syncStats();
@@ -263,7 +264,7 @@
       // A wall is not a prize: it just crumbles out of the way.
       door.gone = true;
       confetti(cx, cy, 16, ["#adb5bd", "#6c757d", "#ced4da"]);
-      say("CRUMBLE!", cx, cy, 24, "#fff");
+      say(t("CRUMBLE!"), cx, cy, 24, "#fff");
       return;
     }
     confetti(cx, cy, 24, ["#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#9b5de5"]);
@@ -271,17 +272,17 @@
     if (door.kind === "weapon") {
       g.tier = door.tier;
       g.count = 1;
-      text = WEAPONS[g.tier].name + "!";
+      text = t("{name}!", { name: WEAPONS[g.tier].name });
     } else if (door.kind === "army") {
       g.count = Math.min(WEAPONS[g.tier].max, g.count + door.amount);
       text = "+" + door.amount + " " + WEAPONS[g.tier].emoji;
     } else if (door.kind === "wall") {
       g.wallMax += 40;
       g.wall = g.wallMax;
-      text = "Bigger wall!";
+      text = t("Bigger wall!");
     } else {
       g.shield = 12;
-      text = "Shield!";
+      text = t("Shield!");
     }
     g.banner = { text: "🎉 " + text, t: 1.8 };
     // You only get one box of the pair: the other one fades away.
@@ -297,7 +298,7 @@
     pair.list.forEach((d) => {
       if (d.kind === "weapon" && !d.broken) {
         g.missed.add(d.tier);
-        g.banner = { text: "😮 Missed the " + WEAPONS[d.tier].name + "!", t: 2 };
+        g.banner = { text: t("😮 Missed the {name}!", { name: WEAPONS[d.tier].name }), t: 2 };
       }
     });
   }
@@ -309,7 +310,7 @@
       g.wall = 0;
       g.shake = 0.5;
       confetti(W / 2, WALL_Y, 30, ["#d4a373", "#a47148", "#e9c46a"]);
-      say("CRASH! The wall broke!", W / 2, WALL_Y - 30, 28, "#ff6b6b");
+      say(t("CRASH! The wall broke!"), W / 2, WALL_Y - 30, 28, "#ff6b6b");
     }
   }
 
@@ -325,7 +326,7 @@
   function breakThrough(e) {
     const T = ENEMIES[e.type];
     g.enemies.splice(g.enemies.indexOf(e), 1);
-    poof(e.x, SQUAD_Y, T.r, "Hee hee!");
+    poof(e.x, SQUAD_Y, T.r, t("Hee hee!"));
     g.leaks = (g.leaks || 0) + 1;
     hurtLife(T.hit * LEVELS[level].hurt);
   }
@@ -377,7 +378,7 @@
         g.breakIn = 2.5;
         startWave(g.wave + 1);
       } else if (!g.banner || g.banner.t <= 0) {
-        g.banner = { text: "Wave " + (g.wave + 1) + " done! ⭐", t: 2.4 };
+        g.banner = { text: t("Wave {n} done! ⭐", { n: g.wave + 1 }), t: 2.4 };
       }
     }
 
@@ -433,7 +434,7 @@
       }
       s.dead = true;
       if (g.shield > 0) {
-        say("Boing!", s.x, lineY - 10, 16, "#90e0ef");
+        say(t("Boing!"), s.x, lineY - 10, 16, "#90e0ef");
         return;
       }
       g.fx.push({ type: "puff", x: s.x, y: lineY, vx: 0, vy: -20, r: 8, t: 0, life: 0.4 });
@@ -927,7 +928,7 @@
       ctx.fillStyle = "#2b2d42";
       ctx.font = "bold 22px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("OPEN!", x + w / 2, y + h / 2 + 8);
+      ctx.fillText(t("OPEN!"), x + w / 2, y + h / 2 + 8);
       ctx.restore();
       return;
     }
@@ -951,7 +952,7 @@
       ctx.fillText(d.kind === "wall" ? "🧱" : "🛡️", x + 32, y + 46);
       ctx.font = "bold 20px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
       ctx.textAlign = "left";
-      wrapText(d.kind === "wall" ? "Bigger wall" : "Shield", x + 64, y + 30, w - 84);
+      wrapText(t(d.kind === "wall" ? "Bigger wall" : "Shield"), x + 64, y + 30, w - 84);
     }
     // How much it still needs.
     const left = Math.max(0, d.hp / d.maxHp);
@@ -983,11 +984,13 @@
     ctx.fillText(fmt(Math.max(0, d.hp)), x + w - 6, y + h - 6);
   }
 
+  // Breaks between words, or between any two characters for Chinese (no spaces).
   function wrapText(text, x, y, maxW) {
-    const words = text.split(" ");
+    const sep = text.includes(" ") ? " " : "";
+    const words = sep ? text.split(" ") : Array.from(text);
     let line = "";
     words.forEach((word) => {
-      const test = line ? line + " " + word : word;
+      const test = line ? line + sep + word : word;
       if (ctx.measureText(test).width > maxW && line) {
         ctx.fillText(line, x, y);
         line = word;
@@ -1120,9 +1123,9 @@
     lines.forEach(([text, size, color], i) => {
       ctx.font = "bold " + size + "px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
       ctx.lineWidth = 6; ctx.strokeStyle = "#2b2d42";
-      ctx.strokeText(text, W / 2, y);
+      ctx.strokeText(text, W / 2, y, W - 20);
       ctx.fillStyle = color || "#fff";
-      ctx.fillText(text, W / 2, y);
+      ctx.fillText(text, W / 2, y, W - 20);
       y += size + 14;
     });
   }
@@ -1184,15 +1187,15 @@
       ctx.fillStyle = "rgba(43, 45, 66, 0.45)";
       ctx.fillRect(0, 0, W, H);
       if (state === "ready") {
-        bigText([["🪖 Army Rush!", 44, "#ffd93d"], ["A silly army is coming!", 24], ["Shoot boxes to get", 24],
-          ["a new weapon 🏹, more of it,", 24], ["or a stronger defence 🧱", 24], ["Level: " + LEVELS[level].name, 24, "#ffd93d"],
-          ["Tap to start!", 32, "#6bcb77"]], H * 0.18);
+        bigText([[t("🪖 Army Rush!"), 44, "#ffd93d"], [t("A silly army is coming!"), 24], [t("Shoot boxes to get"), 24],
+          [t("a new weapon 🏹, more of it,"), 24], [t("or a stronger defence 🧱"), 24],
+          [t("Level: {name}", { name: LEVELS[level].name }), 24, "#ffd93d"], [t("Tap to start!"), 32, "#6bcb77"]], H * 0.18);
       } else if (state === "over") {
-        bigText([["Oh no! 😵", 48, "#ff6b6b"], ["They got through!", 28], ["You reached wave " + (g.wave + 1), 26],
-          ["Tip: open more boxes!", 24, "#ffd93d"], ["Tap to try again", 32, "#6bcb77"]], H * 0.28);
+        bigText([[t("Oh no! 😵"), 48, "#ff6b6b"], [t("They got through!"), 28], [t("You reached wave {n}", { n: g.wave + 1 }), 26],
+          [t("Tip: open more boxes!"), 24, "#ffd93d"], [t("Tap to try again"), 32, "#6bcb77"]], H * 0.28);
       } else {
-        bigText([["YOU WIN! 🏆", 50, "#ffd93d"], ["The King Tank", 28], ["went BOING!", 28],
-          ["Tap to play again", 30, "#6bcb77"]], H * 0.32);
+        bigText([[t("YOU WIN! 🏆"), 50, "#ffd93d"], [t("The King Tank"), 28], [t("went BOING!"), 28],
+          [t("Tap to play again"), 30, "#6bcb77"]], H * 0.32);
       }
       drawFx("confetti");
     }

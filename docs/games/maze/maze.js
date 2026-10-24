@@ -1,5 +1,6 @@
 // Mouse Maze: a new random maze every time. Walk the mouse to the cheese.
 (function () {
+  const t = I18n.t;
   const PX = 520;
   const DIRS = {
     up: { dr: -1, dc: 0, bit: 1, back: 4 },
@@ -55,7 +56,7 @@
     steps = 0;
     won = false;
     stepsEl.textContent = 0;
-    messageEl.textContent = "Help the mouse find the cheese!";
+    messageEl.textContent = t("Help the mouse find the cheese!");
     messageEl.classList.remove("win");
     draw();
   }
@@ -98,18 +99,18 @@
     if (won) return;
     const d = DIRS[name];
     if (!(open[player.r][player.c] & d.bit)) {
-      messageEl.textContent = "Bump! That's a wall. 🧱";
+      messageEl.textContent = t("Bump! That's a wall. 🧱");
       return;
     }
     player = { r: player.r + d.dr, c: player.c + d.dc };
     trail.add(player.r + "," + player.c);
     steps++;
     stepsEl.textContent = steps;
-    messageEl.textContent = "Help the mouse find the cheese!";
+    messageEl.textContent = t("Help the mouse find the cheese!");
     draw();
     if (player.r === size - 1 && player.c === size - 1) {
       won = true;
-      messageEl.textContent = "🎉 Yum! The mouse found the cheese! 🎉";
+      messageEl.textContent = t("🎉 Yum! The mouse found the cheese! 🎉");
       messageEl.classList.add("win");
     }
   }

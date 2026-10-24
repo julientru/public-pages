@@ -22,9 +22,9 @@ window.Duel = (function () {
     },
     // Show the end screen: the winner's half says so, the other half cheers them on.
     showWinner(winner, callback) {
-      const texts = ["😊 Good try!", "😊 Good try!"];
-      texts[winner] = "🏆 You win!";
-      this.showScreen(texts[0], texts[1], "🔄 Again", callback);
+      const texts = [I18n.t("😊 Good try!"), I18n.t("😊 Good try!")];
+      texts[winner] = I18n.t("🏆 You win!");
+      this.showScreen(texts[0], texts[1], I18n.t("🔄 Again"), callback);
     },
     stars(score, goal) {
       return "⭐".repeat(score) + "⚪".repeat(goal - score);

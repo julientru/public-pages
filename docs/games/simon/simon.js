@@ -1,5 +1,6 @@
 // Copy Me: watch a growing sequence of pads light up, then repeat it.
 (function () {
+  const t = I18n.t;
   const NOTES = [329.6, 392.0, 523.3, 659.3];
 
   const pads = Array.from(document.querySelectorAll(".pad"));
@@ -44,7 +45,7 @@
   function playSequence() {
     state = "showing";
     setPadsEnabled(false);
-    messageEl.textContent = "👀 Watch...";
+    messageEl.textContent = t("👀 Watch...");
     messageEl.classList.remove("win");
     // Gets a little faster as the sequence grows, but stays kid-paced.
     const gap = Math.max(420, 750 - sequence.length * 25);
@@ -53,7 +54,7 @@
       state = "input";
       step = 0;
       setPadsEnabled(true);
-      messageEl.textContent = "Your turn! 👆";
+      messageEl.textContent = t("Your turn! 👆");
     }, 600 + sequence.length * gap);
   }
 
@@ -68,7 +69,7 @@
     timers = [];
     pads.forEach((p) => p.classList.remove("lit"));
     sequence = [];
-    startBtn.textContent = "Restart";
+    startBtn.textContent = t("Restart");
     nextRound();
   }
 
@@ -81,8 +82,8 @@
       const score = sequence.length - 1;
       best = Math.max(best, score);
       bestEl.textContent = best;
-      messageEl.textContent = "Oops! You copied " + score + ". Press Play to try again.";
-      startBtn.textContent = "Play";
+      messageEl.textContent = t("Oops! You copied {n}. Press Play to try again.", { n: score });
+      startBtn.textContent = t("Play");
       flash(sequence[step], 900);
       return;
     }
@@ -90,7 +91,7 @@
     if (step === sequence.length) {
       state = "showing";
       scoreEl.textContent = sequence.length;
-      messageEl.textContent = ["Great! 🌟", "Yes! 🎉", "Super memory! 🧠"][sequence.length % 3];
+      messageEl.textContent = I18n.list(["Great! 🌟", "Yes! 🎉", "Super memory! 🧠"])[sequence.length % 3];
       messageEl.classList.add("win");
       later(nextRound, 900);
     }

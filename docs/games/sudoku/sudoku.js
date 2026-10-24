@@ -1,5 +1,6 @@
 // Picture Sudoku: a 4x4 or 6x6 sudoku with fruit pictures instead of numbers.
 (function () {
+  const t = I18n.t;
   const FRUITS = ["🍎", "🍌", "🍇", "🍊", "🍓", "🥝"];
   // Box shape (rows x columns) for each size.
   const BOX = { 4: [2, 2], 6: [2, 3] };
@@ -82,7 +83,7 @@
     selected = -1;
     won = false;
     build();
-    messageEl.textContent = "Each row, column and box gets every fruit once!";
+    messageEl.textContent = t("Each row, column and box gets every fruit once!");
     messageEl.classList.remove("win");
   }
 
@@ -113,14 +114,14 @@
       const b = document.createElement("button");
       b.className = "btn";
       b.textContent = fruit;
-      b.setAttribute("aria-label", "Put " + fruit);
+      b.setAttribute("aria-label", t("Put {fruit}", { fruit }));
       b.addEventListener("click", () => place(v));
       paletteEl.appendChild(b);
     });
     const erase = document.createElement("button");
     erase.className = "btn erase";
     erase.textContent = "🧽";
-    erase.setAttribute("aria-label", "Clear square");
+    erase.setAttribute("aria-label", t("Clear square"));
     erase.addEventListener("click", () => place(null));
     paletteEl.appendChild(erase);
     draw();
@@ -132,7 +133,7 @@
       el.textContent = v === null ? "" : FRUITS[v];
       el.classList.toggle("selected", i === selected);
       el.classList.toggle("bad", v !== null && !given[r][c] && !fits(grid, r, c, v));
-      el.setAttribute("aria-label", "Row " + (r + 1) + " column " + (c + 1) + ": " + (v === null ? "empty" : FRUITS[v]));
+      el.setAttribute("aria-label", t("Row {r} column {c}", { r: r + 1, c: c + 1 }) + ": " + (v === null ? t("empty") : FRUITS[v]));
     });
   }
 
@@ -147,7 +148,7 @@
   function place(v) {
     if (won) return;
     if (selected < 0) {
-      messageEl.textContent = "First tap an empty square 👆";
+      messageEl.textContent = t("First tap an empty square 👆");
       return;
     }
     const r = Math.floor(selected / size), c = selected % size;
@@ -159,12 +160,12 @@
       won = true;
       selected = -1;
       draw();
-      messageEl.textContent = "🎉 You solved it! 🎉";
+      messageEl.textContent = t("🎉 You solved it! 🎉");
       messageEl.classList.add("win");
     } else if (v !== null && !fits(grid, r, c, v)) {
-      messageEl.textContent = "Hmm, that fruit is already in this row, column or box.";
+      messageEl.textContent = t("Hmm, that fruit is already in this row, column or box.");
     } else {
-      messageEl.textContent = "Each row, column and box gets every fruit once!";
+      messageEl.textContent = t("Each row, column and box gets every fruit once!");
     }
   }
 

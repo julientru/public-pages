@@ -1,0 +1,19 @@
+// Apple Grab in French and Cantonese (see js/i18n.js).
+I18n.add({
+  fr: {
+    "Apple Grab": "Attrape-pommes",
+    "Take {n}": "Prendre {n}",
+    "{n} apples left": "Encore {n} pommes",
+    "👉 Your turn!": "👉 À toi !",
+    "🎉 Last apple!": "🎉 La dernière pomme !",
+    "🍎 Take 1, 2 or 3. Get the last apple!": "🍎 Prends 1, 2 ou 3. Attrape la dernière pomme !",
+  },
+  "zh-HK": {
+    "Apple Grab": "搶蘋果",
+    "Take {n}": "攞 {n} 個",
+    "{n} apples left": "仲有 {n} 個蘋果",
+    "👉 Your turn!": "👉 到你喇！",
+    "🎉 Last apple!": "🎉 最後一個蘋果！",
+    "🍎 Take 1, 2 or 3. Get the last apple!": "🍎 每次攞 1、2 或者 3 個，攞到最後一個就贏！",
+  },
+});

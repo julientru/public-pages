@@ -1,0 +1,33 @@
+// Mouse Maze in French and Cantonese (see js/i18n.js).
+I18n.add({
+  fr: {
+    "Mouse Maze": "Labyrinthe",
+    "🐭 Mouse Maze": "🐭 Labyrinthe",
+    "New maze": "Nouveau labyrinthe",
+    "Choose the maze size": "Choisis la taille du labyrinthe",
+    "👣 Steps:": "👣 Pas :",
+    "Help the mouse find the cheese!": "Aide la souris à trouver le fromage !",
+    "Up": "Haut",
+    "Left": "Gauche",
+    "Down": "Bas",
+    "Right": "Droite",
+    "Swipe on the maze, tap the arrows, or use the arrow keys.": "Glisse ton doigt sur le labyrinthe, touche les flèches ou utilise les flèches du clavier.",
+    "Bump! That's a wall. 🧱": "Bong ! C'est un mur. 🧱",
+    "🎉 Yum! The mouse found the cheese! 🎉": "🎉 Miam ! La souris a trouvé le fromage ! 🎉",
+  },
+  "zh-HK": {
+    "Mouse Maze": "老鼠迷宮",
+    "🐭 Mouse Maze": "🐭 老鼠迷宮",
+    "New maze": "新迷宮",
+    "Choose the maze size": "揀迷宮嘅大細",
+    "👣 Steps:": "👣 步數：",
+    "Help the mouse find the cheese!": "幫老鼠搵到芝士！",
+    "Up": "上",
+    "Left": "左",
+    "Down": "下",
+    "Right": "右",
+    "Swipe on the maze, tap the arrows, or use the arrow keys.": "喺迷宮上面掃，撳箭咀，或者用方向鍵。",
+    "Bump! That's a wall. 🧱": "嘭！嗰度係牆。🧱",
+    "🎉 Yum! The mouse found the cheese! 🎉": "🎉 好味！老鼠搵到芝士喇！🎉",
+  },
+});

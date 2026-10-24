@@ -1,6 +1,7 @@
 // Apple Grab (a game of Nim): players take turns picking 1, 2 or 3 apples.
 // Whoever takes the very last apple wins the round. First to 3 rounds wins.
 (function () {
+  const t = I18n.t;
   const GOAL = 3;
   const MAX_TAKE = 3;
 
@@ -11,7 +12,7 @@
       const btn = document.createElement("button");
       btn.className = "take";
       btn.innerHTML = n + "<small>" + "🍎".repeat(n) + "</small>";
-      btn.setAttribute("aria-label", "Take " + n);
+      btn.setAttribute("aria-label", t("Take {n}", { n }));
       btn.addEventListener("click", () => take(p, n));
       el.querySelector(".takes").appendChild(btn);
       side.buttons.push(btn);
@@ -42,12 +43,12 @@
   }
 
   function render() {
-    treeEl.setAttribute("aria-label", left + " apples left");
+    treeEl.setAttribute("aria-label", t("{n} apples left", { n: left }));
     sides.forEach((side, p) => {
       side.stars.textContent = Duel.stars(scores[p], GOAL);
       const mine = p === turn;
       side.el.classList.toggle("waiting", !mine);
-      side.who.textContent = mine ? "👉 Your turn!" : "⏳";
+      side.who.textContent = mine ? t("👉 Your turn!") : "⏳";
       side.buttons.forEach((btn, i) => (btn.disabled = !mine || i + 1 > left));
     });
   }
@@ -60,7 +61,7 @@
       scores[p]++;
       sides.forEach((side) => side.buttons.forEach((btn) => (btn.disabled = true)));
       sides[p].stars.textContent = Duel.stars(scores[p], GOAL);
-      sides[p].who.textContent = "🎉 Last apple!";
+      sides[p].who.textContent = t("🎉 Last apple!");
       sides[1 - p].who.textContent = "";
       starter = 1 - p; // the other player starts next round
       if (scores[p] === GOAL) setTimeout(() => Duel.showWinner(p, newGame), 1200);
@@ -71,6 +72,6 @@
     render();
   }
 
-  const HELLO = "🍎 Take 1, 2 or 3. Get the last apple!";
-  Duel.showScreen(HELLO, HELLO, "▶️ Play", newGame);
+  const HELLO = t("🍎 Take 1, 2 or 3. Get the last apple!");
+  Duel.showScreen(HELLO, HELLO, t("▶️ Play"), newGame);
 })();

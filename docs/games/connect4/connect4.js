@@ -1,6 +1,7 @@
 // Four in a Row: two players take turns on the same screen, dropping discs
 // into columns. Four of your colour in a line (any direction) wins.
 (function () {
+  const t = I18n.t;
   const COLS = 7, ROWS = 6;
   const DISCS = ["🔴", "🟡"];
 
@@ -24,7 +25,7 @@
       for (let c = 0; c < COLS; c++) {
         const cell = document.createElement("button");
         cell.className = "cell";
-        cell.setAttribute("aria-label", "Column " + (c + 1));
+        cell.setAttribute("aria-label", t("Column {n}", { n: c + 1 }));
         cell.addEventListener("click", () => drop(c));
         boardEl.appendChild(cell);
         cells[r].push(cell);
@@ -35,7 +36,7 @@
 
   function showTurn() {
     turnEl.className = "turn p" + turn;
-    turnEl.textContent = DISCS[turn] + " Your turn!";
+    turnEl.textContent = DISCS[turn] + " " + t("Your turn!");
   }
 
   function drop(c) {
@@ -56,14 +57,14 @@
       line.forEach(([lr, lc]) => cells[lr][lc].classList.add("win"));
       scores[turn]++;
       scoreEls[turn].textContent = scores[turn];
-      turnEl.textContent = DISCS[turn] + " wins! 🎉";
+      turnEl.textContent = t("{disc} wins! 🎉", { disc: DISCS[turn] });
       starter = 1 - turn; // the other player starts next game
       nextTimer = setTimeout(newGame, 2500);
     } else if (grid[0].every((v) => v !== -1)) {
       over = true;
       turnEl.className = "turn";
       turnEl.style.background = "var(--purple)";
-      turnEl.textContent = "🤝 Board full: a tie!";
+      turnEl.textContent = t("🤝 Board full: a tie!");
       starter = 1 - starter;
       nextTimer = setTimeout(newGame, 2500);
     } else {

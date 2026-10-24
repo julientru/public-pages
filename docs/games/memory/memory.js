@@ -1,5 +1,6 @@
 // Memory Match: flip two cards at a time and find every pair.
 (function () {
+  const t = I18n.t;
   const PICTURES = ["🐶", "🐱", "🦊", "🐸", "🐵", "🐼", "🦁", "🐷", "🐙", "🦄", "🐢", "🐝"];
   const COLUMNS = { 6: 4, 8: 4, 10: 5 };
 
@@ -26,7 +27,7 @@
     found = 0;
     triesEl.textContent = 0;
     pairsEl.textContent = "0 / " + pairCount;
-    messageEl.textContent = "Find two cards that match!";
+    messageEl.textContent = t("Find two cards that match!");
 
     const picks = shuffle(PICTURES.slice()).slice(0, pairCount);
     const deck = shuffle(picks.concat(picks));
@@ -37,7 +38,7 @@
       card.className = "card";
       card.textContent = pic;
       card.dataset.pic = pic;
-      card.setAttribute("aria-label", "Hidden card");
+      card.setAttribute("aria-label", t("Hidden card"));
       card.addEventListener("click", () => flip(card));
       boardEl.appendChild(card);
     });
@@ -64,17 +65,17 @@
       found++;
       pairsEl.textContent = found + " / " + pairCount;
       if (found === pairCount) {
-        messageEl.textContent = "🎉 You found them all in " + tries + " tries! 🎉";
+        messageEl.textContent = t("🎉 You found them all in {n} tries! 🎉", { n: tries });
       } else {
-        messageEl.textContent = ["Yay! 🌟", "A match! 🎈", "Well done! 👏"][found % 3];
+        messageEl.textContent = I18n.list(["Yay! 🌟", "A match! 🎈", "Well done! 👏"])[found % 3];
       }
     } else {
       locked = true;
-      messageEl.textContent = "Oops, not a pair. Try again!";
+      messageEl.textContent = t("Oops, not a pair. Try again!");
       setTimeout(() => {
         [first, second].forEach((c) => {
           c.classList.remove("up");
-          c.setAttribute("aria-label", "Hidden card");
+          c.setAttribute("aria-label", t("Hidden card"));
         });
         first = null;
         locked = false;

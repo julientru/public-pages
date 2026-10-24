@@ -1,5 +1,6 @@
 // Lights Out: every tap flips a light and its four neighbours. Turn them all off.
 (function () {
+  const t = I18n.t;
   const boardEl = document.getElementById("board");
   const movesEl = document.getElementById("moves");
   const leftEl = document.getElementById("left");
@@ -23,7 +24,7 @@
     cells.forEach((cell) => {
       const on = lights[cell.r][cell.c];
       cell.el.classList.toggle("on", on);
-      cell.el.setAttribute("aria-label", "Row " + (cell.r + 1) + " column " + (cell.c + 1) + (on ? ", on" : ", off"));
+      cell.el.setAttribute("aria-label", t("Row {r} column {c}", { r: cell.r + 1, c: cell.c + 1 }) + t(on ? ", on" : ", off"));
     });
     movesEl.textContent = moves;
     leftEl.textContent = countOn();
@@ -51,7 +52,7 @@
         cells.push({ r, c, el });
       }
     }
-    messageEl.textContent = "Turn off all the lights!";
+    messageEl.textContent = t("Turn off all the lights!");
     messageEl.classList.remove("win");
     draw();
   }
@@ -63,7 +64,7 @@
     draw();
     if (countOn() === 0) {
       won = true;
-      messageEl.textContent = "🎉 All dark in " + moves + " taps! 🎉";
+      messageEl.textContent = t("🎉 All dark in {n} taps! 🎉", { n: moves });
       messageEl.classList.add("win");
     }
   }

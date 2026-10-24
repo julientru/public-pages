@@ -1,5 +1,6 @@
 // Odd One Out: all pictures but one belong to the same group. Find the one that doesn't.
 (function () {
+  const t = I18n.t;
   const GROUPS = [
     { name: "fruits", emoji: "🍎", items: ["🍎", "🍌", "🍇", "🍓", "🍊", "🍐", "🍒", "🍉"] },
     { name: "land animals", emoji: "🐾", kind: "animal", items: ["🐶", "🐱", "🐮", "🐷", "🐴", "🐑", "🦁", "🐯"] },
@@ -48,14 +49,14 @@
       const b = document.createElement("button");
       b.className = "choice";
       b.innerHTML = '<span class="key">' + (i + 1) + "</span>" + pic;
-      b.setAttribute("aria-label", "Picture " + (i + 1) + ": " + pic);
+      b.setAttribute("aria-label", t("Picture {n}", { n: i + 1 }) + ": " + pic);
       b.addEventListener("click", () => choose(b, pic === odd, main, other));
       boardEl.appendChild(b);
       return b;
     });
     roundEl.textContent = round;
     hintEl.textContent = "";
-    messageEl.textContent = "Which one does not belong?";
+    messageEl.textContent = t("Which one does not belong?");
     messageEl.classList.remove("win");
   }
 
@@ -65,20 +66,20 @@
       btn.classList.add("wrong");
       btn.disabled = true;
       firstTry = false;
-      messageEl.textContent = "That one fits with the others. Try again!";
+      messageEl.textContent = t("That one fits with the others. Try again!");
       return;
     }
     locked = true;
     btn.classList.add("right");
     if (firstTry) stars++;
     starsEl.textContent = stars;
-    hintEl.textContent = "The others are " + main.name + " " + main.emoji + ", this is " + other.name + " " + other.emoji;
+    hintEl.textContent = t("The others are {a}, this is {b}", { a: t(main.name) + " " + main.emoji, b: t(other.name) + " " + other.emoji });
     if (round === ROUNDS) {
-      messageEl.textContent = "🎉 All done! " + stars + " stars out of " + ROUNDS + "! 🎉";
+      messageEl.textContent = t("🎉 All done! {n} stars out of {total}! 🎉", { n: stars, total: ROUNDS });
       messageEl.classList.add("win");
       return;
     }
-    messageEl.textContent = firstTry ? "Yes! ⭐" : "Found it! 👍";
+    messageEl.textContent = firstTry ? t("Yes! ⭐") : t("Found it! 👍");
     messageEl.classList.add("win");
     round++;
     timer = setTimeout(newRound, 1800);

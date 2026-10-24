@@ -1,5 +1,6 @@
 // Tic-Tac-Toe: you (❌) against a robot (⭕). The easy robot makes mistakes, the clever one never loses.
 (function () {
+  const t = I18n.t;
   const ME = "❌", BOT = "⭕";
   const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 
@@ -84,11 +85,11 @@
     messageEl.classList.remove("win");
     draw();
     if (robotStarts) {
-      messageEl.textContent = "🤖 Robot goes first this time...";
+      messageEl.textContent = t("🤖 Robot goes first this time...");
       robotTurn();
     } else {
       botTurn = false;
-      messageEl.textContent = "You are ❌. Get three in a row!";
+      messageEl.textContent = t("You are ❌. Get three in a row!");
     }
     robotStarts = !robotStarts;
   }
@@ -98,7 +99,7 @@
       b.innerHTML = '<span class="key">' + (i + 1) + "</span>" + (board[i] || "");
       b.disabled = over || !!board[i];
       b.classList.toggle("line", !!line && line.includes(i));
-      b.setAttribute("aria-label", "Square " + (i + 1) + ": " + (board[i] === ME ? "yours" : board[i] === BOT ? "robot" : "empty"));
+      b.setAttribute("aria-label", t("Square {n}", { n: i + 1 }) + ": " + t(board[i] === ME ? "yours" : board[i] === BOT ? "robot" : "empty"));
     });
   }
 
@@ -108,14 +109,14 @@
     over = true;
     if (w.who === ME) {
       score.you++;
-      messageEl.textContent = "🎉 You win! 🎉";
+      messageEl.textContent = t("🎉 You win! 🎉");
       messageEl.classList.add("win");
     } else if (w.who === BOT) {
       score.robot++;
-      messageEl.textContent = "🤖 Robot wins! Try again?";
+      messageEl.textContent = t("🤖 Robot wins! Try again?");
     } else {
       score.draws++;
-      messageEl.textContent = "🤝 A draw! Nobody wins.";
+      messageEl.textContent = t("🤝 A draw! Nobody wins.");
     }
     Object.keys(score).forEach((k) => (scoreEls[k].textContent = score[k]));
     draw(w.line);
@@ -128,7 +129,7 @@
       board[robotMove()] = BOT;
       botTurn = false;
       draw();
-      if (!check()) messageEl.textContent = "Your turn ❌";
+      if (!check()) messageEl.textContent = t("Your turn ❌");
     }, 600);
   }
 
@@ -137,7 +138,7 @@
     board[i] = ME;
     draw();
     if (check()) return;
-    messageEl.textContent = "🤖 Thinking...";
+    messageEl.textContent = t("🤖 Thinking...");
     robotTurn();
   }
 

@@ -1,5 +1,6 @@
 // Blocks: a gentle, kid-paced falling-blocks game.
 (function () {
+  const t = I18n.t;
   const COLS = 10;
   const ROWS = 20;
   const CELL = 30;
@@ -82,7 +83,7 @@
       score += [0, 100, 300, 500, 800][cleared];
       // Speed up slowly so it stays fun for young players.
       dropInterval = Math.max(250, 900 - lines * 25);
-      messageEl.textContent = cleared > 1 ? "WOW! " + cleared + " lines! 🎉" : "Great job! 🌟";
+      messageEl.textContent = cleared > 1 ? t("WOW! {n} lines! 🎉", { n: cleared }) : t("Great job! 🌟");
       updateStats();
     }
   }
@@ -184,8 +185,8 @@
     dropTimer = 0;
     lastTime = 0;
     running = true;
-    messageEl.textContent = "Fill a whole line to clear it!";
-    startBtn.textContent = "Restart";
+    messageEl.textContent = t("Fill a whole line to clear it!");
+    startBtn.textContent = t("Restart");
     updateStats();
     draw();
     rafId = requestAnimationFrame(loop);
@@ -194,8 +195,8 @@
   function gameOver() {
     running = false;
     piece = null;
-    messageEl.textContent = "Game over! You cleared " + lines + " lines. 👏";
-    startBtn.textContent = "Play again";
+    messageEl.textContent = t("Game over! You cleared {n} lines. 👏", { n: lines });
+    startBtn.textContent = t("Play again");
   }
 
   startBtn.addEventListener("click", start);

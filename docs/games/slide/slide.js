@@ -1,5 +1,6 @@
 // Slide Puzzle: slide the numbered tiles into the empty space until they are 1, 2, 3... in order.
 (function () {
+  const t = I18n.t;
   const COLORS = ["#ff6b6b", "#ff9f43", "#ffc93d", "#6bcb77", "#4dd0e1", "#4d96ff", "#9b5de5", "#f15bb5"];
 
   const boardEl = document.getElementById("board");
@@ -37,7 +38,7 @@
     }
     moves = 0;
     won = false;
-    messageEl.textContent = "Put the numbers in order!";
+    messageEl.textContent = t("Put the numbers in order!");
     messageEl.classList.remove("win");
     boardEl.style.gridTemplateColumns = "repeat(" + size + ", 1fr)";
     draw();
@@ -45,15 +46,15 @@
 
   function draw(focusIndex) {
     boardEl.innerHTML = "";
-    tiles.forEach((t, i) => {
+    tiles.forEach((n, i) => {
       const el = document.createElement("button");
-      el.className = "tile" + (t === 0 ? " blank" : "") + (t !== 0 && t === i + 1 ? " home" : "");
-      if (t === 0) {
+      el.className = "tile" + (n === 0 ? " blank" : "") + (n !== 0 && n === i + 1 ? " home" : "");
+      if (n === 0) {
         el.tabIndex = -1;
-        el.setAttribute("aria-label", "Empty space");
+        el.setAttribute("aria-label", t("Empty space"));
       } else {
-        el.textContent = t;
-        el.style.background = COLORS[(t - 1) % COLORS.length];
+        el.textContent = n;
+        el.style.background = COLORS[(n - 1) % COLORS.length];
         el.addEventListener("click", () => slide(i));
       }
       boardEl.appendChild(el);
@@ -66,7 +67,7 @@
     if (won) return;
     const blank = tiles.indexOf(0);
     if (!neighbours(blank).includes(i)) {
-      messageEl.textContent = "That one can't move. Pick one next to the space!";
+      messageEl.textContent = t("That one can't move. Pick one next to the space!");
       return;
     }
     tiles[blank] = tiles[i];
@@ -76,10 +77,10 @@
     draw(hadFocus ? blank : undefined);
     if (solved()) {
       won = true;
-      messageEl.textContent = "🎉 Solved in " + moves + " moves! 🎉";
+      messageEl.textContent = t("🎉 Solved in {n} moves! 🎉", { n: moves });
       messageEl.classList.add("win");
     } else {
-      messageEl.textContent = "Put the numbers in order!";
+      messageEl.textContent = t("Put the numbers in order!");
     }
   }
 

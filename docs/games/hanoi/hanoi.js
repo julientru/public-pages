@@ -1,5 +1,6 @@
 // Tower Move (Tower of Hanoi): move every ring to the star pole, never putting a big ring on a small one.
 (function () {
+  const t = I18n.t;
   const COLORS = ["#ff6b6b", "#ff9f43", "#ffc93d", "#6bcb77", "#4d96ff"];
 
   const pegsEl = document.getElementById("pegs");
@@ -24,7 +25,7 @@
     moves = 0;
     won = false;
     targetEl.textContent = Math.pow(2, disks) - 1;
-    messageEl.textContent = "Move the whole tower to the ⭐ pole!";
+    messageEl.textContent = t("Move the whole tower to the ⭐ pole!");
     messageEl.classList.remove("win");
     draw();
   }
@@ -40,7 +41,7 @@
         el.appendChild(d);
       });
       el.classList.toggle("picked", i === picked);
-      el.setAttribute("aria-label", "Pole " + (i + 1) + (i === 2 ? " (goal)" : "") + ", " + pegs[i].length + " rings");
+      el.setAttribute("aria-label", t(i === 2 ? "Pole {n} (goal), {rings} rings" : "Pole {n}, {rings} rings", { n: i + 1, rings: pegs[i].length }));
     });
     movesEl.textContent = moves;
   }
@@ -49,33 +50,33 @@
     if (won) return;
     if (picked < 0) {
       if (pegs[i].length === 0) {
-        messageEl.textContent = "That pole is empty. Pick one with rings!";
+        messageEl.textContent = t("That pole is empty. Pick one with rings!");
         return;
       }
       picked = i;
-      messageEl.textContent = "Now tap where it should go.";
+      messageEl.textContent = t("Now tap where it should go.");
     } else if (picked === i) {
       picked = -1;
-      messageEl.textContent = "Put it back. Pick a ring!";
+      messageEl.textContent = t("Put it back. Pick a ring!");
     } else {
       const ring = pegs[picked][pegs[picked].length - 1];
       const top = pegs[i][pegs[i].length - 1];
       if (top !== undefined && top < ring) {
-        messageEl.textContent = "Too big! A big ring can't sit on a small one.";
+        messageEl.textContent = t("Too big! A big ring can't sit on a small one.");
         return;
       }
       pegs[i].push(pegs[picked].pop());
       picked = -1;
       moves++;
-      messageEl.textContent = "Move the whole tower to the ⭐ pole!";
+      messageEl.textContent = t("Move the whole tower to the ⭐ pole!");
     }
     draw();
     if (pegs[2].length === disks) {
       won = true;
       const best = Math.pow(2, disks) - 1;
       messageEl.textContent = moves === best
-        ? "🏆 Perfect! Done in " + moves + " moves! 🏆"
-        : "🎉 You did it in " + moves + " moves! 🎉";
+        ? t("🏆 Perfect! Done in {n} moves! 🏆", { n: moves })
+        : t("🎉 You did it in {n} moves! 🎉", { n: moves });
       messageEl.classList.add("win");
     }
   }

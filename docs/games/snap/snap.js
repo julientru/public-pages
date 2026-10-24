@@ -65,6 +65,6 @@
     }
   }
 
-  const HELLO = "⚡ Find the yellow picture first!";
-  Duel.showScreen(HELLO, HELLO, "▶️ Play", newGame);
+  const HELLO = I18n.t("⚡ Find the yellow picture first!");
+  Duel.showScreen(HELLO, HELLO, I18n.t("▶️ Play"), newGame);
 })();

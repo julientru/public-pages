@@ -1,5 +1,6 @@
 // Jumpy Frog: jump over rocks, score goes up for each rock you clear.
 (function () {
+  const t = I18n.t;
   const W = 800;
   const H = 300;
   const GROUND = 250;
@@ -30,7 +31,7 @@
     if (state === "ready" || state === "over") {
       reset();
       state = "playing";
-      messageEl.textContent = "Jump! 🐸";
+      messageEl.textContent = t("Jump! 🐸");
       cancelAnimationFrame(rafId);
       lastTime = 0;
       acc = 0;
@@ -73,7 +74,7 @@
         r.passed = true;
         score++;
         scoreEl.textContent = score;
-        if (score % 5 === 0) messageEl.textContent = score + " rocks! Super! 🌟";
+        if (score % 5 === 0) messageEl.textContent = t("{n} rocks! Super! 🌟", { n: score });
         speed = Math.min(9, 4 + score * 0.15);
       }
     }
@@ -161,7 +162,7 @@
     state = "over";
     best = Math.max(best, score);
     bestEl.textContent = best;
-    messageEl.textContent = "Bonk! You jumped " + score + " rocks. Tap to try again!";
+    messageEl.textContent = t("Bonk! You jumped {n} rocks. Tap to try again!", { n: score });
   }
 
   canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); jump(); });

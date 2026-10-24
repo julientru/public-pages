@@ -3,6 +3,7 @@
 // toward you); Three.js only draws it. Enemies never get hurt for real: they flash, squash,
 // and tumble away with dizzy stars.
 (function () {
+  const t = I18n.t;
   const W = 480;
   const H = 640;
   const WALL_Y = H - 108;  // sandbag wall: enemies stop and bash it until it breaks
@@ -12,56 +13,56 @@
   // One unit of each weapon: dps = dmg * rate * (multi || 1). max = how many you can have,
   // add = how many an army box gives. Each new weapon starts as one unit.
   const WEAPONS = [
-    { name: "Stones", emoji: "🪨", dmg: 1, rate: 2, speed: 420, kind: "stone", max: 6, add: 2 },
-    { name: "Axes", emoji: "🪓", dmg: 3, rate: 2, speed: 430, kind: "axe", max: 6, add: 2 },
-    { name: "Bows", emoji: "🏹", dmg: 6, rate: 2.5, speed: 620, kind: "arrow", max: 5, add: 1 },
-    { name: "Pistol", emoji: "🔫", dmg: 14, rate: 3, speed: 650, kind: "dart", max: 5, add: 1 },
-    { name: "Two pistols", emoji: "🔫🔫", dmg: 18, rate: 3, multi: 2, speed: 650, kind: "dart", max: 4, add: 1 },
-    { name: "Cannon", emoji: "💣", dmg: 250, rate: 1.2, speed: 420, splash: 45, kind: "ball", max: 4, add: 1, vehicle: true },
-    { name: "Gatling", emoji: "💥", dmg: 80, rate: 10, speed: 760, kind: "pellet", max: 3, add: 1 },
-    { name: "Tank", emoji: "🛡️", dmg: 1400, rate: 1.5, speed: 520, splash: 55, kind: "shell", max: 3, add: 1, vehicle: true },
-    { name: "Missiles", emoji: "🚀", dmg: 1900, rate: 1.5, multi: 2, speed: 480, splash: 60, kind: "missile", max: 3, add: 1 },
-    { name: "Planes", emoji: "✈️", dmg: 7500, rate: 2, speed: 380, splash: 60, kind: "plane", max: 3, add: 1, vehicle: true },
-    { name: "Satellite laser", emoji: "🛰️", dmg: 10000, rate: 4, speed: 1100, pierce: 3, kind: "laser", max: 2, add: 1, vehicle: true },
-    { name: "Mega bomb", emoji: "☢️", dmg: 110000, rate: 1, speed: 360, splash: 130, kind: "bomb", max: 1, add: 0, vehicle: true },
+    { name: t("Stones"), emoji: "🪨", dmg: 1, rate: 2, speed: 420, kind: "stone", max: 6, add: 2 },
+    { name: t("Axes"), emoji: "🪓", dmg: 3, rate: 2, speed: 430, kind: "axe", max: 6, add: 2 },
+    { name: t("Bows"), emoji: "🏹", dmg: 6, rate: 2.5, speed: 620, kind: "arrow", max: 5, add: 1 },
+    { name: t("Pistol"), emoji: "🔫", dmg: 14, rate: 3, speed: 650, kind: "dart", max: 5, add: 1 },
+    { name: t("Two pistols"), emoji: "🔫🔫", dmg: 18, rate: 3, multi: 2, speed: 650, kind: "dart", max: 4, add: 1 },
+    { name: t("Cannon"), emoji: "💣", dmg: 250, rate: 1.2, speed: 420, splash: 45, kind: "ball", max: 4, add: 1, vehicle: true },
+    { name: t("Gatling"), emoji: "💥", dmg: 80, rate: 10, speed: 760, kind: "pellet", max: 3, add: 1 },
+    { name: t("Tank"), emoji: "🛡️", dmg: 1400, rate: 1.5, speed: 520, splash: 55, kind: "shell", max: 3, add: 1, vehicle: true },
+    { name: t("Missiles"), emoji: "🚀", dmg: 1900, rate: 1.5, multi: 2, speed: 480, splash: 60, kind: "missile", max: 3, add: 1 },
+    { name: t("Planes"), emoji: "✈️", dmg: 7500, rate: 2, speed: 380, splash: 60, kind: "plane", max: 3, add: 1, vehicle: true },
+    { name: t("Satellite laser"), emoji: "🛰️", dmg: 10000, rate: 4, speed: 1100, pierce: 3, kind: "laser", max: 2, add: 1, vehicle: true },
+    { name: t("Mega bomb"), emoji: "☢️", dmg: 110000, rate: 1, speed: 360, splash: 130, kind: "bomb", max: 1, add: 0, vehicle: true },
   ];
 
   // hp is a multiple of the wave's toughness. hit = life lost when it reaches your army,
   // bash = wall damage per second while it stands at the wall, shot = what it throws at you.
   const ENEMIES = {
-    thrower: { name: "Stone thrower", r: 20, speed: 40, hp: 1, hit: 5, bash: 3, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue",
+    thrower: { name: t("Stone thrower"), r: 20, speed: 40, hp: 1, hit: 5, bash: 3, color: "#f4a261", hat: "bandana", prop: "stone", mouth: "tongue",
       shot: { kind: "stone", every: 3.4, dmg: 1 } },
-    boss: { name: "Big Boss", r: 40, speed: 22, hp: 7, hit: 15, bash: 8, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth",
+    boss: { name: t("Big Boss"), r: 40, speed: 22, hp: 7, hit: 15, bash: 8, color: "#e76f51", hat: "crown", prop: "club", mouth: "teeth",
       shot: { kind: "rock", every: 3, dmg: 3 } },
-    soldier: { name: "Soldier", r: 21, speed: 46, hp: 1.2, hit: 6, bash: 4, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile",
+    soldier: { name: t("Soldier"), r: 21, speed: 46, hp: 1.2, hit: 6, bash: 4, color: "#c9a0dc", hat: "helmet", prop: "stick", mouth: "smile",
       shot: { kind: "cork", every: 2.8, dmg: 1 } },
-    cannon: { name: "Cannon crew", r: 24, speed: 34, hp: 2, hit: 8, bash: 5, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o",
+    cannon: { name: t("Cannon crew"), r: 24, speed: 34, hp: 2, hit: 8, bash: 5, color: "#ffb4a2", hat: "helmet", prop: "cannon", mouth: "o",
       shot: { kind: "ball", every: 3.2, dmg: 2 } },
-    bigboss: { name: "Big Big Boss", r: 55, speed: 17, hp: 14, hit: 20, bash: 12, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true,
+    bigboss: { name: t("Big Big Boss"), r: 55, speed: 17, hp: 14, hit: 20, bash: 12, color: "#ef476f", hat: "crown", prop: "club", mouth: "teeth", mustache: true,
       shot: { kind: "rock", every: 2.4, dmg: 4 } },
-    tank: { name: "Tank", r: 32, speed: 30, hp: 3, hit: 10, bash: 8, color: "#90a955", tank: true,
+    tank: { name: t("Tank"), r: 32, speed: 30, hp: 3, hit: 10, bash: 8, color: "#90a955", tank: true,
       shot: { kind: "shell", every: 3.2, dmg: 3 } },
-    bigtank: { name: "Big tank", r: 45, speed: 23, hp: 6, hit: 15, bash: 12, color: "#bc6c25", tank: true,
+    bigtank: { name: t("Big tank"), r: 45, speed: 23, hp: 6, hit: 15, bash: 12, color: "#bc6c25", tank: true,
       shot: { kind: "shell", every: 2.6, dmg: 4 } },
-    tankboss: { name: "Tank Boss", r: 62, speed: 15, hp: 20, hit: 30, bash: 20, color: "#6d597a", tank: true, crown: true,
+    tankboss: { name: t("Tank Boss"), r: 62, speed: 15, hp: 20, hit: 30, bash: 20, color: "#6d597a", tank: true, crown: true,
       shot: { kind: "bigshell", every: 2, dmg: 6 } },
-    king: { name: "KING TANK", r: 82, speed: 10, hp: 55, hit: 100, bash: 40, color: "#f4c430", tank: true, crown: true, mustache: true,
+    king: { name: t("KING TANK"), r: 82, speed: 10, hp: 55, hit: 100, bash: 40, color: "#f4c430", tank: true, crown: true, mustache: true,
       shot: { kind: "bigshell", every: 1.4, dmg: 8 } },
   };
 
   const WAVES = [
-    { name: "Stone throwers!", groups: [["thrower", 8]], gap: 2 },
-    { name: "Here comes Big Boss!", groups: [["thrower", 8], ["boss", 1]], gap: 1.8 },
-    { name: "Soldiers!", groups: [["soldier", 12]], gap: 1.5 },
-    { name: "Two Big Bosses!", groups: [["soldier", 10], ["boss", 2]], gap: 1.5 },
-    { name: "Cannons!", groups: [["soldier", 8], ["cannon", 7]], gap: 1.4 },
-    { name: "Big Big Boss!", groups: [["cannon", 9], ["bigboss", 1]], gap: 1.4 },
-    { name: "Tanks!", groups: [["soldier", 6], ["tank", 8]], gap: 1.4 },
-    { name: "Bigger tanks!", groups: [["tank", 8], ["bigtank", 4]], gap: 1.4 },
-    { name: "Boss parade!", groups: [["bigtank", 6], ["bigboss", 2]], gap: 1.5 },
-    { name: "Tank Boss!", groups: [["tank", 10], ["tankboss", 1]], gap: 1.3 },
-    { name: "The whole tank army!", groups: [["bigtank", 10], ["tankboss", 2]], gap: 1.3 },
-    { name: "THE KING TANK!", groups: [["tank", 10], ["king", 1]], gap: 1.3 },
+    { name: t("Stone throwers!"), groups: [["thrower", 8]], gap: 2 },
+    { name: t("Here comes Big Boss!"), groups: [["thrower", 8], ["boss", 1]], gap: 1.8 },
+    { name: t("Soldiers!"), groups: [["soldier", 12]], gap: 1.5 },
+    { name: t("Two Big Bosses!"), groups: [["soldier", 10], ["boss", 2]], gap: 1.5 },
+    { name: t("Cannons!"), groups: [["soldier", 8], ["cannon", 7]], gap: 1.4 },
+    { name: t("Big Big Boss!"), groups: [["cannon", 9], ["bigboss", 1]], gap: 1.4 },
+    { name: t("Tanks!"), groups: [["soldier", 6], ["tank", 8]], gap: 1.4 },
+    { name: t("Bigger tanks!"), groups: [["tank", 8], ["bigtank", 4]], gap: 1.4 },
+    { name: t("Boss parade!"), groups: [["bigtank", 6], ["bigboss", 2]], gap: 1.5 },
+    { name: t("Tank Boss!"), groups: [["tank", 10], ["tankboss", 1]], gap: 1.3 },
+    { name: t("The whole tank army!"), groups: [["bigtank", 10], ["tankboss", 2]], gap: 1.3 },
+    { name: t("THE KING TANK!"), groups: [["tank", 10], ["king", 1]], gap: 1.3 },
   ];
   // How tough each wave is (roughly the firepower a good player has by then).
   const POWER = [2, 9, 35, 100, 300, 500, 1500, 4000, 9000, 14000, 25000, 33000];
@@ -69,13 +70,18 @@
   // power = enemy toughness, boxes = chance that a door is a box (else a tough wall),
   // hurt = how hard enemies hit your wall and your life.
   const LEVELS = {
-    easy: { name: "Easy", power: 0.5, boxes: 1, hurt: 1 },
-    normal: { name: "Normal", power: 0.85, boxes: 2 / 3, hurt: 1.2 },
-    hard: { name: "Hard", power: 1, boxes: 1 / 2, hurt: 1.4 },
-    mega: { name: "Mega-hard", power: 1.05, boxes: 1 / 3, hurt: 1.6 },
+    easy: { name: t("Easy"), power: 0.5, boxes: 1, hurt: 1 },
+    normal: { name: t("Normal"), power: 0.85, boxes: 2 / 3, hurt: 1.2 },
+    hard: { name: t("Hard"), power: 1, boxes: 1 / 2, hurt: 1.4 },
+    mega: { name: t("Mega-hard"), power: 1.05, boxes: 1 / 3, hurt: 1.6 },
   };
 
-  const POOF_WORDS = ["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"];
+  // How it feels, not how it plays: the ground rushes by at SCROLL units a second and
+  // everyone runs TEMPO times faster on the spot. Enemy and shot speeds stay the same.
+  const SCROLL = 150;
+  const TEMPO = 1.6;
+
+  const POOF_WORDS = I18n.list(["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"]);
   const PARTY = ["#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#9b5de5"];
   const FONT = "'Comic Sans MS', 'Chalkboard SE', sans-serif";
 
@@ -116,7 +122,7 @@
     g.spawnQueue = [];
     wave.groups.forEach(([type, count]) => { for (let n = 0; n < count; n++) g.spawnQueue.push(type); });
     g.spawnIn = 2.5;
-    g.banner = { text: "Wave " + (i + 1) + ": " + wave.name, t: 2.5 };
+    g.banner = { text: t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
     // A fresh pair of doors with every wave, so there is always something to aim for.
     g.doorIn = Math.min(g.doorIn, 1);
     syncStats();
@@ -212,6 +218,7 @@
         g.bullets.push({ x: s.x + off, y: s.y - 16, vy: -w.speed, dmg: w.dmg, kind: w.kind,
           splash: w.splash || 0, pierce: w.pierce || 0, hit: [], age: 0 });
       }
+      g.fx.push({ type: "flash", x: s.x, y: s.y - 18, h: shotHeight(w.kind), t: 0, life: 0.07 });
     });
     g.kick = 0.08;
   }
@@ -252,7 +259,7 @@
   function boom(x, y, radius) {
     g.fx.push({ type: "boom", x, y, h: 18, r: radius, t: 0, life: 0.45 });
     if (radius >= 100) {
-      say("KA-BOOM!", x, y, 40, "#ffd93d", 90);
+      say(t("KA-BOOM!"), x, y, 40, "#ffd93d", 90);
       g.shake = 0.35;
     }
   }
@@ -273,7 +280,7 @@
       // A wall is not a prize: it just crumbles out of the way.
       door.gone = true;
       confetti(cx, cy, 16, ["#adb5bd", "#6c757d", "#ced4da"]);
-      say("CRUMBLE!", cx, cy, 24, "#fff", 100);
+      say(t("CRUMBLE!"), cx, cy, 24, "#fff", 100);
       return;
     }
     confetti(cx, cy, 24, PARTY);
@@ -281,17 +288,17 @@
     if (door.kind === "weapon") {
       g.tier = door.tier;
       g.count = 1;
-      text = WEAPONS[g.tier].name + "!";
+      text = t("{name}!", { name: WEAPONS[g.tier].name });
     } else if (door.kind === "army") {
       g.count = Math.min(WEAPONS[g.tier].max, g.count + door.amount);
       text = "+" + door.amount + " " + WEAPONS[g.tier].emoji;
     } else if (door.kind === "wall") {
       g.wallMax += 40;
       g.wall = g.wallMax;
-      text = "Bigger wall!";
+      text = t("Bigger wall!");
     } else {
       g.shield = 12;
-      text = "Shield!";
+      text = t("Shield!");
     }
     g.banner = { text: "🎉 " + text, t: 1.8 };
     // You only get one box of the pair: the other one fades away.
@@ -307,7 +314,7 @@
     pair.list.forEach((d) => {
       if (d.kind === "weapon" && !d.broken) {
         g.missed.add(d.tier);
-        g.banner = { text: "😮 Missed the " + WEAPONS[d.tier].name + "!", t: 2 };
+        g.banner = { text: t("😮 Missed the {name}!", { name: WEAPONS[d.tier].name }), t: 2 };
       }
     });
   }
@@ -319,7 +326,7 @@
       g.wall = 0;
       g.shake = 0.5;
       confetti(W / 2, WALL_Y, 30, ["#d4a373", "#a47148", "#e9c46a"]);
-      say("CRASH! The wall broke!", W / 2, WALL_Y, 28, "#ff6b6b", 60);
+      say(t("CRASH! The wall broke!"), W / 2, WALL_Y, 28, "#ff6b6b", 60);
     }
   }
 
@@ -335,7 +342,7 @@
   function breakThrough(e) {
     const T = ENEMIES[e.type];
     g.enemies.splice(g.enemies.indexOf(e), 1);
-    poof(e.x, SQUAD_Y, T.r, "Hee hee!");
+    poof(e.x, SQUAD_Y, T.r, t("Hee hee!"));
     g.leaks = (g.leaks || 0) + 1;
     hurtLife(T.hit * LEVELS[level].hurt);
   }
@@ -387,7 +394,7 @@
         g.breakIn = 2.5;
         startWave(g.wave + 1);
       } else if (!g.banner || g.banner.t <= 0) {
-        g.banner = { text: "Wave " + (g.wave + 1) + " done! ⭐", t: 2.4 };
+        g.banner = { text: t("Wave {n} done! ⭐", { n: g.wave + 1 }), t: 2.4 };
       }
     }
 
@@ -443,7 +450,7 @@
       }
       s.dead = true;
       if (g.shield > 0) {
-        say("Boing!", s.x, lineY, 16, "#90e0ef", 50);
+        say(t("Boing!"), s.x, lineY, 16, "#90e0ef", 50);
         return;
       }
       g.fx.push({ type: "puff", x: s.x, y: lineY, h: 10, vh: 20, r: 8, t: 0, life: 0.4 });
@@ -564,8 +571,8 @@
     renderer = null;
   }
   if (!renderer) {
-    el.screen.innerHTML = "<div class='big'>😢</div><div>This device can't show 3D.</div>" +
-      "<div><a href='../army/index.html'>Play Army Rush (2D)</a></div>";
+    el.screen.innerHTML = "<div class='big'>😢</div><div>" + t("This device can't show 3D.") + "</div>" +
+      "<div><a href='../army/index.html'>" + t("Play Army Rush (2D)") + "</a></div>";
     return;
   }
   let pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -815,14 +822,9 @@
 
   function buildTank(T, v) {
     const r = T.r, b = v.body;
-    v.bumps = [];
+    v.treads = [];
     [-1, 1].forEach((side) => {
-      part(b, "box", "#3d405b", [r * 0.48, r * 0.5, r * 1.9], [side * r * 0.76, r * 0.26, 0]);
-      for (let i = 0; i < 5; i++) {
-        const bump = part(b, "box", "#6c757d", [r * 0.5, r * 0.08, r * 0.1], [side * r * 0.76, r * 0.52, 0]);
-        bump.userData.i = i;
-        v.bumps.push(bump);
-      }
+      v.treads.push(part(b, "box", treadMat(T), [r * 0.48, r * 0.5, r * 1.9], [side * r * 0.76, r * 0.26, 0]));
     });
     v.paint.push(part(b, "box", T.color, [r * 1.15, r * 0.48, r * 1.6], [0, r * 0.48, 0]));
     v.paint.push(part(b, "box", darken(T.color, 0.85), [r * 0.95, r * 0.12, r * 1.3], [0, r * 0.76, 0]));
@@ -849,6 +851,85 @@
     return top;
   }
 
+  // Tread cleats: a striped texture that rolls, one per kind of tank.
+  const treadMats = {};
+  let treadImage = null;
+  function treadMat(T) {
+    if (treadMats[T.name]) return treadMats[T.name];
+    if (!treadImage) {
+      treadImage = document.createElement("canvas");
+      treadImage.width = 4; treadImage.height = 8;
+      const c = treadImage.getContext("2d");
+      c.fillStyle = "#3d405b"; c.fillRect(0, 0, 4, 8);
+      c.fillStyle = "#6c757d"; c.fillRect(0, 0, 4, 3);
+    }
+    const t = new THREE.CanvasTexture(treadImage);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.magFilter = THREE.NearestFilter;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(1, 5);
+    const m = new THREE.MeshToonMaterial({ map: t, gradientMap: gradient });
+    m.userData.speed = T.speed / (T.r * 0.38);
+    treadMats[T.name] = m;
+    return m;
+  }
+  function rollTreads() {
+    Object.values(treadMats).forEach((m) => { m.map.offset.y = -time * m.userData.speed * TEMPO; });
+  }
+
+  // Glue together every part of an enemy that never moves on its own: one mesh with
+  // painted corners instead of twenty, so phones have far less to draw.
+  const mergedGeo = {};
+  const MERGED = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: gradient });
+  // One geometry from many meshes (placed by their matrixWorld), each keeping its colour.
+  function glueGeometry(parts) {
+    const pos = [], nor = [], col = [];
+    parts.forEach((m) => {
+      const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
+      geo.applyMatrix4(m.matrixWorld);
+      const p = geo.attributes.position, n = geo.attributes.normal, c = m.material.color;
+      for (let i = 0; i < p.count; i++) {
+        pos.push(p.getX(i), p.getY(i), p.getZ(i));
+        nor.push(n.getX(i), n.getY(i), n.getZ(i));
+        col.push(c.r, c.g, c.b);
+      }
+      geo.dispose();
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+    g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    return g;
+  }
+
+  // A whole group (built at the origin) as a single mesh.
+  function glue(group) {
+    group.updateMatrixWorld(true);
+    const parts = [];
+    group.traverse((m) => { if (m.isMesh) parts.push(m); });
+    return new THREE.Mesh(glueGeometry(parts), MERGED);
+  }
+
+  function mergeStatic(type, v) {
+    const keep = new Set([...v.legs, ...v.pupils, ...(v.treads || []), v.mouthO, v.tongue, v.tail]);
+    const skip = new Set([v.arm, v.barrel, v.mouth]);
+    const parts = [];
+    v.body.updateMatrixWorld(true);
+    (function walk(node) {
+      node.children.forEach((ch) => {
+        if (skip.has(ch) || keep.has(ch)) return;
+        if (ch.isMesh) {
+          if (ch.material.side === THREE.FrontSide && !ch.material.map) parts.push(ch);
+        } else walk(ch);
+      });
+    })(v.body);
+    if (!mergedGeo[type]) mergedGeo[type] = glueGeometry(parts);
+    parts.forEach((m) => m.parent.remove(m));
+    const merged = new THREE.Mesh(mergedGeo[type], MERGED);
+    v.body.add(merged);
+    v.paint = [merged];
+  }
+
   const nameMats = {};
   function makeEnemy(type) {
     const T = ENEMIES[type];
@@ -857,6 +938,7 @@
     blob(root, T.r * 0.95);
     root.add(v.body);
     const top = T.tank ? buildTank(T, v) : buildPerson(T, v);
+    mergeStatic(type, v);
     v.paint.forEach((m) => { m.userData.mat = m.material; });
     v.bar = makeBar(Math.max(36, T.r * 1.8));
     v.bar.group.position.y = top + 14;
@@ -896,24 +978,21 @@
     // Bob while marching, hop while bashing, squash when hit.
     let lift = 0;
     if (e.atWall) lift = Math.abs(Math.sin(e.bash * 10)) * r * 0.2;
-    else if (!T.tank) lift = Math.abs(Math.sin(time * 8 + e.seed)) * r * 0.12;
+    else if (!T.tank) lift = Math.abs(Math.sin(time * 8 * TEMPO + e.seed)) * r * 0.12;
     v.body.position.y = lift;
+    v.body.position.z = -(e.flash / 0.15) * r * 0.25; // knocked back a little by each hit
     const sq = e.flash > 0 ? 0.18 : 0;
     v.body.scale.set(1 + sq, 1 - sq, 1 + sq);
     paintFlash(v, e.flash > 0);
     animateFace(v, e.seed, r);
     v.legs.forEach((leg) => {
-      leg.position.y = r * 0.3 + Math.max(0, Math.sin(time * 8 + e.seed + (leg.userData.side > 0 ? Math.PI : 0))) * r * 0.18;
+      leg.position.y = r * 0.3 + Math.max(0, Math.sin(time * 8 * TEMPO + e.seed + (leg.userData.side > 0 ? Math.PI : 0))) * r * 0.18;
     });
     if (v.arm) {
       const swing = e.throwT > 0 ? 1.4 - e.throwT * 6 : Math.sin(time * 4 + e.seed) * 0.6;
       v.arm.rotation.x = -0.5 + swing;
     }
     if (v.barrel) v.barrel.rotation.y = Math.sin(time * 3 + e.seed) * 0.25;
-    if (v.bumps) {
-      const roll = ((time * T.speed) / (r * 0.4)) % 1;
-      v.bumps.forEach((b) => { b.position.z = r * 0.85 - ((b.userData.i + roll) / 5) * r * 1.7; });
-    }
     v.bar.set(e.hp / e.maxHp, e.shownHp / e.maxHp);
     v.bar.group.quaternion.copy(camera.quaternion);
   }
@@ -1118,7 +1197,7 @@
       const u = squad.units[s.i];
       u.position.set(wx(s.x), 0, wz(s.y) + (g.kick > 0 ? 3 : 0));
       const body = u.userData.body;
-      if (!vehicle) body.position.y = Math.abs(Math.sin(time * 9 + s.x * 0.1)) * 2.5;
+      if (!vehicle) body.position.y = Math.abs(Math.sin(time * 9 * TEMPO + s.x * 0.1)) * 3;
       else if (g.tier === 9 || g.tier === 10) {
         body.position.y = (g.tier === 9 ? 46 : 74) + Math.sin(time * 3 + s.i) * 4;
         body.rotation.z = Math.sin(time * 2 + s.i) * 0.12;
@@ -1192,8 +1271,16 @@
         break;
     }
     root.userData.spin = m;
+    // A streak behind every small shot, longer for faster ones.
+    const trail = TRAILS[b.kind];
+    if (trail) part(root, "box", trail[0], [trail[1], trail[1], -b.vy * 0.07], [0, 0, -b.vy * 0.035 + 4]).renderOrder = 4;
     return { root };
   }
+
+  const TRAIL_WHITE = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45, depthWrite: false });
+  const TRAIL_SMOKE = new THREE.MeshBasicMaterial({ color: 0xdee2e6, transparent: true, opacity: 0.6, depthWrite: false });
+  const TRAILS = { stone: [TRAIL_WHITE, 4], axe: [TRAIL_WHITE, 4], arrow: [TRAIL_WHITE, 2], dart: [TRAIL_WHITE, 3],
+    pellet: [TRAIL_WHITE, 2.5], ball: [TRAIL_SMOKE, 8], shell: [TRAIL_SMOKE, 6], missile: [TRAIL_SMOKE, 6] };
 
   function updateBullet(b, v) {
     v.root.position.set(wx(b.x), shotHeight(b.kind), wz(b.y));
@@ -1348,10 +1435,12 @@
     c.restore();
   }
 
+  // Breaks between words, or between any two characters for Chinese (no spaces).
   function wrapText(c, text, x, y, maxW) {
+    const sep = text.includes(" ") ? " " : "";
     let line = "";
-    text.split(" ").forEach((word) => {
-      const test = line ? line + " " + word : word;
+    (sep ? text.split(" ") : Array.from(text)).forEach((word) => {
+      const test = line ? line + sep + word : word;
       if (c.measureText(test).width > maxW && line) {
         c.fillText(line, x, y);
         line = word;
@@ -1406,7 +1495,7 @@
     c.fillStyle = "#2b2d42";
     if (d.broken) {
       c.font = "bold 26px " + FONT; c.textAlign = "center";
-      c.fillText("OPEN!", fw / 2, DOOR_H / 2 + 9);
+      c.fillText(t("OPEN!"), fw / 2, DOOR_H / 2 + 9);
       v.tex.needsUpdate = true;
       return;
     }
@@ -1422,14 +1511,14 @@
       c.fillStyle = "#c1440e";
       for (let r = 0; r < 3; r++) for (let i = 0; i < 2; i++) rrect(c, x + 14 + i * 18 + (r % 2) * 9 - 4, y + 18 + r * 11, 16, 9, 2), c.fill();
       c.fillStyle = "#2b2d42";
-      wrapText(c, "Bigger wall", x + 64, y + 30, w - 84);
+      wrapText(c, t("Bigger wall"), x + 64, y + 30, w - 84);
     } else {
       c.fillStyle = "#4d96ff";
       c.beginPath(); c.moveTo(x + 32, y + 12); c.lineTo(x + 50, y + 20); c.quadraticCurveTo(x + 50, y + 48, x + 32, y + 58);
       c.quadraticCurveTo(x + 14, y + 48, x + 14, y + 20); c.closePath(); c.fill();
       c.fillStyle = "#90e0ef"; c.beginPath(); c.arc(x + 32, y + 34, 7, 0, Math.PI * 2); c.fill();
       c.fillStyle = "#2b2d42";
-      wrapText(c, "Shield", x + 64, y + 30, w - 84);
+      wrapText(c, t("Shield"), x + 64, y + 30, w - 84);
     }
     lifeBar2d(c, x + w / 2 - 18, y + h - 15, w - 56, ratio);
     c.font = "bold 15px sans-serif"; c.textAlign = "right"; c.fillStyle = "#2b2d42";
@@ -1481,6 +1570,10 @@
     const own = (m) => { const c = m.clone(); c.transparent = true; c.depthWrite = false; v.mats.push(c); return c; };
     if (f.type === "puff") {
       v.mesh = part(root, "ball", own(mat("#ffffff")), 1);
+    } else if (f.type === "flash") {
+      v.mesh = part(root, "star", own(basic("#ffd93d")), 1);
+      v.mesh.material.side = THREE.DoubleSide;
+      v.face = true;
     } else if (f.type === "star" || f.type === "pow") {
       v.mesh = part(root, "star", own(basic(f.type === "pow" ? "#ffd93d" : f.color)), 1);
       v.mesh.material.side = THREE.DoubleSide;
@@ -1507,6 +1600,7 @@
     if (f.type === "puff") v.mesh.scale.setScalar(f.r * (1 + k));
     else if (f.type === "star") v.mesh.scale.setScalar(7);
     else if (f.type === "pow") v.mesh.scale.setScalar(6 + k * 10);
+    else if (f.type === "flash") v.mesh.scale.setScalar(7 + k * 6);
     else if (f.type === "boom") {
       v.parts[0].scale.setScalar(f.r * (0.4 + k * 0.8));
       v.parts[1].scale.setScalar(f.r * (0.25 + k * 0.6));
@@ -1556,39 +1650,57 @@
   }
   [-1, 1].forEach((side) => {
     for (let i = 0; i < 12; i++) {
-      const post = new THREE.Group();
-      part(post, "box", "#d4a373", [6, 22, 6], [0, 11, 0]);
-      part(post, "box", "#e9c46a", [4, 4, 60], [0, 16, 0]);
+      const g = new THREE.Group();
+      part(g, "box", "#d4a373", [6, 22, 6], [0, 11, 0]);
+      part(g, "box", "#e9c46a", [4, 4, 60], [0, 16, 0]);
+      const post = glue(g);
       scene.add(post);
       scenery.push({ mesh: post, x: side * (W / 2 + 18), base: i * 60, span: 720, off: -620 });
     }
     for (let i = 0; i < 7; i++) {
-      const tree = new THREE.Group();
+      const g = new THREE.Group();
       const s = 0.8 + ((i * 37) % 10) / 20;
-      part(tree, "cyl", "#8b5a2b", [6 * s, 30 * s, 6 * s], [0, 15 * s, 0]);
-      part(tree, "sphere", i % 3 ? "#52b788" : "#40916c", 26 * s, [0, 46 * s, 0]);
-      part(tree, "sphere", "#52b788", 18 * s, [10 * s, 62 * s, 4]);
+      part(g, "cyl", "#8b5a2b", [6 * s, 30 * s, 6 * s], [0, 15 * s, 0]);
+      part(g, "sphere", i % 3 ? "#52b788" : "#40916c", 26 * s, [0, 46 * s, 0]);
+      part(g, "sphere", "#52b788", 18 * s, [10 * s, 62 * s, 4]);
+      const tree = glue(g);
       scene.add(tree);
       scenery.push({ mesh: tree, x: side * (W / 2 + 70 + ((i * 53) % 60)), base: i * 140 + (side > 0 ? 70 : 0), span: 980, off: -900 });
     }
   });
 
+  // Speed lines: streaks of wind rushing past along both sides of the field.
+  const SPEED_LINE = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false });
+  const speedLines = [];
+  for (let i = 0; i < 14; i++) {
+    const side = i % 2 ? 1 : -1;
+    const mesh = part(scene, "box", SPEED_LINE, [2, 2, 60 + (i % 3) * 30], [side * (W / 2 + 6 + ((i * 29) % 50)), 6 + ((i * 17) % 40), 0]);
+    mesh.renderOrder = 3;
+    speedLines.push({ mesh, base: (i * 157) % 1100 });
+  }
+
   // The sandbag wall: it gets cracks as it gets hurt, and only rubble is left once it breaks.
-  const wall = { group: new THREE.Group(), bags: [], rubble: new THREE.Group(), look: "" };
+  // Each look of the wall is built once and glued into one mesh.
+  const wall = { group: new THREE.Group(), looks: {}, look: "" };
   wall.group.position.z = wz(WALL_Y);
   scene.add(wall.group);
-  for (let x = 0, i = 0; x < W + 10; x += 34, i++) {
-    const low = part(wall.group, "sphere", "#d4a373", [19, 8, 11], [wx(x + 4), 8, 0]);
-    const high = part(wall.group, "sphere", "#d4a373", [19, 8, 11], [wx(x + 21), 21, 0]);
-    wall.bags.push(low, high);
-    high.userData.i = i;
-    high.userData.base = high.position.clone();
-  }
+  ["ok", "hurt", "bad"].forEach((look) => {
+    const g = new THREE.Group();
+    for (let x = 0, i = 0; x < W + 10; x += 34, i++) {
+      part(g, "sphere", "#d4a373", [19, 8, 11], [wx(x + 4), 8, 0]);
+      const high = part(g, "sphere", "#d4a373", [19, 8, 11], [wx(x + 21), 21, 0]);
+      if (look !== "ok" && i % 3 === 0) { high.material = mat("#b5835a"); high.rotation.z = 0.3; }
+      if (look === "bad" && i % 2) { high.position.y = 6; high.position.z = -10; high.rotation.z = -0.4; }
+    }
+    wall.looks[look] = glue(g);
+  });
+  const rubble = new THREE.Group();
   for (let x = 0; x < W + 10; x += 34) {
-    part(wall.rubble, "ball", "#c8a27a", 7, [wx(x + 6), 3, 4]);
-    part(wall.rubble, "ball", "#a47148", 5, [wx(x + 20), 2, -3]);
+    part(rubble, "ball", "#c8a27a", 7, [wx(x + 6), 3, 4]);
+    part(rubble, "ball", "#a47148", 5, [wx(x + 20), 2, -3]);
   }
-  wall.group.add(wall.rubble);
+  wall.looks.gone = glue(rubble);
+  Object.values(wall.looks).forEach((m) => wall.group.add(m));
   wall.bar = makeBar(W - 160, 8);
   wall.bar.group.position.set(0, 44, 0);
   wall.group.add(wall.bar.group);
@@ -1598,15 +1710,7 @@
     const look = g.wall <= 0 ? "gone" : health < 0.35 ? "bad" : health < 0.7 ? "hurt" : "ok";
     if (look !== wall.look) {
       wall.look = look;
-      wall.bags.forEach((b) => { b.visible = look !== "gone"; b.material = mat("#d4a373"); b.rotation.z = 0; });
-      wall.rubble.visible = look === "gone";
-      wall.bags.forEach((b) => {
-        const i = b.userData.i;
-        if (i === undefined) return;
-        b.position.copy(b.userData.base);
-        if ((look === "hurt" || look === "bad") && i % 3 === 0) { b.material = mat("#b5835a"); b.rotation.z = 0.3; }
-        if (look === "bad" && i % 2) { b.position.y = 6; b.position.z = -10; b.rotation.z = -0.4; }
-      });
+      Object.keys(wall.looks).forEach((k) => { wall.looks[k].visible = k === look; });
     }
     wall.bar.group.visible = g.wall > 0;
     wall.bar.set(health, health);
@@ -1696,7 +1800,7 @@
       CAM.pitch = hi;
       aim(0);
       fitWidth();
-      if (project(W / 2, 40, -40).y > 0.5) best = y;
+      if (project(W / 2, 40, -40).y > 0.44) best = y;
     }
     // A little haze only beyond the far end of the field.
     const far = camera.position.distanceTo(tmp.set(0, 0, wz(-60)));
@@ -1724,16 +1828,16 @@
     screenKey = key;
     el.screen.hidden = state === "playing";
     if (state === "ready") {
-      el.screen.innerHTML = "<div class='big'>🪖 Army Rush 3D!</div><div>A silly army is coming!</div>" +
-        "<div>Shoot boxes to get</div><div>a new weapon 🏹, more of it,</div><div>or a stronger defence 🧱</div>" +
-        "<div class='gold'>Level: " + LEVELS[level].name + "</div><div class='go'>Tap to start!</div>";
+      el.screen.innerHTML = "<div class='big'>" + t("🪖 Army Rush 3D!") + "</div><div>" + t("A silly army is coming!") + "</div>" +
+        "<div>" + t("Shoot boxes to get") + "</div><div>" + t("a new weapon 🏹, more of it,") + "</div><div>" + t("or a stronger defence 🧱") + "</div>" +
+        "<div class='gold'>" + t("Level: {name}", { name: LEVELS[level].name }) + "</div><div class='go'>" + t("Tap to start!") + "</div>";
     } else if (state === "over") {
-      el.screen.innerHTML = "<div class='big bad'>Oh no! 😵</div><div>They got through!</div>" +
-        "<div>You reached wave " + (g.wave + 1) + "</div><div class='gold'>Tip: open more boxes!</div>" +
-        "<div class='go'>Tap to try again</div>";
+      el.screen.innerHTML = "<div class='big bad'>" + t("Oh no! 😵") + "</div><div>" + t("They got through!") + "</div>" +
+        "<div>" + t("You reached wave {n}", { n: g.wave + 1 }) + "</div><div class='gold'>" + t("Tip: open more boxes!") + "</div>" +
+        "<div class='go'>" + t("Tap to try again") + "</div>";
     } else if (state === "won") {
-      el.screen.innerHTML = "<div class='big'>YOU WIN! 🏆</div><div>The King Tank</div><div>went BOING!</div>" +
-        "<div class='go'>Tap to play again</div>";
+      el.screen.innerHTML = "<div class='big'>" + t("YOU WIN! 🏆") + "</div><div>" + t("The King Tank") + "</div><div>" + t("went BOING!") + "</div>" +
+        "<div class='go'>" + t("Tap to play again") + "</div>";
     }
   }
 
@@ -1753,14 +1857,21 @@
   function render() {
     const lean = (g.squadX - W / 2) * 0.06;
     const sh = g.shake > 0 ? g.shake * 14 : 0;
-    aim(lean + (Math.random() - 0.5) * sh);
-    camera.position.y += (Math.random() - 0.5) * sh;
+    aim(lean + (Math.random() - 0.5) * sh + Math.sin(time * 7) * 1.5);
+    // Running bounce, and a tiny kick back every time your army fires.
+    camera.position.y += (Math.random() - 0.5) * sh + Math.abs(Math.sin(time * 7)) * 2.5;
+    camera.position.z += g.kick > 0 ? 2 : 0;
 
-    stripes.offset.y = (time * 40) / 80;
+    stripes.offset.y = (time * SCROLL) / 80;
     scenery.forEach((s) => {
-      const y = ((s.base + time * 40) % s.span) + s.off;
+      const y = ((s.base + time * SCROLL) % s.span) + s.off;
       s.mesh.position.set(s.x, s.mesh.position.y, wz(y));
     });
+    speedLines.forEach((l) => {
+      const y = ((l.base + time * SCROLL * 2.6) % 1100) - 420;
+      l.mesh.position.z = wz(y);
+    });
+    rollTreads();
 
     updateWall();
     updateShield();

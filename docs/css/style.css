@@ -76,6 +76,7 @@ p.subtitle { font-size: 1.2rem; margin: 0 0 24px; text-align: center; }
 .game-card.tictactoe { background: #f0eaff; }
 .game-card.army { background: #e4f0d0; }
 .game-card.army3d { background: #d6ecff; }
+.game-card.armyfps { background: #ffe1d6; }
 
 /* ---------- Game pages ---------- */
 .topbar {
@@ -183,3 +184,8 @@ canvas {
 .game-card.snap { background: #fff3c4; }
 .game-card.apples { background: #f0e3ff; }
 .game-card.connect4 { background: #d9f4f7; }
+
+/* ---------- Hub: language switch ---------- */
+.langs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 4px; }
+.langs .btn { min-height: 44px; min-width: 0; padding: 6px 14px; font-size: 1.05rem; background: #b9b9c8; }
+.langs .btn[aria-pressed="true"] { background: var(--blue); }
