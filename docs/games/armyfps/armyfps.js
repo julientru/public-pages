@@ -109,13 +109,23 @@
   // the cross-hair is, from -1 to 1 across and up the view, held = a finger is on the view.
   const input = { left: false, right: false, up: false, down: false, aim: { x: 0, y: 0 }, held: false };
 
+  // "Manage my city": a second view where your city helps this battle (see ../army/city.js).
+  const city = ArmyCity.create({
+    W, wallY: WALL_Y, weapons: WEAPONS,
+    game: () => g, state: () => state, start: () => start(), sync: () => syncStats(),
+    placeToggle: (label) => document.getElementById("menu").appendChild(label),
+    placeButton: (btn) => document.querySelector(".hud .home").after(btn),
+    onToggle() { state = "ready"; newGame(); },
+  });
+
   function newGame() {
     g = {
-      wave: 0, spawnQueue: [], spawnIn: 0, breakIn: 2.5, banner: null,
+      wave: 0, spawnQueue: [], spawnIn: 0, breakIn: city.peace, banner: null,
       enemies: [], bullets: [], shots: [], doors: [], doorIn: 4, fx: [], tumblers: [],
       tier: 0, count: 1, missed: new Set(), life: 100, wall: 100, wallMax: 100, shield: 0,
       squadX: W / 2, fireIn: 0.3, shake: 0, hurt: 0, target: { x: W / 2, y: 0 }, targetH: 10, combo: 0, comboT: 0,
     };
+    city.reset();
     startWave(0);
     syncStats();
   }
@@ -125,8 +135,10 @@
     const wave = WAVES[i];
     g.spawnQueue = [];
     wave.groups.forEach(([type, count]) => { for (let n = 0; n < count; n++) g.spawnQueue.push(type); });
-    g.spawnIn = 2.5;
-    g.banner = { text: t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
+    // With a city to look after, there is a calm moment before the first attack.
+    g.calm = i === 0 && city.on;
+    g.spawnIn = i === 0 ? city.firstWait : 2.5;
+    g.banner = { text: city.on ? city.waveTitle(i, wave.name) : t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
     // A fresh pair of doors with every wave, so there is always something to aim for.
     g.doorIn = Math.min(g.doorIn, 1);
     syncStats();
@@ -146,7 +158,7 @@
   }
 
   function syncStats() {
-    el.wave.textContent = g.wave + 1;
+    el.wave.textContent = city.on ? city.round : g.wave + 1;
     el.life.textContent = Math.max(0, Math.ceil(g.life));
     el.lifeFill.style.width = Math.max(0, Math.min(100, g.life)) + "%";
     el.lifeFill.style.background = g.life > 50 ? "#6bcb77" : g.life > 25 ? "#ffd93d" : "#ff6b6b";
@@ -175,6 +187,17 @@
   function spawnDoors() {
     if (g.noDoors) return;
     const boxHp = (secs) => Math.max(4, Math.ceil(dps() * secs));
+    // Managing a city: your city makes the army, so only a shield box comes now and then
+    // (less often on harder levels), on one side of the road.
+    if (city.on) {
+      if (Math.random() >= LEVELS[level].boxes * 0.3) return;
+      const box = { kind: "shield", hp: boxHp(2) };
+      box.maxHp = box.hp;
+      const left = Math.random() < 0.5;
+      box.x0 = left ? 18 : W / 2 + 12; box.x1 = left ? W / 2 - 12 : W - 18;
+      g.doors.push({ y: -90, h: 84, speed: 52, list: [box] });
+      return;
+    }
     const w = WEAPONS[g.tier];
     const next = nextWeapon();
     const offers = [];
@@ -381,6 +404,7 @@
     if (state !== "playing") return;
     const w = WEAPONS[g.tier];
     const L = LEVELS[level];
+    city.tick(dt);
 
     g.comboT = Math.max(0, g.comboT - dt);
 
@@ -396,17 +420,23 @@
     if (g.spawnQueue.length) {
       g.spawnIn -= dt;
       if (g.spawnIn <= 0) {
+        g.calm = false;
         spawnEnemy(g.spawnQueue.shift());
         g.spawnIn = WAVES[g.wave].gap * (0.7 + Math.random() * 0.6);
+      } else if (g.calm && (!g.banner || g.banner.t <= 0.6)) {
+        city.countdown(g.spawnIn);
       }
     } else if (!g.enemies.length) {
-      if (g.wave === WAVES.length - 1) return win();
+      // With a city to look after there is no last wave: the battle goes on until you lose.
+      if (g.wave === WAVES.length - 1 && !city.on) return win();
       g.breakIn -= dt;
       if (g.breakIn <= 0) {
-        g.breakIn = 2.5;
-        startWave(g.wave + 1);
+        g.breakIn = city.peace;
+        startWave(city.nextWave(g.wave));
+      } else if (city.on && g.breakIn < city.peace - 2.4) {
+        city.countdown(g.breakIn);
       } else if (!g.banner || g.banner.t <= 0) {
-        g.banner = { text: t("Wave {n} done! ⭐", { n: g.wave + 1 }), t: 2.4 };
+        g.banner = { text: t("Wave {n} done! ⭐", { n: city.on ? city.round : g.wave + 1 }), t: 2.4 };
       }
     }
 
@@ -496,6 +526,8 @@
           if (b.hit.length > b.pierce) { b.dead = true; return; }
         }
       }
+      // Tower shots fly past the boxes: picking a box is your choice.
+      if (b.tower) return;
       for (const p of g.doors) {
         if (b.y > p.y + p.h || b.y < p.y) continue;
         for (const d of p.list) {
@@ -1693,6 +1725,31 @@
     el.wallGauge.classList.toggle("gone", g.wall <= 0);
   }
 
+  // Towers from your city (see ../army/city.js), standing on the wall with a flag on top.
+  const towers = [0, 1, 2, 3].map(() => {
+    const t = new THREE.Group();
+    part(t, "cyl", "#adb5bd", [14, 56, 14], [0, 28, 0]);
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * Math.PI * 2;
+      part(t, "box", "#adb5bd", [6, 8, 6], [Math.cos(a) * 12, 59, Math.sin(a) * 12]);
+    }
+    part(t, "box", "#2b2d42", [6, 12, 2], [0, 36, 14]);
+    part(t, "cyl", "#6c757d", [1, 18, 1], [0, 66, 0]);
+    part(t, "box", "#ff6b6b", [11, 7, 1], [6, 71, 0]);
+    t.scale.setScalar(0.7); // smaller, so they do not hide the field
+    t.visible = false;
+    scene.add(t);
+    return t;
+  });
+
+  function updateTowers() {
+    const spots = city.towerSpots();
+    towers.forEach((m, i) => {
+      m.visible = i < spots.length;
+      if (m.visible) m.position.set(wx(spots[i].x), 0, wz(spots[i].y) - 8);
+    });
+  }
+
   const shieldMat = new THREE.MeshBasicMaterial({ color: "#90e0ef", transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false });
   const shieldMesh = new THREE.Mesh(GEO.shield, shieldMat);
   shieldMesh.scale.set(W + 60, 150, 26);
@@ -1973,7 +2030,7 @@
         "<div class='gold'>" + t("Level: {name}", { name: LEVELS[level].name }) + "</div><div class='go'>" + t("Tap to start!") + "</div>";
     } else if (state === "over") {
       el.screen.innerHTML = "<div class='big bad'>" + t("Oh no! 😵") + "</div><div>" + t("They got through!") + "</div>" +
-        "<div>" + t("You reached wave {n}", { n: g.wave + 1 }) + "</div><div class='gold'>" + t("Tip: open more boxes!") + "</div>" +
+        "<div>" + t("You reached wave {n}", { n: city.on ? city.round : g.wave + 1 }) + "</div><div class='gold'>" + t("Tip: open more boxes!") + "</div>" +
         "<div class='go'>" + t("Tap to try again") + "</div>";
     } else if (state === "won") {
       el.screen.innerHTML = "<div class='big'>" + t("YOU WIN! 🏆") + "</div><div>" + t("The King Tank") + "</div><div>" + t("went BOING!") + "</div>" +
@@ -1997,6 +2054,8 @@
 
   function render(dt) {
     turnView(dt);
+    // While waiting for you to start, the view slowly looks around at your army and the field.
+    if (state !== "playing") view.yaw += (Math.sin(time * 0.35) * MAX_YAW * 0.55 - view.yaw) * Math.min(1, dt * 2);
     const sh = g.shake > 0 ? g.shake : 0;
     aimCamera(view.yaw);
     if (sh) {
@@ -2020,6 +2079,7 @@
     el.cross.style.top = ((1 - input.aim.y) / 2) * 100 + "%";
 
     updateWall();
+    updateTowers();
     updateShield();
     updateSquad();
     updateViewModel();
@@ -2068,7 +2128,7 @@
       updateFx(STEP);
       acc -= STEP;
     }
-    render(dt);
+    if (!city.open) render(dt); // the city view covers the battle
     requestAnimationFrame(loop);
   }
 
@@ -2146,7 +2206,7 @@
   // ?debug lets the test script fast-forward the battle and aim.
   if (/[?&]debug/.test(location.search)) {
     window.armyDebug = {
-      get g() { return g; }, get state() { return state; }, dps, nextWeapon, WEAPONS, ENEMIES, input, start,
+      get g() { return g; }, get state() { return state; }, dps, nextWeapon, WEAPONS, ENEMIES, input, start, city,
       setLevel(l) { level = l; }, project, renderer, scene, view, DECK, pickTarget,
       get pixelRatio() { return pixelRatio; }, CAM, camera, fitCamera,
       step(n) { for (let i = 0; i < n; i++) { update(STEP); updateFx(STEP); } render(0); },

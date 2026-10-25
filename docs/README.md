@@ -23,6 +23,14 @@ Simple logic games for kids aged 5 to 10, in English, French and Cantonese. Plai
 | 🪖 Army Rush 3D | `games/army3d/` | Same rules and controls as Army Rush, drawn in 3D from behind your army (uses Three.js) |
 | 🎯 Army Rush FPS | `games/armyfps/` | Same rules as Army Rush, seen through your own eyes from behind the wall. Tap or drag to move the cross-hair (or use the mouse); your army shoots at it. Hold ⬅️ ➡️ (or the arrow keys, or keep your finger at a side) to turn and see your soldiers beside you. 85° wide view upright, 135° on its side (uses Three.js) |
 
+### Manage my city (all three Army Rush games)
+
+Tick **🏘️ Manage my city** under the levels, then tap the 🏘️ button to open a 2D map of your own city while the battle goes on. It starts as a village with one hut and one person. Give people jobs (🌾 farmer, 👷 brick maker, ⛏️ miner, 🛒 trader, 🐄 cow herder, 🧪 scientist), build houses so more people come, and the city moves up through 20 ages as it grows: Stone Age, First Farmers, Egyptian Empire, Ancient Greece, Roman Empire, Chinese Empire, Viking Age, Middle Ages, Renaissance, Age of Explorers, Industrial Age, Railway Age, Electric Age, Age of Cars, Jet Age, Space Age, Computer Age, Internet Age, Robot Age and AI Empire.
+
+The houses, ground and walls change with every age, each age leaves its landmark beside the road at the bottom of the map, from the Railway Age the road gets the vehicles of the age and flying machines cross the sky, and day turns to night (windows light up). The main gate leads down to the road, the only way the enemy comes in; the fields and the mine have their own gate on the left of the wall, and the pasture and the brick yard one on the right. The people are all different (men and women, many skin tones, clothes and hats), and each worker carries the tool of their job.
+
+The battle follows your age: its waves come from your age and repeat until you reach the next one, and there is no last wave, so the AI Empire's waves (King Tank included) keep coming until you lose. The city helps: barracks train soldiers, traders' gold buys soldiers, the lab finds the next weapon (each one only once its age is reached), towers on the wall shoot your weapon at the enemy, and bricks make the wall stronger or fix it. A red bar warns you when the enemy attacks or hits your wall, and there are 15 calm seconds between waves. With the city on, the battle has no weapon, army or wall boxes: your city makes all that. Only a shield box comes now and then, less often on harder levels. The shared code is in `games/army/city.js`, `city.css` and `city-strings.js`.
+
 ### 2-player games
 
 Pick 👤👤 2 at the top of the hub to see them.

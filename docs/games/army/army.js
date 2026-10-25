@@ -79,12 +79,14 @@
 
   const POOF_WORDS = I18n.list(["POOF!", "BOING!", "Bye-bye!", "Oof!", "Wheee!", "Ouchie!", "BONK!", "Oopsie!"]);
 
+  const stage = document.getElementById("stage");
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   const el = {
     wave: document.getElementById("wave"),
     life: document.getElementById("life"),
     weapon: document.getElementById("weapon"),
+    menu: document.getElementById("menu"),
   };
   const levelBtns = document.querySelectorAll("[data-level]");
 
@@ -95,13 +97,23 @@
   let endedAt = -10; // a short pause after the end, so a stray tap does not restart at once
   const input = { left: false, right: false, targetX: null, dragging: false };
 
+  // "Manage my city": a second view where your city helps this battle (see city.js).
+  const city = ArmyCity.create({
+    W, wallY: WALL_Y, weapons: WEAPONS,
+    game: () => g, state: () => state, start: () => start(), sync: () => syncStats(),
+    placeToggle: (label) => document.getElementById("menu").appendChild(label),
+    placeButton: (btn) => document.querySelector(".hud .home").after(btn),
+    onToggle() { state = "ready"; newGame(); },
+  });
+
   function newGame() {
     g = {
-      wave: 0, spawnQueue: [], spawnIn: 0, breakIn: 2.5, banner: null,
+      wave: 0, spawnQueue: [], spawnIn: 0, breakIn: city.peace, banner: null,
       enemies: [], bullets: [], shots: [], doors: [], doorIn: 4, fx: [], tumblers: [],
       tier: 0, count: 1, missed: new Set(), life: 100, wall: 100, wallMax: 100, shield: 0,
       squadX: W / 2, fireIn: 0.3, shake: 0, hurt: 0,
     };
+    city.reset();
     startWave(0);
     syncStats();
   }
@@ -111,8 +123,10 @@
     const wave = WAVES[i];
     g.spawnQueue = [];
     wave.groups.forEach(([type, count]) => { for (let n = 0; n < count; n++) g.spawnQueue.push(type); });
-    g.spawnIn = 2.5;
-    g.banner = { text: t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
+    // With a city to look after, there is a calm moment before the first attack.
+    g.calm = i === 0 && city.on;
+    g.spawnIn = i === 0 ? city.firstWait : 2.5;
+    g.banner = { text: city.on ? city.waveTitle(i, wave.name) : t("Wave {n}: {name}", { n: i + 1, name: wave.name }), t: 2.5 };
     // A fresh pair of doors with every wave, so there is always something to aim for.
     g.doorIn = Math.min(g.doorIn, 1);
     syncStats();
@@ -132,7 +146,7 @@
   }
 
   function syncStats() {
-    el.wave.textContent = g.wave + 1;
+    el.wave.textContent = city.on ? city.round : g.wave + 1;
     el.life.textContent = Math.max(0, Math.ceil(g.life));
     const w = WEAPONS[g.tier];
     el.weapon.textContent = w.emoji + " " + w.name + (g.count > 1 ? " ×" + g.count : "");
@@ -159,6 +173,17 @@
   function spawnDoors() {
     if (g.noDoors) return;
     const boxHp = (secs) => Math.max(4, Math.ceil(dps() * secs));
+    // Managing a city: your city makes the army, so only a shield box comes now and then
+    // (less often on harder levels), on one side of the road.
+    if (city.on) {
+      if (Math.random() >= LEVELS[level].boxes * 0.3) return;
+      const box = { kind: "shield", hp: boxHp(2) };
+      box.maxHp = box.hp;
+      const left = Math.random() < 0.5;
+      box.x0 = left ? 18 : W / 2 + 12; box.x1 = left ? W / 2 - 12 : W - 18;
+      g.doors.push({ y: -90, h: 84, speed: 52, list: [box] });
+      return;
+    }
     const w = WEAPONS[g.tier];
     const next = nextWeapon();
     const offers = [];
@@ -343,6 +368,7 @@
     if (state !== "playing") return;
     const w = WEAPONS[g.tier];
     const L = LEVELS[level];
+    city.tick(dt);
 
     // Move the army.
     const speed = 380;
@@ -368,17 +394,23 @@
     if (g.spawnQueue.length) {
       g.spawnIn -= dt;
       if (g.spawnIn <= 0) {
+        g.calm = false;
         spawnEnemy(g.spawnQueue.shift());
         g.spawnIn = WAVES[g.wave].gap * (0.7 + Math.random() * 0.6);
+      } else if (g.calm && (!g.banner || g.banner.t <= 0.6)) {
+        city.countdown(g.spawnIn);
       }
     } else if (!g.enemies.length) {
-      if (g.wave === WAVES.length - 1) return win();
+      // With a city to look after there is no last wave: the battle goes on until you lose.
+      if (g.wave === WAVES.length - 1 && !city.on) return win();
       g.breakIn -= dt;
       if (g.breakIn <= 0) {
-        g.breakIn = 2.5;
-        startWave(g.wave + 1);
+        g.breakIn = city.peace;
+        startWave(city.nextWave(g.wave));
+      } else if (city.on && g.breakIn < city.peace - 2.4) {
+        city.countdown(g.breakIn);
       } else if (!g.banner || g.banner.t <= 0) {
-        g.banner = { text: t("Wave {n} done! ⭐", { n: g.wave + 1 }), t: 2.4 };
+        g.banner = { text: t("Wave {n} done! ⭐", { n: city.on ? city.round : g.wave + 1 }), t: 2.4 };
       }
     }
 
@@ -447,6 +479,7 @@
     // Bullets fly up and hit the first thing in their way.
     g.bullets.forEach((b) => {
       b.y += b.vy * dt;
+      if (b.vx) b.x += b.vx * dt;
       b.age += dt;
       for (const e of g.enemies) {
         if (b.hit.includes(e)) continue;
@@ -467,6 +500,8 @@
           if (b.hit.length > b.pierce) { b.dead = true; return; }
         }
       }
+      // Tower shots fly past the boxes: picking a box is your choice.
+      if (b.tower) return;
       for (const p of g.doors) {
         if (b.y > p.y + p.h || b.y < p.y) continue;
         for (const d of p.list) {
@@ -481,7 +516,7 @@
         }
       }
     });
-    g.bullets = g.bullets.filter((b) => !b.dead && b.y > -40);
+    g.bullets = g.bullets.filter((b) => !b.dead && b.y > -40 && b.x > -40 && b.x < W + 40);
 
     g.doors.forEach((p) => p.list.forEach((d) => { if (d.flash) d.flash = Math.max(0, d.flash - dt); }));
   }
@@ -1005,12 +1040,18 @@
   // ---------- Scene ----------
 
   function drawField() {
+    const v = view;
+    // A meadow all around, and the field reaches past the edges of the screen, as in Army Rush 3D.
+    ctx.fillStyle = "#74c69d";
+    ctx.fillRect(v.x0, v.y0, v.x1 - v.x0, v.y1 - v.y0);
+    const top = Math.min(0, v.y0), bottom = Math.max(H, v.y1);
     ctx.fillStyle = "#95d5b2";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(-20, top, W + 40, bottom - top);
     // Stripes scroll toward you, like the army is running up.
     ctx.fillStyle = "#a7e0c0";
     const off = (time * 40) % 80;
-    for (let y = -80 + off; y < H; y += 80) ctx.fillRect(0, y, W, 40);
+    for (let y = off - 80 * Math.ceil((off - top) / 80); y < bottom; y += 80) ctx.fillRect(-20, y, W + 40, 40);
+    if (v.x0 < 0 || v.x1 > W) drawSides();
     // Little flowers.
     for (let i = 0; i < 10; i++) {
       const fx = (i * 97) % W + 10;
@@ -1037,6 +1078,76 @@
       ctx.fillText("🧱", 8, WALL_Y + 6);
       lifeBar(W / 2 - 50, WALL_Y - 3, W - 160, health, health);
     }
+  }
+
+  // Beside the field, as in Army Rush 3D: a fence, a row of trees and streaks of wind, all
+  // rolling toward you.
+  function drawSides() {
+    const v = view;
+    const top = Math.min(0, v.y0) - 120, bottom = Math.max(H, v.y1) + 120;
+    [-1, 1].forEach((side) => {
+      const edge = side < 0 ? 0 : W;
+      // Fence: posts with a rail.
+      const px = edge + side * 18;
+      ctx.fillStyle = "#e9c46a";
+      ctx.fillRect(px - 2, top, 4, bottom - top);
+      ctx.fillStyle = "#d4a373";
+      for (let y = top + (time * 40) % 60; y < bottom; y += 60) { rr(px - 4, y - 4, 8, 8, 2); ctx.fill(); }
+      // Wind streaks.
+      ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+      for (let i = 0; i < 7; i++) {
+        const x = edge + side * (6 + ((i * 29) % 50));
+        const y = top + ((i * 157 + time * 104) % (bottom - top));
+        ctx.fillRect(x - 1, y, 2, 60 + (i % 3) * 30);
+      }
+      // Trees: one row near the fence, and a few further out. Tree n always looks the same.
+      for (let row = 0; row < 2; row++) {
+        const gap = row ? 210 : 140;
+        const shift = time * 40 + (side > 0 ? gap / 2 : 0) + row * 50;
+        for (let n = Math.floor((top - shift) / gap); n * gap + shift < bottom + 80; n++) {
+          const k = ((n * 7 + row * 3 + (side > 0 ? 5 : 0)) % 10 + 10) % 10;
+          const x = edge + side * (row ? 190 + k * 11 : 70 + ((k * 53) % 60));
+          if (side < 0 ? x < v.x0 - 60 : x > v.x1 + 60) continue;
+          drawTree(x, n * gap + shift, 0.8 + ((k * 37) % 10) / 20, k % 3 ? "#52b788" : "#40916c");
+        }
+      }
+    });
+  }
+
+  function drawTree(x, y, s, color) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+    ctx.beginPath(); ctx.ellipse(x, y + 2, 22 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#8b5a2b";
+    ctx.fillRect(x - 4 * s, y - 24 * s, 8 * s, 26 * s);
+    circle(x, y - 40 * s, 24 * s, color);
+    circle(x + 9 * s, y - 56 * s, 16 * s, "#52b788");
+  }
+
+  // On a tall screen the field runs on into the haze above it, so the enemies fade in from far away.
+  function drawHaze() {
+    const v = view;
+    if (v.y0 >= 0) return;
+    const fade = Math.min(90, -v.y0);
+    const grad = ctx.createLinearGradient(0, -fade, 0, 0);
+    grad.addColorStop(0, "rgba(189, 224, 254, 1)");
+    grad.addColorStop(1, "rgba(189, 224, 254, 0)");
+    ctx.fillStyle = "#bde0fe";
+    ctx.fillRect(v.x0, v.y0, v.x1 - v.x0, -fade - v.y0);
+    ctx.fillStyle = grad;
+    ctx.fillRect(v.x0, -fade, v.x1 - v.x0, fade);
+  }
+
+  // A tower from your city, standing on the wall with your weapon on top.
+  function drawTower(s) {
+    const x = s.x, y = s.y;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.beginPath(); ctx.ellipse(x, y + 10, 18, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#adb5bd"; rr(x - 13, y - 34, 26, 44, 4); ctx.fill();
+    ctx.strokeStyle = "#6c757d"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = "#adb5bd";
+    for (let k = 0; k < 3; k++) ctx.fillRect(x - 13 + k * 10, y - 40, 6, 7);
+    ctx.fillStyle = "#2b2d42"; rr(x - 4, y - 22, 8, 12, 4); ctx.fill();
+    weaponIcon(g.tier, x, y - 48, 9);
   }
 
   // Your life gauge along the bottom.
@@ -1131,9 +1242,13 @@
   }
 
   function draw() {
+    ctx.setTransform(view.k, 0, 0, view.k, view.ox, view.oy);
+    const all = [view.x0, view.y0, view.x1 - view.x0, view.y1 - view.y0];
+    el.menu.hidden = state === "playing";
     ctx.save();
     if (g.shake > 0) ctx.translate((Math.random() - 0.5) * 12 * g.shake, (Math.random() - 0.5) * 12 * g.shake);
     drawField();
+    city.towerSpots().forEach(drawTower);
 
     g.doors.forEach((p) => p.list.forEach((d) => drawDoor(p, d)));
 
@@ -1155,7 +1270,14 @@
       }
     });
 
-    g.bullets.forEach(drawBullet);
+    g.bullets.forEach((b) => {
+      if (!b.vx) return drawBullet(b);
+      // Tower shots fly at an angle.
+      ctx.save();
+      ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(b.vx, -b.vy)); ctx.translate(-b.x, -b.y);
+      drawBullet(b);
+      ctx.restore();
+    });
     g.shots.forEach(drawShot);
 
     squadSpots().forEach((s) => drawUnit(s.x, s.y, s.i === 0, g.kick > 0 ? 1 : 0, g.tier));
@@ -1165,11 +1287,12 @@
     g.tumblers.forEach((t) => drawEnemy({ type: t.type, x: t.x, y: t.y, rot: t.rot, seed: t.seed, flash: 0 }, true));
 
     drawFx();
+    drawHaze();
     ctx.restore();
 
     if (g.hurt > 0) {
       ctx.fillStyle = "rgba(255, 107, 107, " + g.hurt * 0.6 + ")";
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(...all);
     }
 
     if (state === "playing" && g.banner && g.banner.t > 0) {
@@ -1185,13 +1308,13 @@
 
     if (state !== "playing") {
       ctx.fillStyle = "rgba(43, 45, 66, 0.45)";
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(...all);
       if (state === "ready") {
         bigText([[t("🪖 Army Rush!"), 44, "#ffd93d"], [t("A silly army is coming!"), 24], [t("Shoot boxes to get"), 24],
           [t("a new weapon 🏹, more of it,"), 24], [t("or a stronger defence 🧱"), 24],
           [t("Level: {name}", { name: LEVELS[level].name }), 24, "#ffd93d"], [t("Tap to start!"), 32, "#6bcb77"]], H * 0.18);
       } else if (state === "over") {
-        bigText([[t("Oh no! 😵"), 48, "#ff6b6b"], [t("They got through!"), 28], [t("You reached wave {n}", { n: g.wave + 1 }), 26],
+        bigText([[t("Oh no! 😵"), 48, "#ff6b6b"], [t("They got through!"), 28], [t("You reached wave {n}", { n: city.on ? city.round : g.wave + 1 }), 26],
           [t("Tip: open more boxes!"), 24, "#ffd93d"], [t("Tap to try again"), 32, "#6bcb77"]], H * 0.28);
       } else {
         bigText([[t("YOU WIN! 🏆"), 50, "#ffd93d"], [t("The King Tank"), 28], [t("went BOING!"), 28],
@@ -1200,6 +1323,39 @@
       drawFx("confetti");
     }
   }
+
+  // ---------- Fitting the field on the screen ----------
+
+  // The canvas fills the whole screen. The field (W x H) is as big as it can be: on a tall screen
+  // it stands just above the ⬅️ ➡️ buttons, under the top bar; on a wide one it fills the height.
+  // k is screen pixels per field unit, and x0..x1, y0..y1 is the part of the world on screen.
+  const view = { k: 1, ox: 0, oy: 0, x0: 0, y0: 0, x1: W, y1: H };
+  const TOP = 56, BOTTOM = 84;
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    let s, top;
+    if (w / W < h / H) {
+      s = Math.min(w / W, (h - TOP - BOTTOM) / H);
+      top = Math.max(TOP, h - BOTTOM - H * s);
+    } else {
+      s = h / H;
+      top = 0;
+    }
+    view.k = s * dpr;
+    view.ox = ((w - W * s) / 2) * dpr;
+    view.oy = top * dpr;
+    view.x0 = -view.ox / view.k;
+    view.y0 = -view.oy / view.k;
+    view.x1 = (canvas.width - view.ox) / view.k;
+    view.y1 = (canvas.height - view.oy) / view.k;
+  }
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  else window.addEventListener("resize", resize);
 
   // ---------- Loop + controls ----------
 
@@ -1225,7 +1381,7 @@
 
   function canvasX(e) {
     const rect = canvas.getBoundingClientRect();
-    return ((e.clientX - rect.left) / rect.width) * W;
+    return (((e.clientX - rect.left) / rect.width) * canvas.width - view.ox) / view.k;
   }
 
   canvas.addEventListener("pointerdown", (e) => {
@@ -1276,7 +1432,7 @@
   // ?debug lets the test script fast-forward the battle and steer the army.
   if (/[?&]debug/.test(location.search)) {
     window.armyDebug = {
-      get g() { return g; }, get state() { return state; }, dps, nextWeapon, WEAPONS, ENEMIES, input, start,
+      get g() { return g; }, get state() { return state; }, dps, nextWeapon, WEAPONS, ENEMIES, input, start, city,
       setLevel(l) { level = l; },
       step(n) { for (let i = 0; i < n; i++) { update(STEP); updateFx(STEP); } },
     };

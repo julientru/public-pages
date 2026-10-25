@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Army Rush FPS</title>
   <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../army/city.css">
   <style>
     html, body { height: 100%; overflow: hidden; }
     body { padding: 0; background: #bde0fe; }
@@ -27,6 +28,9 @@
       font-size: clamp(0.85rem, 3.6vw, 1.1rem);
     }
     .hud .btn.home { pointer-events: auto; min-width: 44px; min-height: 44px; padding: 4px 8px; font-size: 1.2rem; cursor: pointer; }
+    .hud .btn.city-open { pointer-events: auto; min-width: 44px; min-height: 44px; padding: 4px 8px; font-size: 1.2rem; }
+    .hud .city-open span { background: none; padding: 0; }
+    #menu .city-toggle { flex: 0 0 100%; justify-content: center; margin: 0; }
     .hud span { background: rgba(255, 255, 255, 0.85); padding: 4px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; }
     .hud #weapon { margin-left: auto; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     #banner {
@@ -83,6 +87,7 @@
     }
     #menu[hidden], .gauges[hidden] { display: none; }
     @media (max-width: 520px) { #menu { left: 8px; right: 8px; bottom: 96px; flex-wrap: nowrap; } }
+    #menu:has(.city-toggle) { flex-wrap: wrap; }
     #menu .btn { min-height: 44px; padding: 6px 10px; font-size: clamp(0.85rem, 3.6vw, 1.1rem); cursor: pointer; }
     @media (orientation: landscape) and (max-height: 500px) {
       #screen { padding-top: 48px; padding-bottom: 64px; font-size: clamp(0.8rem, 3.4vh, 1.2rem); gap: 0; }
@@ -130,6 +135,8 @@
   <script src="../army/strings.js"></script>
   <script src="../army3d/strings.js"></script>
   <script src="strings.js"></script>
+  <script src="../army/city-strings.js"></script>
+  <script src="../army/city.js"></script>
   <script src="armyfps.js"></script>
 </body>
 </html>
