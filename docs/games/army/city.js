@@ -10,30 +10,30 @@
 window.ArmyCity = (function () {
   const t = I18n.t;
 
-  // pop = people needed to reach this age, cap = people per house in this age, house = the look
+  // pop = people needed to reach this age, house = the look
   // of the houses, mark = the landmark built in this age (it stays in the city forever),
   // ride = what drives along the road, sky = what flies over the city.
   const ERAS = [
-    { name: t("Stone Age"), emoji: "🦴", pop: 0, cap: 2, ground: "#a7c957", wall: "#8b5a2b", mark: "🗿", house: 0 },
-    { name: t("First Farmers"), emoji: "🌾", pop: 4, cap: 2, ground: "#b5d67a", wall: "#8b5a2b", mark: "🌻", house: 0 },
-    { name: t("Egyptian Empire"), emoji: "🐫", pop: 7, cap: 3, ground: "#e9d8a6", wall: "#c9a66b", mark: "pyramid", house: 1, tree: "🌴" },
-    { name: t("Ancient Greece"), emoji: "🦉", pop: 10, cap: 3, ground: "#cfe1b9", wall: "#e0d6c8", mark: "🏛️", house: 2, tree: "🫒" },
-    { name: t("Roman Empire"), emoji: "🦅", pop: 14, cap: 4, ground: "#b5c99a", wall: "#d6ccc2", mark: "🏟️", house: 2 },
-    { name: t("Chinese Empire"), emoji: "🐉", pop: 18, cap: 4, ground: "#a7c4a0", wall: "#9c6644", mark: "🏯", house: 3, sky: "🪁", tree: "🎋" },
-    { name: t("Viking Age"), emoji: "🛡️", pop: 23, cap: 5, ground: "#9cc5a1", wall: "#6f4518", mark: "🛶", house: 4, tree: "🌲" },
-    { name: t("Middle Ages"), emoji: "🏰", pop: 29, cap: 5, ground: "#95d5b2", wall: "#8d99ae", mark: "🏰", house: 5 },
-    { name: t("Renaissance"), emoji: "🎨", pop: 36, cap: 6, ground: "#b7e4c7", wall: "#bfb5a5", mark: "⛪", house: 6 },
-    { name: t("Age of Explorers"), emoji: "🧭", pop: 44, cap: 6, ground: "#b7e4c7", wall: "#7f8c8d", mark: "⛵", house: 6, tree: "🌴" },
-    { name: t("Industrial Age"), emoji: "🏭", pop: 53, cap: 7, ground: "#a3b18a", wall: "#9c6644", mark: "🏭", house: 7, sky: "🎈" },
-    { name: t("Railway Age"), emoji: "🚂", pop: 63, cap: 8, ground: "#a3b18a", wall: "#7f5539", mark: "🚉", house: 7, ride: "🚂🚃🚃" },
-    { name: t("Electric Age"), emoji: "💡", pop: 75, cap: 9, ground: "#b8c0a8", wall: "#6c757d", mark: "🗼", house: 8, ride: "🚋", sky: "🎈" },
-    { name: t("Age of Cars"), emoji: "🚗", pop: 88, cap: 10, ground: "#ced4da", wall: "#6c757d", mark: "🎡", house: 8, ride: "🚗", sky: "🛩️" },
-    { name: t("Jet Age"), emoji: "✈️", pop: 103, cap: 11, ground: "#ced4da", wall: "#6c757d", mark: "🛫", house: 9, ride: "🚌", sky: "✈️" },
-    { name: t("Space Age"), emoji: "🚀", pop: 120, cap: 12, ground: "#dee2ff", wall: "#adb5bd", mark: "🚀", house: 10, ride: "🚙", sky: "🛰️" },
-    { name: t("Computer Age"), emoji: "💻", pop: 140, cap: 13, ground: "#d8e2dc", wall: "#adb5bd", mark: "🖥️", house: 11, ride: "🚕", sky: "🚁" },
-    { name: t("Internet Age"), emoji: "🌐", pop: 165, cap: 14, ground: "#cddafd", wall: "#8e9aaf", mark: "📡", house: 11, ride: "🚙", sky: "🛰️" },
-    { name: t("Robot Age"), emoji: "🦾", pop: 195, cap: 16, ground: "#b8c0ff", wall: "#7b8cde", mark: "🤖", house: 12, ride: "🛸", sky: "🚁" },
-    { name: t("AI Empire"), emoji: "🤖", pop: 230, cap: 18, ground: "#3d405b", wall: "#00dcff", mark: "🧠", house: 12, ride: "🛸", sky: "🛸", tree: "💠" },
+    { name: t("Stone Age"), emoji: "🦴", pop: 0, ground: "#a7c957", wall: "#8b5a2b", mark: "🗿", house: 0 },
+    { name: t("First Farmers"), emoji: "🌾", pop: 4, ground: "#b5d67a", wall: "#8b5a2b", mark: "🌻", house: 0 },
+    { name: t("Egyptian Empire"), emoji: "🐫", pop: 7, ground: "#e9d8a6", wall: "#c9a66b", mark: "pyramid", house: 1, tree: "🌴" },
+    { name: t("Ancient Greece"), emoji: "🦉", pop: 10, ground: "#cfe1b9", wall: "#e0d6c8", mark: "🏛️", house: 2, tree: "🫒" },
+    { name: t("Roman Empire"), emoji: "🦅", pop: 14, ground: "#b5c99a", wall: "#d6ccc2", mark: "🏟️", house: 2 },
+    { name: t("Chinese Empire"), emoji: "🐉", pop: 18, ground: "#a7c4a0", wall: "#9c6644", mark: "🏯", house: 3, sky: "🪁", tree: "🎋" },
+    { name: t("Viking Age"), emoji: "🛡️", pop: 23, ground: "#9cc5a1", wall: "#6f4518", mark: "🛶", house: 4, tree: "🌲" },
+    { name: t("Middle Ages"), emoji: "🏰", pop: 29, ground: "#95d5b2", wall: "#8d99ae", mark: "🏰", house: 5 },
+    { name: t("Renaissance"), emoji: "🎨", pop: 36, ground: "#b7e4c7", wall: "#bfb5a5", mark: "⛪", house: 6 },
+    { name: t("Age of Explorers"), emoji: "🧭", pop: 44, ground: "#b7e4c7", wall: "#7f8c8d", mark: "⛵", house: 6, tree: "🌴" },
+    { name: t("Industrial Age"), emoji: "🏭", pop: 53, ground: "#a3b18a", wall: "#9c6644", mark: "🏭", house: 7, sky: "🎈" },
+    { name: t("Railway Age"), emoji: "🚂", pop: 63, ground: "#a3b18a", wall: "#7f5539", mark: "🚉", house: 7, ride: "🚂🚃🚃" },
+    { name: t("Electric Age"), emoji: "💡", pop: 75, ground: "#b8c0a8", wall: "#6c757d", mark: "🗼", house: 8, ride: "🚋", sky: "🎈" },
+    { name: t("Age of Cars"), emoji: "🚗", pop: 88, ground: "#ced4da", wall: "#6c757d", mark: "🎡", house: 8, ride: "🚗", sky: "🛩️" },
+    { name: t("Jet Age"), emoji: "✈️", pop: 103, ground: "#ced4da", wall: "#6c757d", mark: "🛫", house: 9, ride: "🚌", sky: "✈️" },
+    { name: t("Space Age"), emoji: "🚀", pop: 120, ground: "#dee2ff", wall: "#adb5bd", mark: "🚀", house: 10, ride: "🚙", sky: "🛰️" },
+    { name: t("Computer Age"), emoji: "💻", pop: 140, ground: "#d8e2dc", wall: "#adb5bd", mark: "🖥️", house: 11, ride: "🚕", sky: "🚁" },
+    { name: t("Internet Age"), emoji: "🌐", pop: 165, ground: "#cddafd", wall: "#8e9aaf", mark: "📡", house: 11, ride: "🚙", sky: "🛰️" },
+    { name: t("Robot Age"), emoji: "🦾", pop: 195, ground: "#b8c0ff", wall: "#7b8cde", mark: "🤖", house: 12, ride: "🛸", sky: "🚁" },
+    { name: t("AI Empire"), emoji: "🤖", pop: 230, ground: "#3d405b", wall: "#00dcff", mark: "🧠", house: 12, ride: "🛸", sky: "🛸", tree: "💠" },
   ];
   const LAST = ERAS.length - 1;
   // With a city, the enemy waves match your age: they repeat until you reach the next age,
@@ -65,7 +65,8 @@ window.ArmyCity = (function () {
   const EAT = 0.12;        // food each person eats every second
   const NEWCOMER = 6;      // food for each new person
   const PER_LAB = 3;       // scientists in each lab
-  const MAX_BUILD = { lab: 4, barracks: 4, tower: 4 };
+  const MAX_BUILD = { lab: 4, barracks: 4 };
+  const TOWER_SLOTS = 4;
   const TRAIN_EVERY = 10;  // seconds for a barracks to train a soldier
 
   const MW = 480, MH = 360; // the city map: the town, then the road of history at the bottom
@@ -95,7 +96,8 @@ window.ArmyCity = (function () {
 
     function reset() {
       c = {
-        people: 1, jobs: {}, houses: 1, lab: 0, barracks: 0, tower: 0, wallLevel: 0,
+        people: 1, jobs: {}, houses: 1, lab: 0, barracks: 0, wallLevel: 0,
+        towers: [], towerLevel: 0, lv: { house: 0, lab: 0, barracks: 0 }, // towers: one slot each, null once destroyed
         food: 10, bricks: 0, iron: 0, gold: 0, ideas: 0,
         era: 0, arriveIn: 3, trainIn: TRAIN_EVERY, towerIn: [0, 0.5, 0.25, 0.75], hungry: false,
         order: ["house"], // buildings in the town, in the order they were built
@@ -110,8 +112,13 @@ window.ArmyCity = (function () {
     const g = () => opts.game();
     const tools = () => 1 + 0.3 * c.era;
     const idle = () => c.people - JOBS.reduce((s, j) => s + c.jobs[j.id], 0);
-    const room = () => c.houses * ERAS[c.era].cap;
+    // Every house upgrade (one per age) makes room for one more person in each house.
+    const houseCap = (lv) => 2 + lv;
+    const room = () => c.houses * houseCap(c.lv.house);
+    const towerCount = () => c.towers.filter(Boolean).length;
     const labRoom = () => c.lab * PER_LAB;
+    const labBoost = () => 1 + 0.5 * c.lv.lab;
+    const campBoost = () => 1 + 0.3 * c.lv.barracks;
     const jobOpen = (j) => (!j.era || c.era >= j.era) && (!j.lab || c.jobs[j.id] < labRoom());
 
     function costs(what) {
@@ -120,7 +127,15 @@ window.ArmyCity = (function () {
         case "house": return { bricks: 5 + 3 * c.houses };
         case "lab": return { bricks: 15 + 10 * c.lab, gold: 10 + 10 * c.lab };
         case "barracks": return { bricks: 12 + 10 * c.barracks, iron: 5 + 5 * c.barracks };
-        case "tower": return { bricks: 15 + 15 * c.tower, iron: 8 + 8 * c.tower };
+        case "tower": return { bricks: 15 + 15 * towerCount(), iron: 8 + 8 * towerCount() };
+        case "towerUp": { const L = c.towerLevel; return { bricks: 15 + 12 * L, iron: 10 + 10 * L, gold: 5 + 8 * L }; }
+        case "towerFix": {
+          const missing = c.towers.reduce((s, tw) => s + (tw ? tw.max - tw.hp : 0), 0);
+          return { bricks: Math.max(2, Math.ceil(missing / 8)) };
+        }
+        case "up_house": { const L = c.lv.house, n = c.houses; return { bricks: (3 + 2 * L) * n, gold: (1 + L) * n }; }
+        case "up_lab": { const L = c.lv.lab, n = c.lab; return { bricks: (8 + 6 * L) * n, gold: (8 + 6 * L) * n, iron: (2 + 2 * L) * n }; }
+        case "up_barracks": { const L = c.lv.barracks, n = c.barracks; return { bricks: (8 + 6 * L) * n, iron: (4 + 4 * L) * n }; }
         case "wall": return { bricks: 10 + 8 * c.wallLevel };
         case "fix": return { bricks: 4 };
         case "soldier": return { gold: 6 + 3 * tier, iron: 2 + 2 * tier };
@@ -158,10 +173,11 @@ window.ArmyCity = (function () {
       JOBS.forEach((j) => {
         const n = c.jobs[j.id];
         if (!n) return;
-        c[j.makes] += n * j.rate * m * dt;
+        c[j.makes] += n * j.rate * m * (j.lab ? labBoost() : 1) * dt;
         c.made[j.makes] = true;
       });
-      c.food -= c.people * EAT * dt;
+      // The bigger the city, the more each person eats.
+      c.food -= c.people * EAT * (1 + c.people / 12) * dt;
       c.hungry = c.food <= 0;
       if (c.food < 0) c.food = 0;
 
@@ -211,7 +227,7 @@ window.ArmyCity = (function () {
 
       // Barracks train soldiers for your army.
       if (c.barracks) {
-        c.trainIn -= dt * c.barracks;
+        c.trainIn -= dt * c.barracks * campBoost();
         if (c.trainIn <= 0) {
           const cost = costs("train");
           if (b.count < weapons[b.tier].max && affords(cost)) {
@@ -232,18 +248,71 @@ window.ArmyCity = (function () {
 
     // ---------- Towers ----------
 
-    // Where the towers stand on the battle wall (as many as you built).
+    // A tower shoots a weapon you paid for, always at least one step behind your army's,
+    // so it never gets the mega bomb. It has its own life: the enemy goes for it first.
+    const towerTop = () => Math.max(0, Math.min(g().tier - 1, weapons.length - 2));
+    const towerTier = () => Math.min(c.towerLevel, towerTop());
+    const towerMax = () => 60 + 30 * c.towerLevel + 10 * c.era;
+
+    // Where the towers stand on the battle wall (the ones still standing).
     function towerSpots() {
       if (!on) return [];
-      const W = opts.W;
-      return [26, W - 26, 140, W - 140].slice(0, c.tower).map((x) => ({ x, y: opts.wallY }));
+      const W = opts.W, xs = [26, W - 26, 140, W - 140], tier = towerTier();
+      const out = [];
+      c.towers.forEach((tw, i) => { if (tw) out.push({ x: xs[i], y: opts.wallY, hp: tw.hp, max: tw.max, tier, slot: i }); });
+      return out;
     }
 
-    // Each tower shoots your own weapon at the nearest enemy, a bit slower than a soldier.
+    function nearestTower(x) {
+      let best = null;
+      towerSpots().forEach((s) => { if (!best || Math.abs(s.x - x) < Math.abs(best.x - x)) best = s; });
+      return best;
+    }
+
+    function hurtTower(slot, dmg) {
+      const tw = c.towers[slot];
+      if (!tw) return;
+      tw.hp -= dmg;
+      if (tw.hp > 0) return;
+      c.towers[slot] = null;
+      tellBattle(t("💥 A tower fell! Build a new one"));
+      c.alert = { text: t("💥 A tower fell! Build a new one"), level: 3 };
+      c.alertT = 2.5;
+      opts.sync();
+    }
+
+    // The enemy goes for the towers first: it walks towards the nearest one...
+    function towerPull(x, y) {
+      const s = y < opts.wallY ? nearestTower(x) : null;
+      return !s || Math.abs(s.x - x) < 4 ? 0 : Math.sign(s.x - x) * 30;
+    }
+    // ...throws its shots at it (the sideways speed that lands the shot on the tower)...
+    function towerAim(x, y, vy) {
+      const s = nearestTower(x);
+      return s ? ((s.x - x) * vy) / Math.max(40, s.y - 20 - y) : 0;
+    }
+    // ...and a shot or a bash that reaches a tower hurts the tower, not the wall.
+    // The shield keeps the shots off the towers too.
+    function towerShot(x, y, dmg) {
+      if (y < opts.wallY - 30) return false;
+      const s = towerSpots().find((p) => Math.abs(p.x - x) < 16);
+      if (!s) return false;
+      if (!(g().shield > 0)) hurtTower(s.slot, dmg);
+      return true;
+    }
+    function towerBash(x, r, dmg) {
+      const s = towerSpots().find((p) => Math.abs(p.x - x) < r + 14);
+      if (!s) return false;
+      hurtTower(s.slot, dmg);
+      return true;
+    }
+
+    // Each tower shoots at the nearest enemy, a bit slower than a soldier.
     function fireTowers(dt) {
       const b = g();
-      const w = weapons[b.tier];
-      towerSpots().forEach((s, i) => {
+      const w = weapons[towerTier()];
+      towerSpots().forEach((s) => {
+        const i = s.slot;
         c.towerIn[i] -= dt;
         if (c.towerIn[i] > 0) return;
         const y0 = s.y - 24;
@@ -269,16 +338,20 @@ window.ArmyCity = (function () {
       let alert = null;
       if (b.wall <= 0 && attack) alert = { text: t("💥 Your wall is broken! Go and fight!"), level: 3 };
       else if (c.lastWall !== null && b.wall < c.lastWall - 0.01) alert = { text: t("🧱 They are hitting your wall! ({n}%)", { n: Math.ceil((100 * b.wall) / b.wallMax) }), level: 2 };
+      else if (c.lastTowers !== undefined && towerHp() < c.lastTowers - 0.01) alert = { text: t("🗼 They are hitting your towers!"), level: 2 };
       else if (c.lastLife !== null && b.life < c.lastLife) alert = { text: t("❤️ Ouch! They got through!"), level: 3 };
       else if (attack) alert = { text: t("⚠️ Attack! The enemy is here!"), level: 1 };
-      if (alert) { c.alert = alert; c.alertT = alert.level >= 2 ? 1.5 : 0.3; }
+      if (c.alert && c.alert.level === 3 && c.alertT > 0 && (!alert || alert.level < 3)) { c.alertT -= dt; alert = null; } // keep a big alert up a moment
+      else if (alert) { c.alert = alert; c.alertT = alert.level >= 2 ? 1.5 : 0.3; }
       else if (c.alertT > 0) c.alertT -= dt;
       else c.alert = null;
       if (alert && !c.wasAttack && attack && open && navigator.vibrate) navigator.vibrate(200);
       c.wasAttack = attack;
       c.lastWall = b.wall;
       c.lastLife = b.life;
+      c.lastTowers = towerHp();
     }
+    const towerHp = () => c.towers.reduce((s, tw) => s + (tw ? tw.hp : 0), 0);
 
     // ---------- Actions ----------
 
@@ -314,8 +387,22 @@ window.ArmyCity = (function () {
         const s = cellSpot(c.order.length - 1);
         float("✨", s.x, s.y - 10);
       } else if (what === "tower") {
-        c.tower++;
+        let slot = c.towers.indexOf(null);
+        if (slot < 0) slot = c.towers.length;
+        c.towers[slot] = { hp: towerMax(), max: towerMax() };
+        c.towerIn[slot] = 0.5;
         tellBattle(t("🗼 New tower on your wall!"));
+      } else if (what === "towerUp") {
+        c.towerLevel++;
+        c.towers.forEach((tw) => { if (tw) { const m = towerMax(); tw.hp += m - tw.max; tw.max = m; } });
+        tellBattle(t("🗼 Your towers now shoot {name}!", { name: weapons[towerTier()].emoji + " " + weapons[towerTier()].name }));
+      } else if (what === "towerFix") {
+        c.towers.forEach((tw) => { if (tw) tw.hp = tw.max; });
+        tellBattle(t("🔧 Towers fixed!"));
+      } else if (what.startsWith("up_")) {
+        const kind = what.slice(3);
+        c.lv[kind]++;
+        c.order.forEach((k, i) => { if (k === kind) { const s = cellSpot(i); float("⭐", s.x, s.y - 12, "#ffd93d"); } });
       } else if (what === "wall") {
         c.wallLevel++;
         b.wallMax += 50;
@@ -338,6 +425,10 @@ window.ArmyCity = (function () {
       const b = g();
       if ((what === "house" || what === "lab" || what === "barracks") && c.order.length >= CELLS.length) return false;
       if (MAX_BUILD[what] !== undefined && c[what] >= MAX_BUILD[what]) return false;
+      if (what === "tower") return towerCount() < TOWER_SLOTS;
+      if (what === "towerUp") return towerCount() > 0 && c.towerLevel < towerTop();
+      if (what === "towerFix") return c.towers.some((tw) => tw && tw.hp < tw.max);
+      if (what.startsWith("up_")) { const kind = what.slice(3); return (kind === "house" ? c.houses : c[kind]) > 0 && c.lv[kind] < c.era; }
       if (what === "fix") return b.wall < b.wallMax;
       if (what === "soldier") return b.count < weapons[b.tier].max;
       if (what === "invest") { const r = research(); return !!r && c.ideas < r.ideas; }
@@ -390,7 +481,7 @@ window.ArmyCity = (function () {
       const chip = el("span", "city-chip");
       chip.title = r.name;
       chip.setAttribute("aria-label", r.name);
-      chip.append(el("span", "", r.emoji), el("b"));
+      chip.append(r.id === "gold" ? coin() : el("span", "", r.emoji), el("b"));
       ui.res.appendChild(chip);
       resChips[r.id] = chip.querySelector("b");
     });
@@ -410,6 +501,22 @@ window.ArmyCity = (function () {
       ui.tabs.appendChild(btn);
       return { tb, btn };
     });
+
+    // Gold is shown as a round coin with a $ on it (the 🪙 picture is hard to read).
+    function coin() {
+      const e = el("span", "city-coin", "$");
+      e.setAttribute("aria-label", t("Gold"));
+      return e;
+    }
+    function rich(elm, text) {
+      if (elm.dataset.text === text) return;
+      elm.dataset.text = text;
+      elm.textContent = "";
+      text.split("🪙").forEach((part, i) => {
+        if (i) elm.appendChild(coin());
+        if (part) elm.appendChild(document.createTextNode(part));
+      });
+    }
 
     function costText(cost) {
       return Object.keys(cost).map((k) => ICON[k] + " " + fmt(cost[k])).join("  ");
@@ -463,12 +570,12 @@ window.ArmyCity = (function () {
           const locked = j.era && c.era < j.era;
           const noLab = j.lab && labRoom() === 0;
           r.r.classList.toggle("locked", !!(locked || noLab));
-          if (locked) r.sub.textContent = t("🔒 From the {name}", { name: ERAS[j.era].emoji + " " + ERAS[j.era].name });
-          else if (noLab) r.sub.textContent = t("🔒 Build a lab first");
+          if (locked) rich(r.sub, t("🔒 From the {name}", { name: ERAS[j.era].emoji + " " + ERAS[j.era].name }));
+          else if (noLab) rich(r.sub, t("🔒 Build a lab first"));
           else {
             let s = t("makes {what}", { what: ICON[j.makes] + " " + fmt(j.rate * tools() * 10) / 10 + "/s" });
             if (j.lab) s += " · " + t("{n} in each lab", { n: PER_LAB });
-            r.sub.textContent = s;
+            rich(r.sub, s);
           }
           count.textContent = c.jobs[j.id];
           minus.disabled = c.jobs[j.id] <= 0;
@@ -484,19 +591,34 @@ window.ArmyCity = (function () {
       rows.push({ update() {
         const can = canBuild(what);
         const cost = costs(what);
-        r.sub.textContent = info();
+        rich(r.sub, info());
         r.nm.textContent = name + (count ? " " + count() : "");
-        btn.textContent = can ? costText(cost) : "—";
+        rich(btn, can ? costText(cost) : "—");
         btn.disabled = !can || !affords(cost);
         btn.setAttribute("aria-label", t("Build") + " " + name);
       } });
     }
 
     function buildBuild() {
-      buildRow("house", "🏠", t("House"), () => t("Room for {n} people", { n: ERAS[c.era].cap }), () => "×" + c.houses);
+      // "Level 2  ⬆️ what the next level gives", or a lock until the next age.
+      const upInfo = (kind, next) => t("Level {n}", { n: c.lv[kind] + 1 }) + "  " + (c.lv[kind] < c.era ? "⬆️ " + next : t("🔒 Next age first"));
+      buildRow("house", "🏠", t("House"), () => t("Room for {n} people", { n: houseCap(c.lv.house) }), () => "×" + c.houses);
+      buildRow("up_house", "⬆️", t("Better houses"), () => upInfo("house", t("{n} people in each house", { n: houseCap(c.lv.house + 1) })));
       buildRow("lab", "🔬", t("Lab"), () => t("For {n} scientists, who find new weapons", { n: PER_LAB }), () => c.lab + "/" + MAX_BUILD.lab);
+      buildRow("up_lab", "⬆️", t("Better labs"), () => upInfo("lab", t("ideas ×{n}", { n: labBoost() + 0.5 })));
       buildRow("barracks", "⛺", t("Barracks"), () => t("Trains soldiers for your army"), () => c.barracks + "/" + MAX_BUILD.barracks);
-      buildRow("tower", "🗼", t("Tower"), () => t("Shoots at the enemy from your wall"), () => c.tower + "/" + MAX_BUILD.tower);
+      buildRow("up_barracks", "⬆️", t("Better barracks"), () => upInfo("barracks", t("trains ×{n} faster", { n: Math.round((campBoost() + 0.3) * 10) / 10 })));
+      buildRow("tower", "🗼", t("Tower"), () => t("Shoots at the enemy from your wall"), () => towerCount() + "/" + TOWER_SLOTS);
+      buildRow("towerUp", "⬆️", t("Better towers"), () => {
+        const w = weapons[towerTier()];
+        let s = t("Towers shoot {name}", { name: w.emoji + " " + w.name });
+        if (c.towerLevel >= towerTop()) s += "  " + t("🔒 Always one weapon behind your army");
+        return s;
+      });
+      buildRow("towerFix", "🔧", t("Fix the towers"), () => {
+        const max = c.towers.reduce((s, tw) => s + (tw ? tw.max : 0), 0);
+        return max ? t("Towers: {n}%", { n: Math.ceil((100 * towerHp()) / max) }) : t("No tower yet");
+      });
       buildRow("wall", "🧱", t("Stronger wall"), () => t("+50 wall, and fixes it"), () => "×" + c.wallLevel);
       buildRow("fix", "🔧", t("Fix the wall"), () => {
         const b = g();
@@ -523,9 +645,9 @@ window.ArmyCity = (function () {
         const cost = costs("train");
         campBar.hidden = !c.barracks;
         campBar.firstChild.style.width = (100 * (1 - c.trainIn / TRAIN_EVERY)) + "%";
-        if (!c.barracks) camp.sub.textContent = t("Build barracks to train soldiers");
-        else if (b.count >= weapons[b.tier].max) camp.sub.textContent = t("Your army is full!");
-        else camp.sub.textContent = t("Next soldier for {cost}", { cost: costText(cost) });
+        if (!c.barracks) rich(camp.sub, t("Build barracks to train soldiers"));
+        else if (b.count >= weapons[b.tier].max) rich(camp.sub, t("Your army is full!"));
+        else rich(camp.sub, t("Next soldier for {cost}", { cost: costText(cost) }));
       } });
 
       const buy = row("🛒", t("Buy a soldier"));
@@ -534,7 +656,7 @@ window.ArmyCity = (function () {
       rows.push({ update() {
         const can = canBuild("soldier");
         buy.sub.textContent = t("With gold from your traders");
-        buyBtn.textContent = can ? costText(costs("soldier")) : "—";
+        rich(buyBtn, can ? costText(costs("soldier")) : "—");
         buyBtn.disabled = !can || !affords(costs("soldier"));
       } });
 
@@ -560,7 +682,7 @@ window.ArmyCity = (function () {
       rows.push({ update() {
         const can = canBuild("invest");
         invest.sub.textContent = t("Gold gives ideas: {cost}", { cost: "💡 +8" });
-        investBtn.textContent = costText(costs("invest"));
+        rich(investBtn, costText(costs("invest")));
         investBtn.disabled = !can || !affords(costs("invest"));
       } });
     }
@@ -817,11 +939,12 @@ window.ArmyCity = (function () {
       }
     }
 
-    function drawSpecial(kind, x, y, era) {
+    // A lab or barracks, with a star for every upgrade.
+    function drawSpecial(kind, x, y, level) {
       ctx.fillStyle = "rgba(0,0,0,0.15)";
       ctx.beginPath(); ctx.ellipse(x, y + 16, 18, 5, 0, 0, Math.PI * 2); ctx.fill();
       if (kind === "lab") {
-        rr(x - 15, y - 6, 30, 22, 4); ctx.fillStyle = era >= 13 ? "#e3f2fd" : "#f1faee"; ctx.fill();
+        rr(x - 15, y - 6, 30, 22, 4); ctx.fillStyle = level >= 13 ? "#e3f2fd" : "#f1faee"; ctx.fill();
         ctx.fillStyle = "#9b5de5"; ctx.fillRect(x - 15, y - 9, 30, 5);
         emoji("🔬", x, y + 4, 16);
       } else {
@@ -830,6 +953,11 @@ window.ArmyCity = (function () {
         ctx.fillStyle = "#283618"; ctx.beginPath(); ctx.moveTo(x - 4, y + 16); ctx.lineTo(x, y + 4); ctx.lineTo(x + 4, y + 16); ctx.fill();
         ctx.strokeStyle = "#3d2b1f"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x, y - 20); ctx.stroke();
         ctx.fillStyle = "#ff6b6b"; ctx.fillRect(x, y - 20, 9 + Math.sin(clock * 6) * 1.5, 6);
+      }
+      if (level > 0) {
+        rr(x + 6, y + 6, 18, 12, 6); ctx.fillStyle = "#ffd93d"; ctx.fill();
+        ctx.font = "bold 9px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#2b2d42";
+        ctx.fillText("★" + level, x + 15, y + 12.5);
       }
     }
 
@@ -974,14 +1102,54 @@ window.ArmyCity = (function () {
       });
       // Tower shots at the nearest enemy.
       if (list.length) {
-        TOWERS.slice(0, c.tower).forEach(([x, y], i) => {
-          if ((clock * 2 + i * 0.3) % 1 > 0.2) return;
+        TOWERS.forEach(([x, y], i) => {
+          if (!c.towers[i] || (clock * 2 + i * 0.3) % 1 > 0.2) return;
           let best = list[0];
           list.forEach((o) => { if (Math.hypot(o.p.x - x, o.p.y - y) < Math.hypot(best.p.x - x, best.p.y - y)) best = o; });
           if (Math.hypot(best.p.x - x, best.p.y - y) > 170) return; // too far for this tower
           ctx.strokeStyle = "#ffd93d"; ctx.lineWidth = 3;
           ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(best.p.x, best.p.y); ctx.stroke();
         });
+      }
+    }
+
+    // When the battle is lost, the enemy plants its silly flag in the middle of the town
+    // and dances around it.
+    function drawEnemyFlag() {
+      const x = HALL.x + 34, base = HALL.y + 40, top = base - 120;
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.beginPath(); ctx.ellipse(x, base, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#6d4c41"; rr(x - 2.5, top, 5, base - top, 2); ctx.fill();
+      ctx.fillStyle = "#ffd93d"; ctx.beginPath(); ctx.arc(x, top, 5, 0, Math.PI * 2); ctx.fill();
+      // The cloth waves in the wind: two stripes, purple and red.
+      const fw = 92, fh = 60, wave = (u) => Math.sin(clock * 5 - u * 5) * 6 * u;
+      const cloth = (y0, y1, color) => {
+        ctx.beginPath(); ctx.moveTo(x + 2, top + 4 + y0);
+        for (let u = 0; u <= 1.001; u += 0.1) ctx.lineTo(x + 2 + u * fw, top + 4 + y0 + wave(u));
+        for (let u = 1; u >= -0.001; u -= 0.1) ctx.lineTo(x + 2 + u * fw, top + 4 + y1 + wave(u));
+        ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+      };
+      cloth(0, fh / 2, "#9b5de5");
+      cloth(fh / 2, fh, "#c9184a");
+      // A cheeky face: wobbly googly eyes, a big grin and a tongue sticking out.
+      const fx = x + 2 + fw * 0.5, fy = top + 4 + fh / 2 + wave(0.5);
+      [-14, 14].forEach((dx, k) => {
+        ctx.fillStyle = "#fff"; ctx.strokeStyle = "#2b2d42"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(fx + dx, fy - 9, 9 - k * 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#2b2d42";
+        ctx.beginPath(); ctx.arc(fx + dx + Math.sin(clock * 7 + k * 2) * 3, fy - 9 + Math.cos(clock * 5 + k) * 3, 3.5, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.fillStyle = "#2b2d42";
+      ctx.beginPath(); ctx.moveTo(fx - 20, fy + 6); ctx.quadraticCurveTo(fx, fy + 24, fx + 20, fy + 6); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#ff8fab";
+      ctx.beginPath(); ctx.ellipse(fx + 5, fy + 18 + Math.sin(clock * 9) * 2, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
+      // Enemy soldiers dance around the pole.
+      for (let k = 0; k < 4; k++) {
+        const a = clock * 1.5 + (k * Math.PI) / 2;
+        const ex = x + Math.cos(a) * 34, ey = base + Math.sin(a) * 10 - Math.abs(Math.sin(clock * 8 + k)) * 5;
+        ctx.fillStyle = "#c9184a"; ctx.beginPath(); ctx.arc(ex, ey - 6, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#2b2d42"; ctx.beginPath(); ctx.arc(ex, ey - 8, 6.4, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.fillRect(ex - 3.5, ey - 6, 2.5, 2.5); ctx.fillRect(ex + 1, ey - 6, 2.5, 2.5);
       }
     }
 
@@ -1001,7 +1169,7 @@ window.ArmyCity = (function () {
       ctx.fillText(Math.ceil(health * 100) + "%", bx + 82, by + 12);
       emoji("🗼", bx + 116, by + 11, 12);
       ctx.font = "bold 11px sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = "#2b2d42";
-      ctx.fillText(String(c.tower), bx + 124, by + 12);
+      ctx.fillText(String(towerCount()), bx + 124, by + 12);
       ctx.globalAlpha = b.shield > 0 ? 1 : 0.25;
       emoji("🛡️", bx + 143, by + 11, 12);
       ctx.globalAlpha = 1;
@@ -1149,11 +1317,18 @@ window.ArmyCity = (function () {
         ctx.fillStyle = "rgba(144, 224, 239, 0.22)"; ctx.fill();
         ctx.strokeStyle = "#4d96ff"; ctx.lineWidth = 3; ctx.stroke();
       }
-      const w = weapons[b.tier];
-      TOWERS.slice(0, c.tower).forEach(([x, y]) => {
+      // Towers, each with its own life bar; a fallen one is a heap of stones until you build it again.
+      const w = weapons[towerTier()];
+      TOWERS.forEach(([x, y], i) => {
+        const tw = c.towers[i];
+        if (tw === null) { emoji("🪨", x - 5, y + 2, 10); emoji("🪨", x + 5, y - 1, 9); return; }
+        if (!tw) return;
         ctx.fillStyle = "#6c757d"; ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#adb5bd"; ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
         emoji(w.emoji, x, y, 11);
+        const r = Math.max(0, tw.hp / tw.max);
+        rr(x - 13, y + 13, 26, 6, 3); ctx.fillStyle = "#2b2d42"; ctx.fill();
+        rr(x - 12, y + 14, 24 * r, 4, 2); ctx.fillStyle = r > 0.5 ? "#6bcb77" : r > 0.25 ? "#ffd93d" : "#ff6b6b"; ctx.fill();
       });
 
       // Buildings and the town hall, back to front.
@@ -1162,8 +1337,8 @@ window.ArmyCity = (function () {
       spots.sort((a, b) => a.s.y - b.s.y);
       spots.forEach(({ kind, s }) => {
         if (kind === "hall") drawHall(era);
-        else if (kind === "house") drawHouse(s.x, s.y, E.house);
-        else drawSpecial(kind, s.x, s.y, era);
+        else if (kind === "house") drawHouse(s.x, s.y, ERAS[c.lv.house].house);
+        else drawSpecial(kind, s.x, s.y, c.lv[kind]);
       });
 
       // People walk from home to work and back.
@@ -1186,6 +1361,7 @@ window.ArmyCity = (function () {
       }
 
       drawEnemies();
+      if (opts.state() === "over") drawEnemyFlag();
       drawDefence();
 
       // Something flies over the city now and then.
@@ -1301,6 +1477,8 @@ window.ArmyCity = (function () {
       // How many waves came so far (with a city there is no last wave).
       get round() { return c.round + 1; },
       reset, tick, towerSpots, show,
+      // The enemy goes for the towers first (see towerPull and the ones after it).
+      towerPull, towerAim, towerShot, towerBash,
       // The wave after this one: the next in line, or with a city, one from your age.
       nextWave(cur) {
         if (!on) return cur + 1;

@@ -359,7 +359,8 @@
   function enemyShoot(e) {
     const T = ENEMIES[e.type];
     const s = T.shot;
-    g.shots.push({ x: e.x + (T.tank ? 0 : T.r * 0.6), y: e.y + T.r * 0.6, vy: s.kind === "bigshell" ? 190 : 150,
+    const x = e.x + (T.tank ? 0 : T.r * 0.6), y = e.y + T.r * 0.6, vy = s.kind === "bigshell" ? 190 : 150;
+    g.shots.push({ x, y, vy, vx: city.towerAim(x, y, vy),
       dmg: s.dmg, kind: s.kind, age: 0 });
     e.throwT = 0.3;
   }
@@ -435,10 +436,10 @@
       if (e.atWall) {
         e.y = stopY;
         e.bash += dt;
-        hurtWall(T.bash * L.hurt * dt);
+        if (!city.towerBash(e.x, T.r, T.bash * L.hurt * dt)) hurtWall(T.bash * L.hurt * dt);
       } else {
         e.y += T.speed * dt;
-        e.x += Math.sin(time * e.wobble + e.seed) * 14 * dt;
+        e.x += (Math.sin(time * e.wobble + e.seed) * 14 + city.towerPull(e.x, e.y)) * dt;
         e.x = Math.max(T.r, Math.min(W - T.r, e.x));
         e.shotIn -= dt;
         if (e.shotIn <= 0 && e.y > 30 && e.y < WALL_Y - 80) {
@@ -456,7 +457,10 @@
     // Enemy shots hit the wall, or your army once the wall is gone. The shield blocks them all.
     g.shots.forEach((s) => {
       s.y += s.vy * dt;
+      if (s.vx) s.x += s.vx * dt;
       s.age += dt;
+      // The enemy aims at your towers first: they take the hit instead of the wall.
+      if (city.towerShot(s.x, s.y, s.dmg * L.hurt)) { s.dead = true; return; }
       const lineY = g.wall > 0 ? WALL_Y - 6 : SQUAD_Y - 12;
       if (s.y < lineY) return;
       const onArmy = Math.abs(s.x - g.squadX) < squadHalfWidth() + 6;
@@ -1147,7 +1151,8 @@
     ctx.fillStyle = "#adb5bd";
     for (let k = 0; k < 3; k++) ctx.fillRect(x - 13 + k * 10, y - 40, 6, 7);
     ctx.fillStyle = "#2b2d42"; rr(x - 4, y - 22, 8, 12, 4); ctx.fill();
-    weaponIcon(g.tier, x, y - 48, 9);
+    weaponIcon(s.tier, x, y - 48, 9);
+    lifeBar(x, y - 66, 30, s.hp / s.max, s.hp / s.max); // its own life: the enemy goes for it first
   }
 
   // Your life gauge along the bottom.
@@ -1297,12 +1302,28 @@
 
     if (state === "playing" && g.banner && g.banner.t > 0) {
       ctx.globalAlpha = Math.min(1, g.banner.t * 2);
+      // A long message goes on two lines instead of being squeezed.
+      const font = (px) => "bold " + px + "px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
+      let px = 26;
+      ctx.font = font(px);
+      let lines = [g.banner.text];
+      if (ctx.measureText(g.banner.text).width > W - 60) {
+        const words = g.banner.text.split(" ");
+        let best = null;
+        for (let i = 1; i < words.length; i++) {
+          const a = words.slice(0, i).join(" "), b = words.slice(i).join(" ");
+          const wide = Math.max(ctx.measureText(a).width, ctx.measureText(b).width);
+          if (!best || wide < best.wide) best = { lines: [a, b], wide };
+        }
+        if (best) { lines = best.lines; px = Math.max(16, Math.min(24, Math.floor((24 * (W - 60)) / best.wide))); }
+      }
+      const boxH = lines.length > 1 ? 88 : 60;
       ctx.fillStyle = "rgba(43, 45, 66, 0.7)";
-      rr(20, H * 0.36, W - 40, 60, 16); ctx.fill();
-      ctx.font = "bold 26px 'Comic Sans MS', 'Chalkboard SE', sans-serif";
+      rr(20, H * 0.36, W - 40, boxH, 16); ctx.fill();
+      ctx.font = font(px);
       ctx.textAlign = "center";
       ctx.fillStyle = "#fff";
-      ctx.fillText(g.banner.text, W / 2, H * 0.36 + 40, W - 60);
+      lines.forEach((line, i) => ctx.fillText(line, W / 2, H * 0.36 + (lines.length > 1 ? 36 + i * 32 : 40), W - 60));
       ctx.globalAlpha = 1;
     }
 

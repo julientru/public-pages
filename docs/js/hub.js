@@ -106,7 +106,8 @@
   function show(count) {
     let shown = 0;
     cards.forEach((card) => {
-      const match = (card.dataset.players || "1") === count;
+      // Cards marked data-off are put away for now; drop the attribute to bring one back.
+      const match = !("off" in card.dataset) && (card.dataset.players || "1") === count;
       card.hidden = !match;
       if (match) shown++;
     });

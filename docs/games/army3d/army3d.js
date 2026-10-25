@@ -375,7 +375,8 @@
   function enemyShoot(e) {
     const T = ENEMIES[e.type];
     const s = T.shot;
-    g.shots.push({ x: e.x + (T.tank ? 0 : T.r * 0.6), y: e.y + T.r * 0.6, vy: s.kind === "bigshell" ? 190 : 150,
+    const x = e.x + (T.tank ? 0 : T.r * 0.6), y = e.y + T.r * 0.6, vy = s.kind === "bigshell" ? 190 : 150;
+    g.shots.push({ x, y, vy, vx: city.towerAim(x, y, vy),
       dmg: s.dmg, kind: s.kind, age: 0, y0: e.y + T.r * 0.6, h0: T.tank ? T.r * 0.75 : T.r * 2.4 });
     e.throwT = 0.3;
   }
@@ -451,10 +452,10 @@
       if (e.atWall) {
         e.y = stopY;
         e.bash += dt;
-        hurtWall(T.bash * L.hurt * dt);
+        if (!city.towerBash(e.x, T.r, T.bash * L.hurt * dt)) hurtWall(T.bash * L.hurt * dt);
       } else {
         e.y += T.speed * dt;
-        e.x += Math.sin(time * e.wobble + e.seed) * 14 * dt;
+        e.x += (Math.sin(time * e.wobble + e.seed) * 14 + city.towerPull(e.x, e.y)) * dt;
         e.x = Math.max(T.r, Math.min(W - T.r, e.x));
         e.shotIn -= dt;
         if (e.shotIn <= 0 && e.y > 30 && e.y < WALL_Y - 80) {
@@ -472,7 +473,10 @@
     // Enemy shots hit the wall, or your army once the wall is gone. The shield blocks them all.
     g.shots.forEach((s) => {
       s.y += s.vy * dt;
+      if (s.vx) s.x += s.vx * dt;
       s.age += dt;
+      // The enemy aims at your towers first: they take the hit instead of the wall.
+      if (city.towerShot(s.x, s.y, s.dmg * L.hurt)) { s.dead = true; return; }
       const lineY = g.wall > 0 ? WALL_Y - 6 : SQUAD_Y - 12;
       if (s.y < lineY) return;
       const onArmy = Math.abs(s.x - g.squadX) < squadHalfWidth() + 6;
@@ -1764,16 +1768,23 @@
     part(t, "box", "#2b2d42", [6, 12, 2], [0, 36, 14]);
     part(t, "cyl", "#6c757d", [1, 18, 1], [0, 66, 0]);
     part(t, "box", "#ff6b6b", [11, 7, 1], [6, 71, 0]);
+    t.bar = makeBar(34, 6);
+    t.bar.group.position.set(0, 92, 0);
+    t.add(t.bar.group);
     t.visible = false;
     scene.add(t);
     return t;
   });
 
+  // Each tower has its own life bar: the enemy goes for the towers first.
   function updateTowers() {
-    const spots = city.towerSpots();
-    towers.forEach((m, i) => {
-      m.visible = i < spots.length;
-      if (m.visible) m.position.set(wx(spots[i].x), 0, wz(spots[i].y) - 8);
+    towers.forEach((m) => { m.visible = false; });
+    city.towerSpots().forEach((s) => {
+      const m = towers[s.slot];
+      m.visible = true;
+      m.position.set(wx(s.x), 0, wz(s.y) - 8);
+      m.bar.set(s.hp / s.max, s.hp / s.max);
+      m.bar.group.quaternion.copy(camera.quaternion);
     });
   }
 
