@@ -82,6 +82,7 @@
       const score = sequence.length - 1;
       best = Math.max(best, score);
       bestEl.textContent = best;
+      Accounts.submit("simon", score);
       messageEl.textContent = t("Oops! You copied {n}. Press Play to try again.", { n: score });
       startBtn.textContent = t("Play");
       flash(sequence[step], 900);

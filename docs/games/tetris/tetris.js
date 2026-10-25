@@ -196,6 +196,7 @@
     running = false;
     piece = null;
     messageEl.textContent = t("Game over! You cleared {n} lines. 👏", { n: lines });
+    Accounts.submit("tetris", score);
     startBtn.textContent = t("Play again");
   }
 

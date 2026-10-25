@@ -9,6 +9,7 @@
       "🎈 Kids Games 🎈": "🎈 Jeux pour enfants 🎈",
       "Pick a game and have fun!": "Choisis un jeu et amuse-toi !",
       "Language": "Langue",
+      "Player": "Joueur",
       "How many players?": "Combien de joueurs ?",
       "🚧 Games for this many players are coming soon!": "🚧 Des jeux pour autant de joueurs arrivent bientôt !",
       "Blocks": "Blocs",
@@ -55,6 +56,7 @@
       "🎈 Kids Games 🎈": "🎈 小朋友遊戲 🎈",
       "Pick a game and have fun!": "揀個遊戲，玩得開心啲！",
       "Language": "語言",
+      "Player": "玩家",
       "How many players?": "幾多個人玩？",
       "🚧 Games for this many players are coming soon!": "🚧 呢個人數嘅遊戲就快有啦！",
       "Blocks": "砌方塊",
@@ -98,6 +100,7 @@
     },
   });
   I18n.makeSwitch(document.getElementById("langs"));
+  Accounts.makeBar(document.getElementById("account"), { scoresHref: "scores.html" });
 
   const pickBtns = document.querySelectorAll("[data-pick]");
   const cards = document.querySelectorAll(".game-card");

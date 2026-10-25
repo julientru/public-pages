@@ -579,9 +579,17 @@
     }
   }
 
+  // Best scores: the wave you reached, on its level ("-city" with Manage my city).
+  function sendScore() {
+    if (g.scored) return;
+    g.scored = true;
+    Accounts.submit("army3d", city.on ? city.round : g.wave + 1, level + (city.on ? "-city" : ""));
+  }
+
   function gameOver() {
     state = "over";
     endedAt = time;
+    sendScore();
     g.banner = null;
     g.doors = [];
     g.shots = [];
@@ -590,6 +598,7 @@
   function win() {
     state = "won";
     endedAt = time;
+    sendScore();
     g.banner = null;
     g.doors = [];
     g.shots = [];

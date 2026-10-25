@@ -75,6 +75,7 @@
     starsEl.textContent = stars;
     hintEl.textContent = t("The others are {a}, this is {b}", { a: t(main.name) + " " + main.emoji, b: t(other.name) + " " + other.emoji });
     if (round === ROUNDS) {
+      Accounts.submit("odd", stars);
       messageEl.textContent = t("🎉 All done! {n} stars out of {total}! 🎉", { n: stars, total: ROUNDS });
       messageEl.classList.add("win");
       return;

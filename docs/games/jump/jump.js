@@ -162,6 +162,7 @@
     state = "over";
     best = Math.max(best, score);
     bestEl.textContent = best;
+    Accounts.submit("jump", score);
     messageEl.textContent = t("Bonk! You jumped {n} rocks. Tap to try again!", { n: score });
   }
 

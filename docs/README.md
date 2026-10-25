@@ -1,6 +1,6 @@
 # kids-games
 
-Simple logic games for kids aged 5 to 10, in English, French and Cantonese. Plain HTML and vanilla JavaScript: no build step, and nothing saved except the language you pick (everything else lives in browser memory).
+Simple logic games for kids aged 5 to 10, in English, French and Cantonese. Plain HTML and vanilla JavaScript: no build step. The browser keeps the language you pick and the best scores; with a Supabase project, kids can also log in with a name and PIN and see everyone's best scores (see [Accounts and best scores](#accounts-and-best-scores)).
 
 ## Games
 
@@ -42,6 +42,12 @@ Pick 👤👤 2 at the top of the hub to see them.
 | ⚡ Snap Match | `games/snap/` | Face to face: phone flat between the players. First to tap the yellow picture in your own grid gets a ⭐. Wrong tap = frozen for 1 second. 5 ⭐ wins. |
 | 🍎 Apple Grab | `games/apples/` | Face to face, taking turns: take 1, 2 or 3 apples. Whoever takes the last apple wins the round. 3 rounds wins. |
 | 🔴🟡 Four in a Row | `games/connect4/` | Take turns on the same screen: tap a column to drop a disc. Four in a line wins. |
+
+## Accounts and best scores
+
+The hub has a **👤 Log in** button (a name and a 4 to 6 digit PIN, no email) and a **🏆 Best scores** page (`scores.html`) with each player's best and the top 10 of every game. Army Rush (all three), Blocks, Jumpy Frog, Copy Me and Odd One Out send their score at the end of a round. Scores made signed out stay on the device and are sent the next time someone logs in there.
+
+It runs on a free [Supabase](https://supabase.com) project: run `supabase/setup.sql` once and paste the project's URL and public key into `js/config.js`. All the steps are in [supabase/README.md](supabase/README.md). Without a project, the Log in button stays hidden and scores stay on the device.
 
 ## Languages
 

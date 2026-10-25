@@ -189,3 +189,40 @@ canvas {
 .langs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 4px; }
 .langs .btn { min-height: 44px; min-width: 0; padding: 6px 14px; font-size: 1.05rem; background: #b9b9c8; }
 .langs .btn[aria-pressed="true"] { background: var(--blue); }
+
+/* ---------- Player accounts (js/accounts.js) ---------- */
+.account { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 8px 0 4px; }
+.account .btn { min-height: 44px; min-width: 0; padding: 6px 14px; font-size: 1.05rem; }
+.account .me { font-weight: bold; font-size: 1.2rem; background: var(--card); padding: 6px 14px; border-radius: 12px; box-shadow: var(--shadow); }
+dialog.login {
+  border: none; border-radius: var(--radius); box-shadow: var(--shadow);
+  background: var(--bg); color: var(--ink); padding: 20px; width: min(92vw, 400px);
+}
+dialog.login::backdrop { background: rgba(43, 45, 66, 0.5); }
+dialog.login form { display: flex; flex-direction: column; gap: 12px; position: relative; }
+dialog.login h2 { margin: 0 32px 4px 0; }
+dialog.login label { display: flex; flex-direction: column; gap: 4px; font-weight: bold; font-size: 1.1rem; }
+dialog.login input { font: inherit; font-size: 1.3rem; padding: 10px 12px; border: 3px solid #d6d6e0; border-radius: 12px; }
+dialog.login input:focus { border-color: var(--blue); outline: none; }
+dialog.login .row { display: flex; gap: 10px; flex-wrap: wrap; }
+dialog.login .row .btn { flex: 1 1 auto; font-size: 1.15rem; }
+dialog.login .btn:disabled { opacity: 0.6; }
+dialog.login .close { position: absolute; top: -6px; right: -6px; border: none; background: none; font-size: 1.4rem; cursor: pointer; padding: 6px; color: var(--ink); }
+dialog.login .error { color: #c1121f; font-weight: bold; margin: 0; min-height: 1.2em; }
+dialog.login .note { margin: 0; font-size: 0.95rem; opacity: 0.8; }
+
+/* ---------- Best scores page ---------- */
+.scores { width: 100%; max-width: 900px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.scores h2 { grid-column: 1 / -1; margin: 12px 0 0; text-align: center; }
+.score-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.score-card h3 { margin: 0 0 8px; font-size: 1.3rem; }
+.score-card ol { margin: 0; padding: 0; list-style: none; }
+.score-card li { display: flex; gap: 8px; align-items: baseline; padding: 4px 6px; border-radius: 8px; font-size: 1.1rem; }
+.score-card li.mine { background: #fff4c2; font-weight: bold; }
+.score-card .rank { width: 2em; text-align: right; flex: none; }
+.score-card .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.score-card .lvl { font-size: 0.85rem; opacity: 0.7; }
+.score-card .pts { font-weight: bold; }
+.score-card .big { font-size: 2rem; font-weight: bold; margin: 0; }
+.score-card .unit { font-size: 0.95rem; opacity: 0.75; }
+.scores .empty { grid-column: 1 / -1; text-align: center; font-size: 1.2rem; }
