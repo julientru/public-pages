@@ -221,7 +221,6 @@ dialog.login .note { margin: 0; font-size: 0.95rem; opacity: 0.8; }
 .score-card li.mine { background: #fff4c2; font-weight: bold; }
 .score-card .rank { width: 2em; text-align: right; flex: none; }
 .score-card .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.score-card .lvl { font-size: 0.85rem; opacity: 0.7; }
 .score-card .pts { font-weight: bold; }
 .score-card .big { font-size: 2rem; font-weight: bold; margin: 0; }
 .score-card .unit { font-size: 0.95rem; opacity: 0.75; }

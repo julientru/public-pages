@@ -13,18 +13,34 @@ window.Accounts = (function () {
 
   const SESSION = "kids-games-player";   // { token, id, name }
   const WAITING = "kids-games-waiting";  // scores not sent yet: [{ game, level, score, played_at, owner }]
-  const LOCAL = "kids-games-best";       // best on this device: { game: { score, level } }
+  const LOCAL = "kids-games-bests";      // bests on this device: { "game|level": score }
 
   // The games with a score, in the order the Best scores page shows them.
+  // fastest: the score is the seconds it took to win, and the smallest is the best.
+  // Those games have one list for each level (and mode), since only the same level compares.
   const GAMES = [
-    { id: "army", emoji: "🪖", name: "Army Rush", unit: "🌊 Wave" },
-    { id: "army3d", emoji: "🪖", name: "Army Rush 3D", unit: "🌊 Wave" },
-    { id: "armyfps", emoji: "🎯", name: "Army Rush FPS", unit: "🌊 Wave" },
+    { id: "army", emoji: "🪖", name: "Army Rush", unit: "⏱️ Time to win", fastest: true },
+    { id: "army3d", emoji: "🪖", name: "Army Rush 3D", unit: "⏱️ Time to win", fastest: true },
+    { id: "armyfps", emoji: "🎯", name: "Army Rush FPS", unit: "⏱️ Time to win", fastest: true },
     { id: "tetris", emoji: "🧱", name: "Blocks", unit: "⭐ Points" },
     { id: "jump", emoji: "🐸", name: "Jumpy Frog", unit: "🪨 Rocks" },
     { id: "simon", emoji: "🎵", name: "Copy Me", unit: "🎵 Copied" },
     { id: "odd", emoji: "🔍", name: "Odd One Out", unit: "⭐ Stars" },
   ];
+
+  const game = (id) => GAMES.find((g) => g.id === id) || { id };
+  const better = (id, a, b) => (game(id).fastest ? a < b : a > b);
+  // The order of the lists on the Best scores page: easiest first, then the same with a city.
+  const LEVELS = ["", "easy", "normal", "hard", "mega"];
+  const levelOrder = (l) => LEVELS.indexOf(l.replace(/-city$/, "")) + (l.endsWith("-city") ? LEVELS.length : 0);
+
+  // 75 → "1:15", 3725 → "1:02:05".
+  function formatTime(secs) {
+    secs = Math.round(secs);
+    const h = Math.floor(secs / 3600), m = Math.floor(secs / 60) % 60, s = secs % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return h ? h + ":" + pad(m) + ":" + pad(s) : m + ":" + pad(s);
+  }
 
   function load(name, empty) {
     try {
@@ -136,22 +152,46 @@ window.Accounts = (function () {
     if (!(score > 0)) return;
     level = level || "";
     const best = load(LOCAL, {});
-    if (!best[game] || score > best[game].score) {
-      best[game] = { score, level };
+    const k = game + "|" + level;
+    if (!(k in best) || better(game, score, best[k])) {
+      best[k] = score;
       save(LOCAL, best);
     }
     const waiting = load(WAITING, []);
     waiting.push({ game, level, score, played_at: new Date().toISOString(), at: Date.now(), owner: player ? player.id : null });
-    // Keep the list small if nobody signs in for a long time: the best 200.
-    waiting.sort((a, b) => b.score - a.score);
-    save(WAITING, waiting.slice(0, 200));
+    // Keep the list small if nobody signs in for a long time: the latest 200.
+    save(WAITING, waiting.slice(-200));
     send();
   }
 
-  // Every player's best in every game: [{ game, player_id, username, level, score }], highest first.
+  // Every player's best in every game and level: [{ game, player_id, username, level, score }].
   async function bestScores() {
-    return read("best_scores?select=game,player_id,username,level,score&order=score.desc,played_at.asc");
+    return read("best_scores?select=game,player_id,username,level,score&order=played_at.asc");
   }
+
+  // Rows in lists, one per game and level, in the page's order, the best first in each:
+  // [{ game, level, rows }]. Equal scores keep the order they came in (the earliest first).
+  function boards(rows) {
+    const out = [];
+    GAMES.forEach((g) => {
+      const mine = rows.filter((r) => r.game === g.id);
+      [...new Set(mine.map((r) => r.level))].sort((a, b) => levelOrder(a) - levelOrder(b)).forEach((level) => {
+        const list = mine.filter((r) => r.level === level);
+        list.sort((a, b) => (g.fastest ? a.score - b.score : b.score - a.score));
+        out.push({ game: g, level, rows: list });
+      });
+    });
+    return out;
+  }
+
+  // The bests kept on this device: [{ game, level, score }].
+  function localBest() {
+    const best = load(LOCAL, {});
+    return Object.keys(best).map((k) => ({ game: k.split("|")[0], level: k.split("|")[1] || "", score: best[k] }));
+  }
+
+  // How a score reads: a time for the games you win the fastest, else the number.
+  const show = (id, score) => (game(id).fastest ? formatTime(score) : String(score));
 
   // Level names for the Best scores page.
   function levelName(level) {
@@ -290,9 +330,8 @@ window.Accounts = (function () {
   send();
 
   return {
-    online, games: GAMES, submit, bestScores, levelName, makeBar, logOut,
+    online, games: GAMES, submit, bestScores, boards, localBest, show, formatTime, levelName, makeBar, logOut,
     get player() { return player; },
-    localBest: () => load(LOCAL, {}),
     onChange: (fn) => listeners.push(fn),
   };
 })();

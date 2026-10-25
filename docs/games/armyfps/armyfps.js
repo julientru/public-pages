@@ -122,7 +122,7 @@
     g = {
       wave: 0, spawnQueue: [], spawnIn: 0, breakIn: city.peace, banner: null,
       enemies: [], bullets: [], shots: [], doors: [], doorIn: 4, fx: [], tumblers: [],
-      tier: 0, count: 1, missed: new Set(), life: 100, wall: 100, wallMax: 100, shield: 0,
+      clock: 0, tier: 0, count: 1, missed: new Set(), life: 100, wall: 100, wallMax: 100, shield: 0,
       squadX: W / 2, fireIn: 0.3, shake: 0, hurt: 0, target: { x: W / 2, y: 0 }, targetH: 10, combo: 0, comboT: 0,
     };
     city.reset();
@@ -272,6 +272,8 @@
         vh: 280 + T.r * 1.5, rot: 0, vr: (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 6), seed: e.seed, t: 0, view: e.view });
       poof(e.x, e.y, T.r, POOF_WORDS[Math.floor(Math.random() * POOF_WORDS.length)]);
       if (T.r > 40) g.shake = 0.4;
+      // The King Tank only comes in the very last wave (in the AI Empire with a city): knocking it out wins.
+      if (e.type === "king") return win();
       g.shake = Math.max(g.shake, 0.08);
       // Quick knock-outs in a row make a combo.
       g.combo = g.comboT > 0 ? g.combo + 1 : 1;
@@ -403,6 +405,7 @@
 
   function update(dt) {
     if (state !== "playing") return;
+    g.clock += dt;  // how long this battle has lasted, for Best scores
     const w = WEAPONS[g.tier];
     const L = LEVELS[level];
     city.tick(dt);
@@ -428,12 +431,11 @@
         city.countdown(g.spawnIn);
       }
     } else if (!g.enemies.length) {
-      // With a city to look after there is no last wave: the battle goes on until you lose.
-      if (g.wave === WAVES.length - 1 && !city.on) return win();
+      // There is no last wave: the King Tank's wave comes back until you knock the King Tank out.
       g.breakIn -= dt;
       if (g.breakIn <= 0) {
         g.breakIn = city.peace;
-        startWave(city.nextWave(g.wave));
+        startWave(Math.min(city.nextWave(g.wave), WAVES.length - 1));
       } else if (city.on && g.breakIn < city.peace - 2.4) {
         city.countdown(g.breakIn);
       } else if (!g.banner || g.banner.t <= 0) {
@@ -592,17 +594,16 @@
     }
   }
 
-  // Best scores: the wave you reached, on its level ("-city" with Manage my city).
+  // Best scores: only a win counts, with its level, "-city" with Manage my city, and the time it took.
   function sendScore() {
     if (g.scored) return;
     g.scored = true;
-    Accounts.submit("armyfps", city.on ? city.round : g.wave + 1, level + (city.on ? "-city" : ""));
+    Accounts.submit("armyfps", Math.round(g.clock), level + (city.on ? "-city" : ""));
   }
 
   function gameOver() {
     state = "over";
     endedAt = time;
-    sendScore();
     g.banner = null;
     g.doors = [];
     g.shots = [];
@@ -2054,7 +2055,7 @@
         "<div class='go'>" + t("Tap to try again") + "</div>";
     } else if (state === "won") {
       el.screen.innerHTML = "<div class='big'>" + t("YOU WIN! 🏆") + "</div><div>" + t("The King Tank") + "</div><div>" + t("went BOING!") + "</div>" +
-        "<div class='go'>" + t("Tap to play again") + "</div>";
+        "<div class='gold'>⏱️ " + Accounts.formatTime(g.clock) + "</div><div class='go'>" + t("Tap to play again") + "</div>";
     }
   }
 
