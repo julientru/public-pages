@@ -1,1 +1,0 @@
-var APP_VERSION="3.0.1";!function(){if(!document.body.hasAttribute("data-no-footer")){var e=document.createElement("footer");e.className="site-footer",e.textContent="🄯 Julien Tru - Version "+APP_VERSION,document.body.appendChild(e)}}();
