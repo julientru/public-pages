@@ -1,1 +1,0 @@
-var APP_VERSION="3.4.0";!function(){if(!document.body.hasAttribute("data-no-footer")){var e=document.createElement("footer");e.className="site-footer",e.innerHTML='<span class="copyleft">&copy;</span> Julien Tru - Version '+APP_VERSION,document.body.appendChild(e)}}();
