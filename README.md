@@ -1,28 +1,27 @@
 # public-pages
 
-My projects, published with GitHub Pages. The home page lists every project automatically.
+My projects, published with GitHub Pages at `https://julientru.github.io/public-pages/`.
 
 ## How it works
 
-- Every top-level folder with an `index.html` is a project, served at `/<folder>/`.
-- On every push to `main`, `.github/workflows/pages.yml` runs `scripts/build-site.mjs`, which copies the project folders into `_site/`, generates the landing page (`_site/index.html`) with one card per folder, and deploys it to GitHub Pages.
-- Pushes from other repos (for example kids-games publishing its build into `kids-games/`) trigger the same deploy, so the site is always up to date.
+- The root `index.html` is the landing page: one card per project.
+- Each project is deployed into its own top-level folder by its own repo (for example kids-games publishes its build into `kids-games/`), and is served at `/public-pages/<folder>/`. This repo holds no project sources and copies nothing around.
+- On every push to `main`, including those deploys, `.github/workflows/landing.yml` runs `scripts/build-landing.mjs`. It lists every top-level folder with an `index.html`, rewrites `index.html`, and commits it only if it changed.
 
 ## Adding a project
 
-1. Add a folder with an `index.html` (the built app, with relative paths).
+1. Have the project deploy its built files (with relative paths) into a new folder here.
 2. Optionally give it a title, description, emoji icon, tags and position in `projects.json`. Without an entry, the card uses the page's own `<title>` and `<meta name="description">`.
-3. Push. It appears on the home page a minute later.
+3. The landing page picks it up on that push.
 
 To keep a project online but off the list, set `"hidden": true` for it in `projects.json`.
 
 ## Preview locally
 
 ```sh
-node scripts/build-site.mjs
-npx serve _site   # or open _site/index.html
+node scripts/build-landing.mjs   # then open index.html
 ```
 
 ## One-time setup
 
-**Settings → Pages → Build and deployment → Source: GitHub Actions.** (Before this change Pages served the `docs` folder.)
+**Settings → Pages → Build and deployment:** Source *Deploy from a branch*, branch `main`, folder `/ (root)`. (Before this change it served the `docs` folder.)

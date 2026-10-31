@@ -1,19 +1,20 @@
-// Builds the published site into ./_site: every project folder as it is, plus a generated
-// landing page (index.html) with one card per project.
+// Writes the landing page (index.html at the repo root) with one card per project.
+// It only writes that one file: the projects themselves are deployed into their own
+// folders by their own repos, and GitHub Pages serves the repo as it is.
 //
 // A project is any top-level folder with an index.html in it. Nothing has to be registered:
-// add a folder, push, and it shows up. projects.json can give a folder a nicer title,
-// description, icon, tags and position, or leave it off the list (it stays online at its URL). Without an entry, the card uses the
-// folder's own <title> and <meta name="description">.
+// when a new folder lands, the "Update landing page" workflow re-runs this and commits the result.
+// projects.json can give a folder a nicer title, description, icon, tags and position, or leave
+// it off the list (it stays online at its URL). Without an entry, the card uses the folder's own
+// <title> and <meta name="description">.
 //
-// No dependencies. Run it locally with: node scripts/build-site.mjs  (then open _site/index.html)
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+// No dependencies. Run it locally with: node scripts/build-landing.mjs  (then open index.html)
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
-const OUT = join(ROOT, "_site");
 // Top-level folders that are never projects.
-const SKIP = new Set(["_site", "scripts", "node_modules"]);
+const SKIP = new Set(["scripts", "node_modules"]);
 
 const config = existsSync(join(ROOT, "projects.json"))
   ? JSON.parse(readFileSync(join(ROOT, "projects.json"), "utf8"))
@@ -38,8 +39,8 @@ function readMeta(html) {
   return { title: title && decode(title), description: description && decode(description) };
 }
 
-const all = readdirSync(ROOT, { withFileTypes: true })
-  .filter((d) => d.isDirectory() && !d.name.startsWith(".") && !SKIP.has(d.name))
+const found = readdirSync(ROOT, { withFileTypes: true })
+  .filter((d) => d.isDirectory() && !d.name.startsWith(".") && !d.name.startsWith("_") && !SKIP.has(d.name))
   .filter((d) => existsSync(join(ROOT, d.name, "index.html")))
   .map((d) => {
     const meta = readMeta(readFileSync(join(ROOT, d.name, "index.html"), "utf8"));
@@ -54,8 +55,7 @@ const all = readdirSync(ROOT, { withFileTypes: true })
       hidden: o.hidden === true,
     };
   });
-// Hidden projects are still published at their URL, just not listed.
-const projects = all
+const projects = found
   .filter((p) => !p.hidden)
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
@@ -177,9 +177,5 @@ const html = `<!doctype html>
 </html>
 `;
 
-rmSync(OUT, { recursive: true, force: true });
-mkdirSync(OUT);
-for (const p of all) cpSync(join(ROOT, p.folder), join(OUT, p.folder), { recursive: true });
-writeFileSync(join(OUT, "index.html"), html);
-writeFileSync(join(OUT, ".nojekyll"), "");
-console.log(`Built _site with ${projects.length} projects: ${projects.map((p) => p.folder).join(", ")}`);
+writeFileSync(join(ROOT, "index.html"), html);
+console.log(`Wrote index.html with ${projects.length} projects: ${projects.map((p) => p.folder).join(", ")}`);
