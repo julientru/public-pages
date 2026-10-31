@@ -5,7 +5,7 @@ My projects, published with GitHub Pages at `https://julientru.github.io/public-
 ## How it works
 
 - The root `index.html` is the landing page: one card per project.
-- Each project is deployed into its own top-level folder by its own repo (for example kids-games publishes its build into `kids-games/`), and is served at `/public-pages/<folder>/`. This repo holds no project sources and copies nothing around.
+- Each project has its own top-level folder, served at `/public-pages/<folder>/`. Until a project is deployed there, the folder holds a placeholder `index.html`. Each project's own repo deploys its build into its folder (for example kids-games publishes into `kids-games/`). This repo holds no project sources.
 - On every push to `main`, including those deploys, `.github/workflows/landing.yml` runs `scripts/build-landing.mjs`. It lists every top-level folder with an `index.html`, rewrites `index.html`, and commits it only if it changed.
 
 ## Adding a project
