@@ -1,0 +1,43 @@
+# Keeps the landing page (index.html) in step with the project folders. Runs on every push to main,
+# including the pushes project repos make when they deploy into their folder. It only rewrites
+# index.html and commits it when it changed; nothing else in the repo is touched.
+# Its own commit doesn't re-trigger it (pushes made with GITHUB_TOKEN start no workflow).
+name: Update landing page
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: landing
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: node scripts/build-landing.mjs
+
+      - name: Commit index.html if it changed
+        run: |
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Landing page already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update landing page"
+          git pull --rebase
+          git push

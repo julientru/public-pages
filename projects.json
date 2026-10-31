@@ -1,0 +1,30 @@
+{
+  "_help": "Optional details for the landing page. Every top-level folder with an index.html is listed even if it is not here. Keys are folder names. Fields: title, description, icon (an emoji), tags, order (lower comes first), hidden (true to leave it off the list; it stays online at its URL).",
+  "site": {
+    "title": "Julien's projects",
+    "intro": "Things I build in my spare time: games, prototypes and experiments. Pick one and try it in your browser."
+  },
+  "projects": {
+    "ai-financial-advisor": {
+      "title": "AI Financial Advisor",
+      "description": "A prototype that explores market data across 22 countries and commodities, with forecasts, rankings, portfolio comparison and dividends.",
+      "icon": "📈",
+      "tags": ["Finance", "Prototype"],
+      "order": 1
+    },
+    "kids-games": {
+      "title": "Kids Games",
+      "description": "Simple logic and puzzle games for kids: memory, sudoku, mazes, times tables, a little city to build and more.",
+      "icon": "🧩",
+      "tags": ["Games", "Kids"],
+      "order": 2
+    },
+    "ai-sales-dealer": {
+      "title": "AI Sales Dealer",
+      "description": "A chat assistant that helps a sales dealer price deposit requests and route exceptions to Treasury for approval.",
+      "icon": "💬",
+      "tags": ["Banking", "Prototype"],
+      "order": 3
+    }
+  }
+}
