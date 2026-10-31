@@ -96,17 +96,7 @@ const html = `<!doctype html>
     --muted: #5d6170;
     --line: #e3e1da;
     --tag: #efede6;
-    color-scheme: light dark;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #111216;
-      --surface: #1a1c22;
-      --text: #f1f1f3;
-      --muted: #a2a6b4;
-      --line: #2b2e37;
-      --tag: #252831;
-    }
+    color-scheme: light;
   }
   * { box-sizing: border-box; }
   body {
@@ -169,7 +159,6 @@ const html = `<!doctype html>
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .tags span { padding: 2px 10px; border-radius: 999px; background: var(--tag); color: var(--muted); font-size: 12.5px; }
   .open { font-weight: 600; font-size: 14px; color: hsl(var(--hue) 60% 45%); }
-  @media (prefers-color-scheme: dark) { .open { color: hsl(var(--hue) 70% 70%); } }
   .empty { color: var(--muted); }
   footer { margin-top: 56px; color: var(--muted); font-size: 13px; }
   @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
