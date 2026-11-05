@@ -1,4 +1,4 @@
-/* UI wiring for the AI Financial Advisor prototype.
+/* UI wiring for My Financial Advisor.
    initApp() is called by loader.js once MARKET_DATA has been assembled
    from the split per-country data files — nothing here runs at parse time
    except pure function/constant definitions. */
@@ -631,7 +631,7 @@ function renderDetail() {
 function exportAssetSummary(asset, analysis) {
   const rec = analysis.recommendation;
   const lines = [
-    `AI Financial Advisor — prototype export`,
+    `My Financial Advisor — prototype export`,
     `Generated: ${new Date().toISOString()}`,
     ``,
     `Asset: ${asset.displayName} (${asset.symbol})`,
@@ -1521,6 +1521,168 @@ function populateAboutSyncInfo() {
   if (dividendsEl) dividendsEl.textContent = formatSyncTimestamp(DIVIDEND_DATA?.generatedAt);
 }
 
+/* ---------- guide wizard ----------
+   A short, dismissible walkthrough of how to read the data. It opens on the
+   first visit (remembered in localStorage) and can be reopened at any time
+   from the "Guide" button in the masthead. Each step can link to the tab
+   it describes. */
+
+const GUIDE_SEEN_KEY = 'afa-guide-seen';
+
+function guideSteps() {
+  const assetCount = ASSETS ? ASSETS.length.toLocaleString('en-US') : 'about 940';
+  const dividendModelCount = typeof DIVIDEND_MODEL_DEFS !== 'undefined' ? DIVIDEND_MODEL_DEFS.length : 9;
+  return [
+    {
+      title: 'Welcome to My Financial Advisor',
+      html: `
+        <p>This dashboard looks at <b>${assetCount} stocks, indices and commodities</b> across 20 countries, using real historical prices from Yahoo Finance. Everything is computed in your browser from that history, with simple, transparent statistical rules. There is no AI and no black box.</p>
+        <p>Use it to explore how an asset has behaved, what its past trend implies if it continued, and how reliable its dividend looks. It is a prototype, so <b>none of this is financial advice</b>, and past performance does not predict future results.</p>
+        <p>This guide takes about a minute. You can close it at any time and reopen it from the <b>❓ Guide</b> button at the top.</p>`,
+    },
+    {
+      title: 'Reading an asset',
+      tab: 'dashboard',
+      html: `
+        <p>On the <b>Dashboard</b>, search or filter the list on the left and click an asset. Then pick a <b>lookback</b> period (1 month up to all history) above the chart: every number on the page is computed from that window only.</p>
+        <div class="guide-legend">
+          <span><span class="guide-swatch"></span>Price history</span>
+          <span><span class="guide-swatch forecast"></span>Forecast if the trend continues</span>
+          <span><span class="guide-swatch band"></span>Likely range (±1σ, widens with time)</span>
+        </div>
+        <ul>
+          <li>The <b>signal</b> (Bullish, Bearish, Caution, Watch or Neutral) compares the long-term trend with recent momentum. Caution means the trend is up but momentum turned down; Watch is the reverse.</li>
+          <li><b>Confidence</b> comes from R², how closely prices follow the trend line. <b>Risk</b> comes from annualized volatility.</li>
+          <li>The <b>stat row</b> shows the change over the period, trend growth and momentum (annualized), volatility, and the base forecast with its range.</li>
+          <li>The <b>backtest</b> at the bottom checks how the signal would have done in the past against simply buying and holding.</li>
+        </ul>`,
+    },
+    {
+      title: 'Several forecasting models',
+      tab: 'dashboard',
+      html: `
+        <p>No single model is right, so the app implements <b>eight independent models plus an Ensemble</b> that blends them. In an asset's <b>Forecast models</b> section, click the chips to overlay one or more of them on the chart.</p>
+        <ul>
+          <li><b>Linear Trend</b>: straight-line fit of log-price, the basis of the signal.</li>
+          <li><b>Moving Average Crossover</b> and <b>Holt's Linear Trend</b>: smoothed trends that react less to single-day noise.</li>
+          <li><b>ARIMA(1,1,0)</b> and <b>Feature Regression</b>: predict tomorrow's move from recent moves, then repeat day by day.</li>
+          <li><b>GARCH(1,1)</b>: forecasts volatility, not direction. It sets the width of the Ensemble's range.</li>
+          <li><b>Monte Carlo</b>: hundreds of simulated price paths, showing a spread of outcomes rather than one line.</li>
+          <li><b>Sentiment Proxy</b>: simulated from price momentum (no news data), so it counts for half in the Ensemble.</li>
+        </ul>
+        <p>When models agree, the trend is more robust. When they disagree, treat any single forecast with care. The <b>About</b> tab has the full maths for each model.</p>`,
+    },
+    {
+      title: 'Dividend history and outlook',
+      tab: 'dividends',
+      html: `
+        <p>The <b>Dividends</b> tab covers about 900 large companies and scores them on their real dividend payment history and financial statements rather than on prices. Companies yielding under 1.5% are left out of the ranking.</p>
+        <ul>
+          <li>Choose a country and one of <b>${dividendModelCount} scoring models</b> under "Rank by": the Composite, the length of the no-cut streak, payout versus free cash flow, yield adjusted for volatility, leverage or sector, a projected forward dividend, growth slowdown, and earnings quality.</li>
+          <li>Click a company to see its <b>dividend payments year by year</b>, its free cash flow margin by year, recent quarterly cash-flow momentum, and all ${dividendModelCount} models side by side.</li>
+          <li>The Composite outlook reads <b>Strong outlook</b>, <b>Stable</b>, <b>Caution</b> or <b>At risk</b>. Cash-flow years with partial or stale data are labelled as such.</li>
+        </ul>`,
+    },
+    {
+      title: 'Getting around',
+      html: `
+        <ul>
+          <li><b>Rankings</b>: list the top or bottom 1 to 100 assets by the composite score or by any single model, for a lookback and asset class. Click a row to open its full detail inline.</li>
+          <li><b>Compare</b>: overlay 2 to 4 assets as % change from the same start date, with a correlation matrix of their daily returns.</li>
+          <li><b>Portfolio</b>: build a mock portfolio and see its combined value and forecast. It is saved only in this browser.</li>
+          <li><b>About</b>: when the data was last synced, the formulas behind every model, and how the rankings are scored.</li>
+        </ul>
+        <p>Tip: on an asset, <b>⬇ Export summary</b> downloads a text summary of what you are looking at. The 🌙 button switches to dark mode.</p>`,
+    },
+  ];
+}
+
+let guideIndex = 0;
+
+function renderGuide() {
+  const steps = guideSteps();
+  const step = steps[guideIndex];
+  const isLast = guideIndex === steps.length - 1;
+  const tabLabel = step.tab ? document.querySelector(`.tab-btn[data-tab="${step.tab}"]`)?.textContent : null;
+
+  document.getElementById('guide-step-count').textContent = `Step ${guideIndex + 1} of ${steps.length}`;
+  document.getElementById('guide-body').innerHTML = `
+    <h2 id="guide-title">${step.title}</h2>
+    ${step.html}
+    ${tabLabel ? `<p><button class="guide-goto" data-goto="${step.tab}">Show me the ${escapeHtml(tabLabel)} tab →</button></p>` : ''}`;
+  document.getElementById('guide-body').scrollTop = 0;
+
+  document.getElementById('guide-dots').innerHTML = steps
+    .map((s, i) => `<button class="guide-dot${i === guideIndex ? ' active' : ''}" data-step="${i}" aria-label="Go to step ${i + 1}: ${escapeHtml(s.title)}"></button>`)
+    .join('');
+
+  document.getElementById('guide-prev').disabled = guideIndex === 0;
+  document.getElementById('guide-next').textContent = isLast ? 'Start exploring' : 'Next';
+}
+
+function openGuide(startAt = 0) {
+  guideIndex = startAt;
+  renderGuide();
+  document.getElementById('guide-overlay').hidden = false;
+  document.getElementById('guide-next').focus();
+}
+
+function closeGuide() {
+  document.getElementById('guide-overlay').hidden = true;
+  try {
+    localStorage.setItem(GUIDE_SEEN_KEY, '1');
+  } catch (e) {}
+  document.getElementById('guide-link').focus();
+}
+
+function shouldAutoOpenGuide() {
+  try {
+    return localStorage.getItem(GUIDE_SEEN_KEY) !== '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+document.getElementById('guide-link').addEventListener('click', () => openGuide(0));
+document.getElementById('guide-close').addEventListener('click', closeGuide);
+document.getElementById('guide-prev').addEventListener('click', () => {
+  if (guideIndex > 0) {
+    guideIndex--;
+    renderGuide();
+  }
+});
+document.getElementById('guide-next').addEventListener('click', () => {
+  if (guideIndex < guideSteps().length - 1) {
+    guideIndex++;
+    renderGuide();
+  } else {
+    closeGuide();
+  }
+});
+document.getElementById('guide-dots').addEventListener('click', (e) => {
+  const dot = e.target.closest('.guide-dot');
+  if (!dot) return;
+  guideIndex = Number(dot.getAttribute('data-step'));
+  renderGuide();
+});
+document.getElementById('guide-body').addEventListener('click', (e) => {
+  const link = e.target.closest('.guide-goto');
+  if (!link) return;
+  closeGuide();
+  state.tab = link.getAttribute('data-goto');
+  renderTabs();
+});
+// Click on the dimmed backdrop (outside the dialog) closes the guide.
+document.getElementById('guide-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'guide-overlay') closeGuide();
+});
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('guide-overlay').hidden) return;
+  if (e.key === 'Escape') closeGuide();
+  else if (e.key === 'ArrowRight') document.getElementById('guide-next').click();
+  else if (e.key === 'ArrowLeft') document.getElementById('guide-prev').click();
+});
+
 function initApp() {
   ASSETS = MARKET_DATA.assets;
   ASSET_BY_SYMBOL = new Map(ASSETS.map((a) => [a.symbol, a]));
@@ -1532,6 +1694,7 @@ function initApp() {
   populateDividendsFilters();
   populateAboutSyncInfo();
   renderTabs();
+  if (shouldAutoOpenGuide()) openGuide(0);
 }
 
 window.initApp = initApp;

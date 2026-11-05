@@ -1,4 +1,4 @@
-/* Forecast + recommendation engine for the AI Financial Advisor prototype.
+/* Forecast + recommendation engine for My Financial Advisor.
    Method: linear regression on ln(price) vs time (models compound growth as
    a straight line), projected forward and exponentiated back to price.
 

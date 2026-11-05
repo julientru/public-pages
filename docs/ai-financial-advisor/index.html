@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>AI Financial Advisor — prototype</title>
+<title>My Financial Advisor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 @font-face {
@@ -89,6 +89,7 @@ body {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line-strong);
   gap: 16px;
+  flex-wrap: wrap;
 }
 .brand {
   display: flex;
@@ -105,6 +106,7 @@ body {
 .masthead-right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 .disclaimer-link {
@@ -802,18 +804,161 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
   border-radius: 8px;
   padding: 12px 16px;
 }
+
+/* ---------- Guide wizard ---------- */
+.guide-link {
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.guide-link:hover { opacity: 0.85; }
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 26, 43, 0.55);
+}
+.guide-overlay[hidden] { display: none; }
+.guide-dialog {
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-raised);
+  color: var(--text-1);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+.guide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+.guide-step-count {
+  font-size: var(--fs-small);
+  color: var(--text-3);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.guide-close {
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.guide-close:hover { color: var(--text-1); background: var(--paper); }
+.guide-body {
+  padding: 8px 20px 4px;
+  overflow-y: auto;
+  font-size: var(--fs-medium);
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.guide-body h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-xl);
+  color: var(--text-1);
+  margin: 0 0 10px;
+}
+.guide-body p { margin: 0 0 10px; }
+.guide-body ul { margin: 0 0 10px; padding-left: 18px; }
+.guide-body li { margin-bottom: 5px; }
+.guide-body b { color: var(--text-1); font-weight: 600; }
+.guide-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0 0 10px;
+  font-size: var(--fs-small);
+}
+.guide-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-top: 2px solid var(--ink);
+}
+.guide-swatch.forecast { border-top-style: dashed; border-color: var(--gold); }
+.guide-swatch.band { height: 10px; border: 1px solid var(--gold); background: var(--gold-soft); border-radius: 2px; }
+.guide-goto {
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent-ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.guide-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 16px;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+.guide-dots { display: flex; gap: 6px; }
+.guide-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--line);
+  cursor: pointer;
+}
+.guide-dot.active { background: var(--accent); border-color: var(--accent); }
+.guide-nav { display: flex; gap: 8px; }
+.guide-nav .btn-secondary {
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.guide-nav .btn-secondary:hover { border-color: var(--accent); color: var(--accent-ink); }
+.guide-nav .btn-secondary:disabled { visibility: hidden; }
+@media (max-width: 520px) {
+  .guide-overlay { padding: 8px; align-items: flex-end; }
+  .guide-head, .guide-body, .guide-foot { padding-left: 16px; padding-right: 16px; }
+}
 </style>
 </head>
 <body>
 <div id="loading-screen" class="loading-screen">
-  <div class="loading-title">AI Financial Advisor</div>
+  <div class="loading-title">My Financial Advisor</div>
   <div class="loading-bar-track"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
   <div class="loading-detail" id="loading-detail">Loading market data…</div>
 </div>
 <div class="app" id="app-root" hidden>
   <div class="masthead">
     <div class="brand">
-      <svg class="brand-logo" viewBox="0 0 40 40" width="30" height="30" role="img" aria-label="AI Financial Advisor logo">
+      <svg class="brand-logo" viewBox="0 0 40 40" width="30" height="30" role="img" aria-label="My Financial Advisor logo">
         <rect x="2" y="14" width="32" height="20" rx="3.2" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="1.4" opacity="0.75"/>
         <rect x="5" y="10" width="32" height="20" rx="3.2" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="1.4" opacity="0.9"/>
         <rect x="8" y="6" width="32" height="20" rx="3.2" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="1.6"/>
@@ -822,9 +967,10 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
         <path d="M6 30 L12 25 L17 22 L22 18 L27 14 L34 8" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M27 8 L34 8 L34 15" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span class="brand-word">AI Financial <span>Advisor</span></span>
+      <span class="brand-word">My Financial <span>Advisor</span></span>
     </div>
     <div class="masthead-right">
+      <button class="guide-link" id="guide-link" title="Open the quick guide">❓ Guide</button>
       <button class="disclaimer-link" id="disclaimer-link">⚠️ This is a prototype</button>
       <button class="theme-toggle" id="theme-toggle">🌙 Dark mode</button>
     </div>
@@ -1514,6 +1660,22 @@ score = clamp(70 - gap · 250, 0, 100)</div>
   </div>
 </div>
 
+<div class="guide-overlay" id="guide-overlay" hidden>
+  <div class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+    <div class="guide-head">
+      <span class="guide-step-count" id="guide-step-count"></span>
+      <button class="guide-close" id="guide-close" aria-label="Close the guide">✕</button>
+    </div>
+    <div class="guide-body" id="guide-body"></div>
+    <div class="guide-foot">
+      <div class="guide-dots" id="guide-dots"></div>
+      <div class="guide-nav">
+        <button class="btn-secondary" id="guide-prev">Back</button>
+        <button class="btn-primary" id="guide-next">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="forecast.js"></script>
 <script src="models.js"></script>
 <script src="dividends.js"></script>

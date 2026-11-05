@@ -1,4 +1,4 @@
-/* Dividend outlook scoring for the AI Financial Advisor prototype.
+/* Dividend outlook scoring for My Financial Advisor.
 
    Rather than one blended number claiming to be "the" answer, this offers
    9 independent models plus the original Composite, matching how the

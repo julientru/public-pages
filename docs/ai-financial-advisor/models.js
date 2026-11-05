@@ -1,4 +1,4 @@
-/* Additional forecasting models for the AI Financial Advisor prototype.
+/* Additional forecasting models for My Financial Advisor.
    forecast.js already provides the "Linear trend" model (log-price
    regression) via analyzeAsset(); this file adds independent alternative
    models plus an ensemble that blends all of them, so several methods can

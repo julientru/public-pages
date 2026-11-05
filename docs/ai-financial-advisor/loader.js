@@ -3,7 +3,7 @@
    rest of the app expects, then calls initApp().
 
    Each data file is a plain script that registers its payload on
-   window.AFA_DATA (see backend/scripts/data-file.js), so the page works when
+   window.AFA_DATA (see scripts/data-file.js), so the page works when
    opened straight from disk (file://) — no local server needed. data/index.js
    is loaded by a <script> tag in index.html; the per-group files are added
    here so the progress bar can track them. */
@@ -27,7 +27,7 @@
 
   function showError(message) {
     loadingScreen.innerHTML = `
-      <div class="loading-title">AI Financial Advisor</div>
+      <div class="loading-title">My Financial Advisor</div>
       <div class="loading-error">
         Could not load market data: ${message}<br><br>
         Make sure the <code>data</code> folder sits next to <code>index.html</code> and contains the <code>.js</code> data files.
