@@ -92,6 +92,17 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 #modal .box{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;max-height:86%;overflow-y:auto}
 #modal h2{font-family:var(--display);font-weight:400;font-size:34px;margin:0;line-height:1;color:var(--brass);text-wrap:balance}
 #modal h2.bad{color:var(--blood)}
+/* the "You lost" screen (ending.js): torn flag, big title, what happened */
+#modal .box.lost{text-align:center;border-color:#5a2a20}
+#modal .box.lost h2{font-size:clamp(48px,14vw,64px);text-shadow:0 3px 0 #000}
+#modal .box.lost .lines{text-align:left}
+.tornFlag{width:min(200px,60%);height:auto;align-self:center;margin-bottom:-6px;filter:drop-shadow(0 4px 6px #000a)}
+.tornFlag .cloth{transform-origin:37px 60px;animation:flagFlap 2.6s ease-in-out infinite}
+@keyframes flagFlap{0%,100%{transform:skewY(0deg) scaleX(1)}50%{transform:skewY(2.5deg) scaleX(.97)}}
+#modal .endCause{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:-4px}
+#modal .story{text-align:left;line-height:1.45;font-size:17.5px;background:var(--panel2);border-left:3px solid var(--blood);border-radius:8px;padding:10px 14px}
+#modal .story p{margin:0 0 8px}#modal .story p:last-child{margin:0}
+@media (prefers-reduced-motion: reduce){ .tornFlag .cloth{animation:none} }
 #modal .lines{display:flex;flex-direction:column;gap:6px;font-size:16.5px;line-height:1.4}
 #modal .lines .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:5px;font-variant-numeric:tabular-nums}
 #modal .lines .row span:first-child{color:var(--muted)}
@@ -267,7 +278,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 <div id="toast"></div>
 
 <section id="title" class="screen">
-  <div class="ver" style="position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom,0px));font-size:12.5px;letter-spacing:.08em;color:var(--muted);opacity:.6;pointer-events:none">v0.9.3-b</div>
+  <div class="ver" style="position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom,0px));font-size:12.5px;letter-spacing:.08em;color:var(--muted);opacity:.6;pointer-events:none">v0.9.5-b</div>
   <h1>Plunder<br>Tide</h1>
   <p data-t>Build a ship, raid fat merchants, bank your doubloons at a pirate haven, and never let the admiral's fleet find you.</p>
   <button class="btn" id="btnResume" type="button" hidden></button>
