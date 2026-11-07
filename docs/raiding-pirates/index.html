@@ -21,10 +21,14 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 #sea{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:var(--sea)}
 .screen{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;background:var(--deep)}
 /* Title */
-#title{align-items:center;justify-content:center;text-align:center;gap:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+#title{align-items:center;justify-content:safe center;overflow-y:auto;text-align:center;gap:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse at 50% 120%, #1a4a55 0%, var(--deep) 60%)}
 #title h1{font-family:var(--display);font-weight:400;font-size:clamp(56px,18vw,120px);line-height:.9;margin:0;color:var(--brass);text-shadow:0 4px 0 #000,0 0 40px rgba(224,168,66,.25);letter-spacing:.01em}
 #title p{max-width:34ch;margin:0;color:var(--muted);line-height:1.45;text-wrap:balance}
+/* small way back to the parent site (the game lives in a subfolder of Julien's projects page) */
+#title{padding-top:52px}
+#homeLink{box-sizing:border-box;position:absolute;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:6px;min-height:32px;padding:4px 11px 4px 9px;border:1px solid rgba(239,226,198,.2);border-radius:999px;color:var(--muted);font-size:12.5px;letter-spacing:.04em;text-decoration:none;white-space:nowrap;opacity:.85}
+#homeLink:hover,#homeLink:focus-visible{color:var(--brass);border-color:var(--brass);opacity:1}
 #title .best{font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .btn{border:0;border-radius:10px;padding:14px 22px;font-size:19.5px;font-weight:800;background:var(--brass);color:#1b1206;box-shadow:0 3px 0 #7a5513}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #7a5513}
@@ -111,6 +115,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 #modal .btns .btn.half{grid-column:span 1;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding-top:10px;padding-bottom:10px}
 #modal .btns .btn{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #modal .btns .btn small{font-weight:400;font-size:15px;opacity:.85}
+@media (max-width:440px){ #modal .btns .btn:not(.half):has(small){flex-direction:column;align-items:flex-start;justify-content:center;gap:2px} }
 /* Cutscene */
 #cut{position:fixed;inset:0;z-index:60;background:#000;overflow:hidden}
 #cutStage{position:absolute;inset:0}
@@ -161,6 +166,10 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 #bRound{font-family:var(--display);font-size:26px;color:#fff;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.6);flex:1;line-height:1}
 #bRound .init{display:block;margin-top:3px;font-family:var(--body);font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#ffd36b}
 #bRound .init.bad{color:#ff8a78}
+#bRound{min-width:0}
+@media (max-width:440px){ /* small phones: the help chip becomes a "?" so the round title and who fires first stay on one line each */
+  #bHelp{font-size:0;min-width:40px} #bHelp::before{content:'?';font-size:18px;font-weight:800}
+  #bRound .init{font-size:12.5px;letter-spacing:.03em;white-space:nowrap} }
 .bchip{border:1px solid rgba(255,255,255,.25);background:rgba(10,8,6,.6);border-radius:999px;padding:6px 11px;font-size:14.5px;color:#fff}
 .bstage{position:relative;flex:1;min-height:200px}
 #bcv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
@@ -278,7 +287,8 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 <div id="toast"></div>
 
 <section id="title" class="screen">
-  <div class="ver" style="position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom,0px));font-size:12.5px;letter-spacing:.08em;color:var(--muted);opacity:.6;pointer-events:none">v0.9.5-b</div>
+  <a id="homeLink" href="../index.html" title="Julien's projects" aria-label="Julien's projects"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span data-t>Julien's projects</span></a>
+  <div class="ver" style="position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom,0px));font-size:12.5px;letter-spacing:.08em;color:var(--muted);opacity:.6;pointer-events:none">v1.1.0</div>
   <h1>Plunder<br>Tide</h1>
   <p data-t>Build a ship, raid fat merchants, bank your doubloons at a pirate haven, and never let the admiral's fleet find you.</p>
   <button class="btn" id="btnResume" type="button" hidden></button>
@@ -355,6 +365,6 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
   <button id="skip" type="button"><span data-t>Skip</span> ›</button>
 </div>
 
-<script src="game.js"></script>
+<script src="game-XXWOHT5V.js"></script>
 </body>
 </html>
