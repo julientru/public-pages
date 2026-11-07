@@ -133,6 +133,23 @@ body {
   white-space: nowrap;
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent-ink); }
+/* Link back to the parent "Julien's projects" page (same icon as Plunder Tide). */
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  padding: 7px 12px 7px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.home-link svg { flex-shrink: 0; }
+.home-link:hover, .home-link:focus-visible { border-color: var(--accent); color: var(--accent-ink); }
 
 .tab-nav {
   display: flex;
@@ -970,6 +987,7 @@ table.corr-table th.row-label { text-align: right; padding-right: 8px; position:
       <span class="brand-word">My Financial <span>Advisor</span></span>
     </div>
     <div class="masthead-right">
+      <a class="home-link" id="home-link" href="../index.html" title="Julien's projects" aria-label="Julien's projects"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span>Julien's projects</span></a>
       <button class="guide-link" id="guide-link" title="Open the quick guide">❓ Guide</button>
       <button class="disclaimer-link" id="disclaimer-link">⚠️ This is a prototype</button>
       <button class="theme-toggle" id="theme-toggle">🌙 Dark mode</button>
@@ -1676,11 +1694,7 @@ score = clamp(70 - gap · 250, 0, 100)</div>
     </div>
   </div>
 </div>
-<script src="forecast.js"></script>
-<script src="models.js"></script>
-<script src="dividends.js"></script>
-<script src="data/index.js"></script>
-<script src="loader.js"></script>
-<script src="app.js"></script>
+<script src="data/index.d0e1301518.js"></script>
+<script src="app.0c82bf6c57.js"></script>
 </body>
 </html>
