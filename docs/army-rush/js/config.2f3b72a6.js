@@ -1,0 +1,1 @@
+window.KIDS_GAMES_SUPABASE={url:"https://evwcfqrhrfvaovboevto.supabase.co",key:"sb_publishable_gfw0jfYXsgoG7uCF5edgMg_Wui6a95e"};
