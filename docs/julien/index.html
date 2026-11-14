@@ -1,0 +1,92 @@
+<title>Who Is Julien Templates</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: picker bar on top, the chosen template rendered in a laptop or phone frame below. */
+:root { --bg: #eceef2; --fg: #15171c; --muted: #5f6573; --line: #d5d9e1; --chip: #ffffff; --sel: #15171c; --sel-fg: #ffffff; --new: #1f7a4d; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #101216; --fg: #e8eaef; --muted: #9aa0ad; --line: #2a2e37; --chip: #1a1d24; --sel: #e8eaef; --sel-fg: #101216; --new: #5fd39a; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #101216; --fg: #e8eaef; --muted: #9aa0ad; --line: #2a2e37; --chip: #1a1d24; --sel: #e8eaef; --sel-fg: #101216; --new: #5fd39a; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, sans-serif; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-block: 20px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 14px; }
+h1 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+p { margin: 0; color: var(--muted); max-width: 80ch; }
+.bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; }
+.group { display: grid; gap: 6px; min-width: 0; }
+.group > span { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); padding: 6px 12px; border-radius: 9px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--sel); color: var(--sel-fg); border-color: var(--sel); }
+.seg button:focus-visible { outline: 2px solid #4a7dff; outline-offset: 2px; }
+.desc { font-size: 14px; color: var(--fg); min-height: 1.5em; }
+.desc b { color: var(--new); font-weight: 600; }
+.info { display: grid; gap: 10px; background: var(--chip); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pc h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.pc ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 2px; }
+#pros li::marker { content: "+  "; color: var(--new); font-weight: 700; }
+#cons li::marker { content: "–  "; color: #c0453a; font-weight: 700; }
+@media (max-width: 640px) { .pc { grid-template-columns: 1fr; } }
+.stage { display: flex; justify-content: center; }
+.frame { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--chip); box-shadow: 0 10px 30px rgba(0,0,0,.08); max-width: 100%; }
+.frame.phone { border-radius: 32px; border-width: 8px; border-color: var(--sel); }
+iframe { display: block; border: 0; transform-origin: 0 0; }
+</style>
+<div class="wrap">
+  <div><h1>Pick a look for “Who is Julien”</h1><p>Your shortlist: A, D, F, H, I and J. All six share the same structure and top links to each section. Each one has a short summary with pros and cons below.</p></div>
+  <div class="bar">
+    <div class="group"><span>Shortlist</span><div class="seg tpl" id="list"></div></div>
+    <div class="group"><span>Device</span><div class="seg" id="dev">
+      <button aria-pressed="true" data-w="1280" data-h="800">Laptop</button>
+      <button aria-pressed="false" data-w="390" data-h="780">Phone</button>
+    </div></div>
+  </div>
+  <div class="info" id="info"><p class="desc" id="desc"></p><div class="pc"><div><h3>Pros</h3><ul id="pros"></ul></div><div><h3>Cons</h3><ul id="cons"></ul></div></div></div>
+  <div class="stage"><div class="frame" id="frame"><iframe id="view" title="Template preview"></iframe></div></div>
+</div>
+<script>
+const T = [
+  ["A", "Blueprint", "a-blueprint.html", "An architect's drawing: faint blueprint grid, mono labels, the four cards as one spec strip, and the career drawn as nodes on a line.",
+    ["Sober and credible, reads as a solution architect's page", "Very light and fast, easy to keep tidy as content grows", "Works well in both light and dark"],
+    ["The most restrained of the six, so less personal", "The family and music sections feel a bit technical in this style"]],
+  ["D", "Passport", "d-passport.html", "A navy cover with your four cities as passport stamps; the rest of the page is clean white pages with serif headings.",
+    ["Puts your multicultural, ready-to-move side first", "Strong first impression, memorable cover", "Warm enough for the family and music parts"],
+    ["The travel theme can feel like a gimmick if overdone", "Serif headings are less 'tech' if the page is mainly for recruiters"]],
+  ["F", "Colourways", "f-colorways.html", "Each part of life has its own colour (girls, music, career, home), shared by its summary card, its nav pill and its section.",
+    ["Friendliest and most personal of the six", "Colour coding makes the page easy to scan", "Easy to add new sections later, each with its own colour"],
+    ["Less formal, could feel light for a professional audience", "Pastel cards look busier once real photos are added"]],
+  ["H", "Boarding pass", "h-boarding-pass.html", "Airline tickets: the header is a boarding pass, the cards are ticket stubs, and Where is a flight itinerary ETZ → CDG → YYZ → HKG.",
+    ["Fun and very on-theme for someone who keeps moving", "Airport codes make the Where route instantly readable", "Condensed type keeps it compact on phones"],
+    ["A strong theme to live with for every future section", "Ticket details (seat, flight) are decoration that some may find cute and others noisy"]],
+  ["I", "Metro map", "i-metro-map.html", "A transit line runs down the page and each section is a coloured station on it; Where is a horizontal line diagram.",
+    ["Clever nod to Hong Kong and Toronto transit, without copying either", "The line gives the long page a clear path to follow", "Clean and modern, works for both personal and pro readers"],
+    ["The vertical line takes some width on phones", "More sections later means a longer line to keep balanced"]],
+  ["J", "Terminal", "j-terminal.html", "A shell session: whoami, cat about.txt, ls ~/girls. Monospace everywhere with soft colours, dark only.",
+    ["Instantly says 'engineer', fun for tech readers", "Distinctive, nobody will confuse it with a template", "Nav and links double as commands (./music, cd career)"],
+    ["Dark only, no light version", "Monospace is harder to read for long text and for non-technical visitors", "The family section reads oddly as a directory listing"]],
+];
+const view = document.getElementById("view"), frame = document.getElementById("frame"), stage = frame.parentElement, desc = document.getElementById("desc");
+let dev = { w: 1280, h: 800 };
+for (const [k, name, src, d, pros, cons] of T) {
+  const b = document.createElement("button");
+  b.textContent = k + " · " + name; b.dataset.src = src; b.dataset.desc = d; b.dataset.pros = JSON.stringify(pros); b.dataset.cons = JSON.stringify(cons); b.setAttribute("aria-pressed", "false");
+  document.getElementById("list").append(b);
+}
+const fill = (id, items) => { const ul = document.getElementById(id); ul.replaceChildren(...items.map((t) => Object.assign(document.createElement("li"), { textContent: t }))); };
+const tplButtons = [...document.querySelectorAll(".tpl button")];
+function choose(b) {
+  tplButtons.forEach((x) => x.setAttribute("aria-pressed", x === b));
+  view.src = b.dataset.src; desc.innerHTML = "<b>" + b.textContent + ".</b> " + b.dataset.desc; fill("pros", JSON.parse(b.dataset.pros)); fill("cons", JSON.parse(b.dataset.cons));
+  try { localStorage.setItem("tpl", b.dataset.src); } catch (e) {}
+}
+document.querySelectorAll(".tpl").forEach((g) => g.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) choose(b); }));
+function fit() {
+  const pad = dev.w < 600 ? 16 : 2, avail = stage.clientWidth - pad, s = Math.min(1, avail / dev.w);
+  view.style.width = dev.w + "px"; view.style.height = dev.h + "px"; view.style.transform = `scale(${s})`;
+  frame.style.width = Math.round(dev.w * s) + pad + "px"; frame.style.height = Math.round(dev.h * s) + pad + "px";
+  frame.classList.toggle("phone", dev.w < 600);
+}
+document.getElementById("dev").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return;
+  e.currentTarget.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); dev = { w: +b.dataset.w, h: +b.dataset.h }; fit(); });
+let start = tplButtons[0];
+try { const s = localStorage.getItem("tpl"); start = tplButtons.find((b) => b.dataset.src === s) || start; } catch (e) {}
+choose(start); addEventListener("resize", fit); fit();
+</script>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Julien Truchot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;700;900&family=Red+Hat+Text:wght@400;500&display=swap">
+<style>
+/* A transit line: one coloured line runs down the page, each section is a station on it; the Where route is a horizontal line diagram. */
+:root{--bg:#ffffff;--fg:#15181d;--muted:#5f6672;--line:#e4e7ec;--card:#f5f6f8;--accent:#0a73c9;--l1:#d6332b;--l2:#7a4bd1;--l3:#0a73c9;--l4:#0a9d58;--display:"Red Hat Display",system-ui,sans-serif;--body:"Red Hat Text",system-ui,sans-serif;--radius:10px;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1217;--fg:#eceff3;--muted:#9aa3b0;--line:#252b35;--card:#171b22;--accent:#4ea3ff;--l1:#ff6259;--l2:#a985ff;--l3:#4ea3ff;--l4:#3ccf8a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1217;--fg:#eceff3;--muted:#9aa3b0;--line:#252b35;--card:#171b22;--accent:#4ea3ff;--l1:#ff6259;--l2:#a985ff;--l3:#4ea3ff;--l4:#3ccf8a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:var(--max,1040px);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero{padding-block:56px 32px}.hero h1{font-family:var(--display);font-size:clamp(40px,7vw,72px);line-height:1;margin:0 0 12px;letter-spacing:-.02em;text-wrap:balance}
+.aka{margin:0 0 10px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.tag{margin:0;font-size:19px;color:var(--muted);max-width:36em}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:2px;padding:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius,14px);text-decoration:none;min-width:0;transition:transform .15s}
+a.card:hover{transform:translateY(-3px)}
+.card .n{font-family:var(--display);font-size:40px;line-height:1.05;font-weight:700}.card .t{font-weight:600}.card .s{color:var(--muted);font-size:14px}
+.card .go{margin-top:auto;padding-top:10px;font-size:14px;font-weight:600;color:var(--accent)}
+.sec{padding-block:48px;border-top:1px solid var(--line)}.summary+.sec{margin-top:40px}
+.sec-head{margin-bottom:22px}.eyebrow{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:600}
+.sec h2{font-family:var(--display);font-size:clamp(28px,4.4vw,40px);line-height:1.1;margin:6px 0 0;text-wrap:balance}
+.about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px}
+.facts{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px 16px;margin:0}.facts dt{color:var(--muted);font-size:14px;padding-top:1px}.facts dd{margin:0}
+.where h3{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.route{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.route li{display:flex;flex-direction:column;min-width:0}.route b{font-family:var(--display);font-size:19px;line-height:1.2}.route small{color:var(--muted);font-size:13px}.route .code{display:none}
+.pics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.pic{margin:0;min-width:0}
+.ph{aspect-ratio:4/3;max-width:100%;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius,14px);display:grid;place-items:center;color:var(--muted);font-size:14px}
+.pic figcaption{padding-top:10px;display:flex;flex-direction:column}.pic figcaption b{font-family:var(--display);font-size:20px}.pic figcaption span{color:var(--muted);font-size:14px}
+.instr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.instr .i{padding:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius,14px);display:flex;flex-direction:column;gap:4px;min-width:0}
+.instr b{font-family:var(--display);font-size:20px}.instr span{color:var(--muted);font-size:14px}
+.projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.projects a{display:flex;flex-direction:column;gap:2px;padding:18px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius,14px);text-decoration:none;min-width:0}
+.projects b{font-family:var(--display);font-size:18px}.projects span{color:var(--muted);font-size:14px}
+.lead{font-size:19px;max-width:36em;margin:0 0 20px}
+.jobs{list-style:none;margin:0;padding:0}.jobs li{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.jobs .when{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}.jobs b{display:block;font-size:17px}.jobs em{font-style:normal;color:var(--accent);font-size:14px;font-weight:600}.jobs p{margin:4px 0 0;color:var(--muted)}
+footer{padding-block:40px;color:var(--muted);font-size:13px}
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--navbg,var(--bg)) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);color:var(--navfg,var(--fg))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:11;background:var(--navbg,var(--bg))}
+.topnav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}.topnav b{font-size:14px;font-weight:600;white-space:nowrap}
+.topnav ul{list-style:none;display:flex;gap:18px;margin:0;padding:0;font-size:14px;overflow-x:auto;scrollbar-width:none}.topnav ul::-webkit-scrollbar{display:none}
+.topnav a{text-decoration:none;opacity:.75;white-space:nowrap}.topnav a:hover{opacity:1}
+.sec{scroll-margin-top:56px}
+@media (max-width:640px){.topnav b{display:none}.topnav ul{gap:14px;width:100%}}
+.split{display:grid;grid-template-columns:minmax(340px,40%) minmax(0,1fr)}.side{position:sticky;top:0;height:100vh;overflow:auto}.split .summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.split{grid-template-columns:1fr}.side{position:static;height:auto}}
+@media (max-width:800px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.about-grid,.instr{grid-template-columns:1fr}.route{grid-template-columns:repeat(2,minmax(0,1fr))}.jobs li{grid-template-columns:1fr;gap:2px}}
+@media (max-width:520px){.pics,.projects{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+.topnav li a::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--l4)}.topnav li:nth-child(2) a::before{background:var(--l1)}.topnav li:nth-child(3) a::before{background:var(--l2)}.topnav li:nth-child(n+4) a::before{background:var(--l3)}
+.hero h1{font-weight:900}
+.card{border:0;border-top:6px solid var(--lc);border-radius:0 0 10px 10px}.card .go{color:var(--lc)}
+.c1{--lc:var(--l1)}.c2{--lc:var(--l2)}.c3{--lc:var(--l3)}.c4{--lc:var(--l4)}
+.sec{border-top:0;position:relative;padding-left:48px}
+.sec::before{content:"";position:absolute;left:11px;top:0;bottom:0;width:6px;background:var(--lc,var(--l3))}
+.sec .sec-head::before{content:"";position:absolute;left:4px;top:52px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:5px solid var(--lc,var(--l3))}
+.sec-about{--lc:var(--l4)}.sec-girls{--lc:var(--l1)}.sec-music{--lc:var(--l2)}.sec-projects,.sec-career{--lc:var(--l3)}
+.sec:first-of-type::before{top:56px}.sec:last-of-type::before{bottom:auto;height:60px}
+.eyebrow{color:var(--lc)}.sec h2{font-weight:900}
+.route{position:relative;gap:0}.route::before{content:"";position:absolute;left:12.5%;right:12.5%;top:9px;height:6px;background:var(--l4)}
+.route li{align-items:center;text-align:center;position:relative;padding-top:30px}
+.route li::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:var(--bg);border:5px solid var(--l4);box-sizing:border-box}
+.route li:last-child::before{background:var(--l4)}
+.jobs em{color:var(--l3)}
+@media (max-width:800px){.sec{padding-left:36px}.sec::before{left:7px;width:5px}.sec .sec-head::before{left:1px;width:18px;height:18px;border-width:4px}
+.route{grid-template-columns:repeat(4,minmax(0,1fr))}.route b{font-size:15px}.route small{font-size:11px}}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap"><b>Julien Truchot</b><ul><li><a href="#about">About</a></li><li><a href="#girls">My girls</a></li><li><a href="#music">Music</a></li><li><a href="#projects">Projects</a></li><li><a href="#career">Career</a></li></ul></div></nav><header class="hero"><div class="wrap"><p class="aka">Hong Kong</p><h1>Julien Truchot</h1><p class="tag">Dad, musician and software architect. Happiest with a packed suitcase.</p></div></header><main class="wrap"><div class="summary"><a class="card c1 c-girls" href="#girls"><span class="n">2</span><span class="t">beautiful girls</span><span class="s"><span data-born="2019-05-08"></span> and <span data-born="2021-09-15"></span> years old</span><span class="go">My girls →</span></a><a class="card c2 c-music" href="#music"><span class="n">3</span><span class="t">Musician</span><span class="s">Pianist, guitarist, singer</span><span class="go">Music →</span></a><a class="card c3 c-career" href="#career"><span class="n">18+</span><span class="t">years building software</span><span class="s">IT Director &amp; Solution Architect</span><span class="go">Career →</span></a><div class="card c4 c-home"><span class="n">3</span><span class="t">countries</span><span class="s">France, Canada, Hong Kong</span></div></div>
+<section id="about" class="sec sec-about"><div class="sec-head"><span class="eyebrow">About</span><h2>The short version</h2></div><div class="about-grid"><dl class="facts"><dt>From</dt><dd>Nancy, France</dd><dt>Lives</dt><dd>Hong Kong</dd><dt>Speaks</dt><dd>French, English, some German and Cantonese</dd><dt>Studied</dt><dd>Master's in Software Engineering</dd><dt>Find me</dt><dd><a href="https://www.linkedin.com/in/julientruchot">LinkedIn</a> · <a href="https://github.com/julientru">GitHub</a></dd></dl>
+<div class="where"><h3>Where</h3><ol class="route"><li><i class="code">ETZ</i><b>Nancy</b><small>France · studies</small></li><li><i class="code">CDG</i><b>Paris</b><small>France · 2008–13</small></li><li><i class="code">YYZ</i><b>Toronto</b><small>Canada · 2013–24</small></li><li><i class="code">HKG</i><b>Hong Kong</b><small>Now</small></li></ol></div></div></section>
+<section id="girls" class="sec sec-girls"><div class="sec-head"><span class="eyebrow">My girls</span><h2>The two best things I made</h2></div><div class="pics"><figure class="pic"><div class="ph">Photo</div><figcaption><b>The eldest</b><span><span data-born="2019-05-08"></span> years old · born 8 May 2019</span></figcaption></figure><figure class="pic"><div class="ph">Photo</div><figcaption><b>The youngest</b><span><span data-born="2021-09-15"></span> years old · born 15 September 2021</span></figcaption></figure></div></section>
+<section id="music" class="sec sec-music"><div class="sec-head"><span class="eyebrow">Music</span><h2>Piano, guitar and voice</h2></div><div class="instr"><div class="i"><b>Piano</b><span>What I play, recordings to come.</span></div><div class="i"><b>Guitar</b><span>What I play, recordings to come.</span></div><div class="i"><b>Voice</b><span>What I sing, recordings to come.</span></div></div></section>
+<section id="projects" class="sec sec-projects"><div class="sec-head"><span class="eyebrow">Side projects</span><h2>Built on weekends</h2></div><div class="projects"><a href="#"><b>Kids Games</b><span>Logic and puzzle games for kids.</span></a><a href="#"><b>My Financial Advisor</b><span>Forecasts and dividend models for ~940 assets.</span></a><a href="#"><b>Plunder or Sink</b><span>Phone-first pirate game with 3D cutscenes.</span></a><a href="#"><b>Army Rush</b><span>Defend your city and grow it through the ages.</span></a></div></section>
+<section id="career" class="sec sec-career"><div class="sec-head"><span class="eyebrow">Pro</span><h2>Career</h2></div><p class="lead">IT Director and hands-on Solution Architect. I lead digital transformations for banks and insurers, and I still write code.</p><ol class="jobs"><li><span class="when">2024 – now</span><div><b>Managing Principal</b><em>Capco · Hong Kong</em><p>Architect and delivery lead for National Australia Bank's new securitization platform.</p></div></li><li><span class="when">2021 – 2024</span><div><b>Managing Principal → Executive Director</b><em>Capco · Toronto</em><p>19 projects for Intact and The Co-operators, up to 45 people, $23MM CAD revenue.</p></div></li><li><span class="when">2017 – 2021</span><div><b>Senior → Principal Consultant</b><em>Capco · Toronto</em><p>Front-end architecture for online banking, Mastercard and FIS's 55,000-employee platform.</p></div></li><li><span class="when">2013 – 2017</span><div><b>Software engineer &amp; tech lead</b><em>Exchange Solutions · Toronto</em><p>Loyalty and messaging platforms for Sobeys, Esso and Aeroplan.</p></div></li><li><span class="when">2008 – 2013</span><div><b>Developer → Project manager</b><em>Bouygues Construction · Paris area</em><p>Equipment-modelling software for building sites.</p></div></li></ol></section></main><footer class="wrap">Template I · Metro map</footer>
+<script>function age(i){const b=new Date(i+"T00:00:00"),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return a}document.querySelectorAll("[data-born]").forEach(e=>e.textContent=age(e.dataset.born));</script>
+</body>
+</html>

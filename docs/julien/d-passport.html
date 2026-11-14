@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Julien Truchot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a travel document. Hero is the route Nancy → Paris → Toronto → Hong Kong drawn as passport stamps; sections follow as pages. */
+:root {
+  --bg: #f4f6f8; --page: #ffffff; --ink: #14213d; --muted: #5b6680; --line: #dbe1ea;
+  --navy: #14213d; --navy-ink: #f1f4fa; --stamp: #c8372d; --stamp2: #1d7a5f; --stamp3: #6b4bb8; --stamp4: #c27a10;
+  --display: "DM Serif Display", Georgia, serif; --sans: "DM Sans", system-ui, sans-serif; --mono: "DM Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1220; --page: #131b2c; --ink: #e8ecf5; --muted: #98a3bb; --line: #253049; --navy: #0a1a3a; --navy-ink: #eef2fb;
+  --stamp: #ff6b5e; --stamp2: #4fd1a5; --stamp3: #a98bff; --stamp4: #f2b33d; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0c1220; --page: #131b2c; --ink: #e8ecf5; --muted: #98a3bb; --line: #253049; --navy: #0a1a3a; --navy-ink: #eef2fb; --stamp: #ff6b5e; --stamp2: #4fd1a5; --stamp3: #a98bff; --stamp4: #f2b33d; color-scheme: dark; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cover { background: var(--navy); color: var(--navy-ink); }
+.cover .wrap { padding-block: 56px 40px; display: grid; gap: 28px; }
+.mrz { font-family: var(--mono); font-size: 12px; letter-spacing: .2em; opacity: .55; overflow: hidden; white-space: nowrap; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(44px, 8vw, 80px); line-height: 1; margin: 0; letter-spacing: -.01em; }
+.cover p { margin: 0; font-size: 19px; opacity: .85; max-width: 36em; }
+.stamps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stamp { border: 2px dashed currentColor; border-radius: 10px; padding: 12px 14px; transform: rotate(var(--r, 0deg)); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.stamp b { display: block; font-family: var(--display); font-weight: 400; font-size: 24px; letter-spacing: 0; text-transform: none; line-height: 1.1; margin: 2px 0; }
+.stamp:nth-child(1) { color: #ff8a7f; --r: -3deg; } .stamp:nth-child(2) { color: #8fe0c4; --r: 2deg; }
+.stamp:nth-child(3) { color: #c4b0ff; --r: -1.5deg; } .stamp:nth-child(4) { color: #ffcf6e; --r: 2.5deg; }
+.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: -28px; }
+.card { background: var(--page); border: 1px solid var(--line); border-radius: 14px; padding: 20px; text-decoration: none; display: flex; flex-direction: column; gap: 6px; min-width: 0; box-shadow: 0 6px 20px rgba(20,33,61,.08); transition: transform .15s; }
+a.card:hover, a.card:focus-visible { transform: translateY(-3px); }
+.card .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.card strong { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.15; }
+.card span { color: var(--muted); font-size: 14px; }
+.card .go { margin-top: auto; padding-top: 6px; font-size: 13px; font-weight: 700; }
+.card:nth-child(1) .go { color: var(--stamp); } .card:nth-child(2) .go { color: var(--stamp3); } .card:nth-child(3) .go { color: var(--stamp2); }
+section { padding-block: 48px; }
+section + section { border-top: 1px solid var(--line); }
+.eyebrow { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--stamp); }
+h2 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 42px); margin: 6px 0 20px; line-height: 1.1; }
+.about { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; }
+dl { display: grid; grid-template-columns: 100px 1fr; gap: 10px 16px; margin: 0; }
+dt { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding-top: 3px; }
+dd { margin: 0; }
+.route { list-style: none; margin: 0; padding: 0 0 0 22px; position: relative; display: grid; gap: 14px; }
+.route::before { content: ""; position: absolute; left: 6px; top: 8px; bottom: 8px; border-left: 2px dashed var(--line); }
+.route li { position: relative; } .route li::before { content: ""; position: absolute; left: -22px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--page); border: 3px solid var(--stamp); }
+.route li:last-child::before { background: var(--stamp); }
+.route b { font-family: var(--display); font-weight: 400; font-size: 20px; } .route small { display: block; color: var(--muted); font-size: 13px; }
+.duo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.ph { aspect-ratio: 4/3; max-width: 100%; border-radius: 14px; border: 1px dashed var(--line); display: grid; place-items: center; color: var(--muted); font-size: 14px; background: var(--page); }
+.girl h3, .inst h3 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 12px 0 2px; }
+.girl p, .inst p { margin: 0; color: var(--muted); }
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.inst { background: var(--page); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.inst .ic { font-family: var(--mono); font-size: 12px; color: var(--stamp3); text-transform: uppercase; letter-spacing: .1em; }
+.proj { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.job { display: grid; grid-template-columns: 140px 1fr; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.job .when { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.job h3 { margin: 0; font-size: 18px; } .job .org { color: var(--stamp2); font-weight: 500; } .job p { margin: 4px 0 0; color: var(--muted); }
+.topnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); color: var(--navy-ink); border-bottom: 1px solid rgba(255,255,255,.1); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--navy); }
+.topnav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 12px; }
+.topnav b { font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.topnav ul { list-style: none; display: flex; gap: 18px; margin: 0; padding: 0; font-size: 14px; overflow-x: auto; scrollbar-width: none; }
+.topnav a { text-decoration: none; opacity: .8; white-space: nowrap; } .topnav a:hover { opacity: 1; }
+section { scroll-margin-top: 56px; }
+@media (max-width: 640px) { .topnav b { display: none; } .topnav ul { gap: 14px; } }
+footer { padding-block: 32px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+@media (max-width: 760px) {
+  .stamps, .summary { grid-template-columns: repeat(2, 1fr); }
+  .about, .duo, .trio, .proj { grid-template-columns: 1fr; }
+  .job { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap"><b>Julien Truchot</b><ul><li><a href="#about">About</a></li><li><a href="#girls">My girls</a></li><li><a href="#music">Music</a></li><li><a href="#projects">Projects</a></li><li><a href="#career">Career</a></li></ul></div></nav>
+<header class="cover"><div class="wrap">
+  <div class="mrz">P&lt;FRA&lt;TRUCHOT&lt;&lt;JULIEN&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+  <h1>Julien Truchot</h1>
+  <p>Dad, musician and software architect, happiest with a packed suitcase.</p>
+  <div class="stamps">
+    <div class="stamp">France<b>Nancy</b>until 2007</div>
+    <div class="stamp">France<b>Paris</b>2008 – 2013</div>
+    <div class="stamp">Canada<b>Toronto</b>2013 – 2024</div>
+    <div class="stamp">HKSAR<b>Hong Kong</b>2024 – now</div>
+  </div>
+</div></header>
+<main class="wrap">
+  <div class="summary">
+    <a class="card" href="#girls"><span class="k">Family</span><strong>2 beautiful girls</strong><span><span data-born="2019-05-08"></span> and <span data-born="2021-09-15"></span> years old</span><span class="go">My girls →</span></a>
+    <a class="card" href="#music"><span class="k">Music</span><strong>Musician</strong><span>Pianist, guitarist, singer</span><span class="go">Music →</span></a>
+    <a class="card" href="#career"><span class="k">Work</span><strong>18+ years</strong><span>building software</span><span class="go">Career →</span></a>
+    <div class="card"><span class="k">Home</span><strong>3 countries</strong><span>France, Canada, Hong Kong</span></div>
+  </div>
+
+  <section id="about">
+    <div class="eyebrow">About</div>
+    <h2>The short version</h2>
+    <div class="about">
+      <dl>
+        <dt>From</dt><dd>Nancy, France</dd>
+        <dt>Lives</dt><dd>Hong Kong</dd>
+        <dt>Speaks</dt><dd>French, English, some German and Cantonese</dd>
+        <dt>Does</dt><dd>IT Director &amp; Solution Architect at Capco</dd>
+        <dt>Find me</dt><dd><a href="https://www.linkedin.com/in/julientruchot">LinkedIn</a> · <a href="https://github.com/julientru">GitHub</a></dd>
+      </dl>
+      <div><div class="eyebrow" style="margin-bottom:12px">Where</div>
+        <ol class="route">
+          <li><b>Nancy</b><small>Studied computer science</small></li>
+          <li><b>Paris</b><small>First job, Bouygues Construction</small></li>
+          <li><b>Toronto</b><small>Eleven years, Capco and more</small></li>
+          <li><b>Hong Kong</b><small>Now</small></li>
+        </ol></div>
+    </div>
+  </section>
+
+  <section id="girls">
+    <div class="eyebrow">My girls</div>
+    <h2>The two best things I made</h2>
+    <div class="duo">
+      <div class="girl"><div class="ph">Photo</div><h3>The eldest</h3><p><span data-born="2019-05-08"></span> years old · born May 2019</p></div>
+      <div class="girl"><div class="ph">Photo</div><h3>The youngest</h3><p><span data-born="2021-09-15"></span> years old · born September 2021</p></div>
+    </div>
+  </section>
+
+  <section id="music">
+    <div class="eyebrow">Music</div>
+    <h2>Piano, guitar and voice</h2>
+    <div class="trio">
+      <div class="inst"><div class="ic">Keys</div><h3>Piano</h3><p>What I play, recordings to come.</p></div>
+      <div class="inst"><div class="ic">Strings</div><h3>Guitar</h3><p>What I play, recordings to come.</p></div>
+      <div class="inst"><div class="ic">Voice</div><h3>Singing</h3><p>What I sing, recordings to come.</p></div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="eyebrow">Side projects</div>
+    <h2>Built on weekends</h2>
+    <div class="proj">
+      <a class="card" href="#"><strong>Kids Games</strong><span>Logic and puzzle games for kids.</span></a>
+      <a class="card" href="#"><strong>My Financial Advisor</strong><span>Forecasts for ~940 assets.</span></a>
+      <a class="card" href="#"><strong>Plunder or Sink</strong><span>Phone-first pirate game.</span></a>
+      <a class="card" href="#"><strong>Army Rush</strong><span>Defend and grow your city.</span></a>
+    </div>
+  </section>
+
+  <section id="career">
+    <div class="eyebrow">Pro</div>
+    <h2>Career</h2>
+    <div class="job"><div class="when">2024 – now</div><div><h3>Managing Principal</h3><div class="org">Capco · Hong Kong</div><p>Architect and delivery lead for National Australia Bank's new securitization platform.</p></div></div>
+    <div class="job"><div class="when">2021 – 2024</div><div><h3>Managing Principal → Executive Director</h3><div class="org">Capco · Toronto</div><p>19 projects and up to 45 people for Intact and The Co-operators, $23MM CAD revenue.</p></div></div>
+    <div class="job"><div class="when">2017 – 2021</div><div><h3>Senior → Principal Consultant</h3><div class="org">Capco · Toronto</div><p>Front-end architecture for online banking, Mastercard and FIS's 55,000-employee platform.</p></div></div>
+    <div class="job"><div class="when">2013 – 2017</div><div><h3>Software engineer &amp; tech lead</h3><div class="org">Exchange Solutions · Toronto</div><p>Loyalty and messaging platforms for Sobeys, Esso and Aeroplan.</p></div></div>
+    <div class="job"><div class="when">2008 – 2013</div><div><h3>Developer → Project manager</h3><div class="org">Bouygues Construction · Paris area</div><p>Equipment-modelling software for building sites.</p></div></div>
+  </section>
+</main>
+<footer class="wrap">Template D · Passport</footer>
+<script>
+function age(iso) { const b = new Date(iso + "T00:00:00"), n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; }
+document.querySelectorAll("[data-born]").forEach((el) => (el.textContent = age(el.dataset.born)));
+</script>
+</body>
+</html>

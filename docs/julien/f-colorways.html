@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Julien Truchot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600&display=swap">
+<style>
+/* Layout: each part of life gets its own colour. Summary cards use that colour, and the matching section below wears it too, so the page reads as a colour-coded map. */
+:root {
+  --bg: #f7f7fb; --card: #ffffff; --ink: #1b1d2a; --muted: #616579; --line: #e3e4ee;
+  --girls: #e2557c; --girls-bg: #fde8ee; --music: #7b5cf0; --music-bg: #efeafe; --work: #1f7ae0; --work-bg: #e5f0fd; --home: #149a6e; --home-bg: #e1f5ec;
+  --display: "Outfit", system-ui, sans-serif; --body: "Nunito Sans", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11121a; --card: #1a1c27; --ink: #eceef6; --muted: #a0a4b8; --line: #2a2d3c;
+  --girls: #ff86a6; --girls-bg: #3a1f2a; --music: #ad97ff; --music-bg: #2a2342; --work: #6eaefc; --work-bg: #1a2a40; --home: #4fd1a2; --home-bg: #15332a; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #11121a; --card: #1a1c27; --ink: #eceef6; --muted: #a0a4b8; --line: #2a2d3c; --girls: #ff86a6; --girls-bg: #3a1f2a; --music: #ad97ff; --music-bg: #2a2342; --work: #6eaefc; --work-bg: #1a2a40; --home: #4fd1a2; --home-bg: #15332a; color-scheme: dark; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header .wrap { padding-block: 56px 32px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.avatar { width: 104px; height: 104px; border-radius: 28px; background: conic-gradient(from 200deg, var(--girls), var(--music), var(--work), var(--home), var(--girls)); display: grid; place-items: center; flex: none; }
+.avatar span { width: 92px; height: 92px; border-radius: 22px; background: var(--card); display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 34px; }
+.hi { min-width: 0; flex: 1; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(36px, 6vw, 58px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 6px; }
+.hi p { margin: 0; color: var(--muted); font-size: 18px; }
+.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.tile { --c: var(--ink); --cb: var(--card); background: var(--cb); border-radius: 22px; padding: 22px; text-decoration: none; display: flex; flex-direction: column; gap: 4px; min-width: 0; transition: transform .15s; }
+a.tile:hover, a.tile:focus-visible { transform: translateY(-3px); }
+.tile strong { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; color: var(--c); }
+.tile .t { font-family: var(--display); font-weight: 700; font-size: 18px; }
+.tile .s { color: var(--muted); font-size: 14px; }
+.tile .go { margin-top: auto; padding-top: 10px; font-weight: 600; font-size: 14px; color: var(--c); }
+.g { --c: var(--girls); --cb: var(--girls-bg); } .m { --c: var(--music); --cb: var(--music-bg); } .w { --c: var(--work); --cb: var(--work-bg); } .h { --c: var(--home); --cb: var(--home-bg); }
+.about { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 32px; }
+.about h2 { margin-top: 0; }
+dl { display: grid; grid-template-columns: 90px 1fr; gap: 8px 14px; margin: 0; } dt { color: var(--muted); font-size: 14px; padding-top: 1px; } dd { margin: 0; }
+.where h3 { font-family: var(--display); font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--home); margin: 0 0 14px; }
+.hops { display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
+.hops::before { content: ""; position: absolute; left: 12%; right: 12%; top: 21px; height: 3px; background: repeating-linear-gradient(90deg, var(--home) 0 8px, transparent 8px 14px); }
+.hop { text-align: center; position: relative; }
+.hop i { display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 8px; border-radius: 50%; background: var(--home-bg); color: var(--home); font: 700 13px var(--display); font-style: normal; border: 3px solid var(--card); }
+.hop:last-child i { background: var(--home); color: var(--card); }
+.hop b { display: block; font-family: var(--display); font-size: 17px; } .hop small { color: var(--muted); font-size: 12px; }
+section { padding-block: 48px 8px; }
+h2 { font-family: var(--display); font-weight: 800; font-size: 32px; letter-spacing: -.02em; margin: 0 0 18px; display: flex; align-items: center; gap: 12px; }
+h2 .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--c); flex: none; }
+.pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px; min-width: 0; }
+.box h3 { font-family: var(--display); margin: 0 0 4px; font-size: 20px; } .box p { margin: 0; color: var(--muted); }
+.photo { aspect-ratio: 16/10; max-width: 100%; border-radius: 16px; background: var(--cb); margin-bottom: 14px; display: grid; place-items: center; color: var(--c); font-weight: 600; }
+.proj a { text-decoration: none; display: block; } .proj a:hover h3 { color: var(--work); }
+.jobs { display: grid; gap: 12px; }
+.job { display: grid; grid-template-columns: 130px 1fr; gap: 16px; }
+.job .when { color: var(--work); font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+.topnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--bg); }
+.topnav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 10px; }
+.topnav b { font-family: var(--display); font-weight: 800; white-space: nowrap; }
+.topnav ul { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
+.topnav a { display: block; text-decoration: none; font-weight: 600; font-size: 14px; padding: 5px 12px; border-radius: 999px; background: var(--cb, var(--card)); color: var(--c, var(--ink)); white-space: nowrap; }
+.topnav .h a { --c: var(--home); --cb: var(--home-bg); }
+section, .about { scroll-margin-top: 60px; }
+@media (max-width: 640px) { .topnav b { display: none; } }
+footer { padding-block: 48px; color: var(--muted); font-size: 13px; }
+@media (max-width: 800px) {
+  .summary { grid-template-columns: repeat(2, 1fr); } .about { grid-template-columns: 1fr; padding: 20px; }
+  .pair, .trio { grid-template-columns: 1fr; } .job { grid-template-columns: 1fr; gap: 2px; }
+}
+@media (max-width: 380px) { .hop b { font-size: 14px; } .tile strong { font-size: 32px; } }
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap"><b>Julien Truchot</b><ul><li class="h"><a href="#about">About</a></li><li class="g"><a href="#girls">My girls</a></li><li class="m"><a href="#music">Music</a></li><li class="w"><a href="#projects">Projects</a></li><li class="w"><a href="#career">Career</a></li></ul></div></nav>
+<header><div class="wrap">
+  <div class="avatar"><span>JT</span></div>
+  <div class="hi"><h1>Hi, I'm Julien Truchot</h1><p>Dad, musician, software architect, living in Hong Kong.</p></div>
+</div></header>
+<main class="wrap">
+  <div class="summary">
+    <a class="tile g" href="#girls"><strong>2</strong><span class="t">beautiful girls</span><span class="s"><span data-born="2019-05-08"></span> and <span data-born="2021-09-15"></span> years old</span><span class="go">My girls →</span></a>
+    <a class="tile m" href="#music"><strong>3</strong><span class="t">instruments</span><span class="s">Pianist, guitarist, singer</span><span class="go">Music →</span></a>
+    <a class="tile w" href="#career"><strong>18+</strong><span class="t">years building software</span><span class="s">IT Director &amp; Solution Architect</span><span class="go">Career →</span></a>
+    <div class="tile h"><strong>3</strong><span class="t">countries</span><span class="s">France, Canada, Hong Kong</span></div>
+  </div>
+
+  <div class="about" id="about">
+    <div><h2>The short version</h2>
+      <dl>
+        <dt>From</dt><dd>Nancy, France</dd>
+        <dt>Speaks</dt><dd>French, English, some German and Cantonese</dd>
+        <dt>Studied</dt><dd>Master's in Software Engineering</dd>
+        <dt>Find me</dt><dd><a href="https://www.linkedin.com/in/julientruchot">LinkedIn</a> · <a href="https://github.com/julientru">GitHub</a></dd>
+      </dl></div>
+    <div class="where"><h3>Where</h3>
+      <div class="hops">
+        <div class="hop"><i>FR</i><b>Nancy</b><small>studies</small></div>
+        <div class="hop"><i>FR</i><b>Paris</b><small>2008–13</small></div>
+        <div class="hop"><i>CA</i><b>Toronto</b><small>2013–24</small></div>
+        <div class="hop"><i>HK</i><b>Hong Kong</b><small>now</small></div>
+      </div></div>
+  </div>
+
+  <section id="girls" class="g"><h2><span class="dot"></span>My girls</h2>
+    <div class="pair">
+      <div class="box"><div class="photo">Photo</div><h3>The eldest</h3><p><span data-born="2019-05-08"></span> years old, born 8 May 2019</p></div>
+      <div class="box"><div class="photo">Photo</div><h3>The youngest</h3><p><span data-born="2021-09-15"></span> years old, born 15 September 2021</p></div>
+    </div></section>
+
+  <section id="music" class="m"><h2><span class="dot"></span>Music</h2>
+    <div class="trio">
+      <div class="box"><h3>Piano</h3><p>What I play, recordings to come.</p></div>
+      <div class="box"><h3>Guitar</h3><p>What I play, recordings to come.</p></div>
+      <div class="box"><h3>Singing</h3><p>What I sing, recordings to come.</p></div>
+    </div></section>
+
+  <section id="projects" class="w"><h2><span class="dot"></span>Side projects</h2>
+    <div class="pair proj">
+      <a class="box" href="#"><h3>Kids Games</h3><p>Logic and puzzle games for kids.</p></a>
+      <a class="box" href="#"><h3>My Financial Advisor</h3><p>Forecasts for ~940 assets.</p></a>
+      <a class="box" href="#"><h3>Plunder or Sink</h3><p>Phone-first pirate game.</p></a>
+      <a class="box" href="#"><h3>Army Rush</h3><p>Defend and grow your city.</p></a>
+    </div></section>
+
+  <section id="career" class="w"><h2><span class="dot"></span>Career</h2>
+    <div class="box jobs">
+      <div class="job"><div class="when">2024 – now</div><div><h3>Managing Principal · Capco Hong Kong</h3><p>Architect and delivery lead for National Australia Bank's securitization platform.</p></div></div>
+      <div class="job"><div class="when">2021 – 2024</div><div><h3>Executive Director · Capco Toronto</h3><p>19 projects for Intact and The Co-operators, up to 45 people, $23MM CAD revenue.</p></div></div>
+      <div class="job"><div class="when">2017 – 2021</div><div><h3>Principal Consultant · Capco Toronto</h3><p>Online banking, Mastercard, FIS platform for 55,000+ employees.</p></div></div>
+      <div class="job"><div class="when">2013 – 2017</div><div><h3>Tech lead · Exchange Solutions</h3><p>Loyalty and messaging for Sobeys, Esso and Aeroplan.</p></div></div>
+      <div class="job"><div class="when">2008 – 2013</div><div><h3>Developer → PM · Bouygues Construction</h3><p>Equipment-modelling software for building sites.</p></div></div>
+    </div></section>
+</main>
+<footer class="wrap">Template F · Colourways</footer>
+<script>
+function age(iso) { const b = new Date(iso + "T00:00:00"), n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; }
+document.querySelectorAll("[data-born]").forEach((el) => (el.textContent = age(el.dataset.born)));
+</script>
+</body>
+</html>
