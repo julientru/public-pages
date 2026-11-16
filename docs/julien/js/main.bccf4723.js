@@ -1,0 +1,1 @@
+document.querySelectorAll("[data-born]").forEach(function(e){var t,a,n,l;e.textContent=(t=e.dataset.born,a=new Date(t+"T00:00:00"),n=new Date,l=n.getFullYear()-a.getFullYear(),n<new Date(n.getFullYear(),a.getMonth(),a.getDate())&&l--,l)});
