@@ -72,6 +72,10 @@
     font-size: 28px;
     background: hsl(var(--hue) 70% 55% / .14);
   }
+  .icon.photo { position: relative; overflow: hidden; background: none; }
+  .icon.photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; display: block; }
+  /* Same scanline texture as the Who is Julien page, kept in full color. */
+  .icon.photo::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(15,23,32,.18) 0 1px, transparent 1px 4px); pointer-events: none; }
   .body { display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .name { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
   .desc { color: var(--muted); font-size: 15px; }
@@ -136,7 +140,7 @@
     </li>
     <li>
       <a class="card" href="https://julientru.github.io/public-pages/julien/index.html" style="--hue:330">
-        <span class="icon" aria-hidden="true">👋</span>
+        <span class="icon photo" aria-hidden="true"><img src="https://julientru.github.io/public-pages/julien/img/julien.jpg" width="52" height="52" alt=""></span>
         <span class="body">
           <span class="name">Who is Julien?</span>
           <span class="desc">A little about me, the person behind these projects.</span>
